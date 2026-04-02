@@ -25,20 +25,33 @@ export default function Header() {
 
   return (
     <header className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}>
+      <div className={styles.topBar}>
+        <div className={`container ${styles.topBarContent}`}>
+          <div className={styles.institutionalBranding}>
+            <span>University of Karachi</span>
+            <span className={styles.divider}>|</span>
+            <span>Faculty of Pharmacy</span>
+          </div>
+          <div className={styles.topLinks}>
+            <Link href="/login" className={styles.topLink}>Author Login</Link>
+            <Link href="/board" className={styles.topLink}>Editorial Board</Link>
+          </div>
+        </div>
+      </div>
+      
       <div className={styles.progressBar} style={{ width: `${scrollProgress}%` }}></div>
+      
       <div className={`container ${styles.headerContent}`}>
         <Link href="/" className={styles.logo}>
           <div className={styles.logoBadge}>PJPS</div>
           <div className={styles.logoText}>
-            <span className={styles.journalFull}>Pakistan Journal of Pharmaceutical Sciences</span>
-            <span className={styles.faculty}>Faculty of Pharmacy, University of Karachi</span>
+            <span className={styles.journalFull}>Pakistan Journal of <br/> Pharmaceutical Sciences</span>
           </div>
         </Link>
 
         <nav className={styles.nav}>
           <ul className={styles.navList}>
             <li><Link href="/" className={styles.navLink}>Home</Link></li>
-            <li><Link href="/board" className={styles.navLink}>Editorial Board</Link></li>
             <li><Link href="/issues" className={styles.navLink}>Issues</Link></li>
             <li><Link href="/archive" className={styles.navLink}>Archive</Link></li>
             <li><Link href="/submission" className={styles.navLink}>Submission</Link></li>

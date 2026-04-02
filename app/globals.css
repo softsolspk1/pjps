@@ -2,22 +2,22 @@
 
 :root {
   /* Elite Academic Palette */
-  --primary-navy: #002147;
-  --primary-navy-light: #003366;
+  --primary-navy: #002d5e;
+  --primary-navy-light: #004289;
   --primary-navy-dark: #001a38;
-  --accent-gold: #c5a059;
-  --accent-gold-soft: rgba(197, 160, 89, 0.1);
-  --accent-emerald: #059669;
+  --accent-gold: #b38b4d;
+  --accent-gold-soft: rgba(179, 139, 77, 0.1);
+  --accent-emerald: #065f46;
   
   /* UI Foundation */
   --background: #ffffff;
-  --foreground: #111827;
-  --text-main: #1f2937;
+  --foreground: #0f172a;
+  --text-main: #1e293b;
   --text-muted: #64748b;
   --border-light: #f1f5f9;
   --border-medium: #e2e8f0;
   --bg-soft: #f8fafc;
-  --bg-accent-light: #f0f4f8;
+  --bg-accent-light: #f1f5f9;
   
   /* Typography - Award Winning Pairings */
   --font-serif: "Playfair Display", "Merriweather", serif;
@@ -32,24 +32,24 @@
 
   /* Components Refinement */
   --border-radius: 2px; /* Sharper, more professional academic look */
-  --shadow-subtle: 0 2px 10px rgba(0, 0, 0, 0.04);
-  --shadow-standard: 0 10px 30px -10px rgba(0, 33, 71, 0.1);
-  --shadow-premium: 0 20px 40px -15px rgba(0, 33, 71, 0.15);
-  --transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.03);
+  --shadow-standard: 0 10px 30px -10px rgba(0, 45, 94, 0.12);
+  --shadow-premium: 0 20px 40px -15px rgba(0, 45, 94, 0.15);
+  --transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0f1a;
+    --background: #0a0e17;
     --foreground: #f8fafc;
-    --text-main: #e2e8f0;
+    --text-main: #cbd5e1;
     --text-muted: #94a3b8;
     --border-light: #1e293b;
     --border-medium: #334155;
     --bg-soft: #111827;
     --bg-accent-light: #0f172a;
-    --primary-navy: #38bdf8;
-    --accent-gold: #fbbf24;
+    --primary-navy: #60a5fa; /* More sophisticated sky blue for dark mode */
+    --accent-gold: #d4af37;
   }
 }
 
