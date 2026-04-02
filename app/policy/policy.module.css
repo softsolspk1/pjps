@@ -1,0 +1,45 @@
+.policy {
+  min-height: 80vh;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.title {
+  font-size: 3.5rem;
+  margin-bottom: 20px;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+}
+
+.policySection {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 40px;
+  background-color: var(--bg-soft);
+  border-left: 4px solid var(--accent-gold);
+  border-radius: var(--border-radius);
+}
+
+.policySection h2 {
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  margin-bottom: 20px;
+}
+
+.policySection p {
+  color: var(--text-main);
+  line-height: 1.8;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 2.8rem;
+  }
+}

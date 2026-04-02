@@ -1,0 +1,151 @@
+.hero {
+  position: relative;
+  min-height: 85vh;
+  background-color: var(--background);
+  display: flex;
+  align-items: center;
+  padding-top: 100px;
+  padding-bottom: 60px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.heroDecorative {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 100%;
+  background: radial-gradient(circle at 70% 30%, var(--bg-accent-light) 0%, transparent 70%);
+  z-index: 1;
+}
+
+.heroDecorative::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -10%;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(var(--border-medium) 1px, transparent 1px);
+  background-size: 40px 40px;
+  transform: skewX(-15deg);
+  opacity: 0.4;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+  color: var(--text-main);
+  max-width: 900px;
+}
+
+.heroBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--primary-navy);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 30px;
+}
+
+.badgeLine {
+  width: 40px;
+  height: 2px;
+  background: var(--accent-gold);
+}
+
+.heroTitle {
+  font-family: var(--font-serif);
+  font-size: 4.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--primary-navy);
+  margin-bottom: 32px;
+  letter-spacing: -0.03em;
+}
+
+.titleAccent {
+  color: var(--accent-gold);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.heroSubtitle {
+  font-size: 1.25rem;
+  line-height: 1.7;
+  color: var(--text-muted);
+  margin-bottom: 48px;
+  max-width: 700px;
+}
+
+.heroActions {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 100px;
+}
+
+.statsStrip {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  padding-top: 50px;
+  border-top: 1px solid var(--border-light);
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.statDivider {
+  height: 40px;
+  width: 1px;
+  background: var(--border-medium);
+}
+
+.statValue {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--primary-navy);
+  font-family: var(--font-serif);
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+@media (max-width: 1024px) {
+  .heroTitle {
+    font-size: 3.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .heroTitle {
+    font-size: 2.8rem;
+  }
+  
+  .statsStrip {
+    flex-wrap: wrap;
+    gap: 30px;
+  }
+  
+  .statDivider {
+    display: none;
+  }
+  
+  .statItem {
+    width: calc(50% - 15px);
+  }
+}
+

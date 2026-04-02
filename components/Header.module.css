@@ -1,0 +1,155 @@
+.header {
+  height: 90px;
+  background-color: transparent;
+  position: fixed; /* Changed from sticky to fixed for better glass control */
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  transition: var(--transition);
+  border-bottom: 1px solid transparent;
+}
+
+.scrolled {
+  height: 70px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+@media (prefers-color-scheme: dark) {
+  .scrolled {
+    background: rgba(10, 15, 26, 0.85);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+}
+
+.progressBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: var(--accent-gold);
+  z-index: 1001;
+  transition: width 0.1s ease-out;
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.logoBadge {
+  background: var(--primary-navy);
+  color: white;
+  font-family: var(--font-serif);
+  font-weight: 900;
+  padding: 4px 8px;
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+}
+
+.logoText {
+  display: flex;
+  flex-direction: column;
+}
+
+.journalFull {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+  line-height: 1.2;
+}
+
+.faculty {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 2px;
+}
+
+.navList {
+  display: flex;
+  gap: 2.5rem;
+}
+
+.navLink {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-main);
+  padding: 0.5rem 0;
+  position: relative;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.navLink:after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--accent-gold);
+  transition: var(--transition);
+}
+
+.navLink:hover {
+  color: var(--primary-navy);
+}
+
+.navLink:hover:after {
+  width: 100%;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.searchBtn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: var(--transition);
+}
+
+.searchBtn:hover {
+  background-color: var(--bg-soft);
+  color: var(--primary-navy);
+  transform: scale(1.1);
+}
+
+.cta {
+  padding: 0.7rem 1.4rem;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 1024px) {
+  .nav {
+    display: none;
+  }
+}
+
