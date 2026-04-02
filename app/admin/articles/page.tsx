@@ -45,7 +45,12 @@ export default async function AdminArticlesList() {
                   </div>
                 </td>
                 <td className="p-4">
-                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">
+                  <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                    article.status === "PUBLISHED" ? "bg-green-100 text-green-800" :
+                    article.status === "SUBMITTED" ? "bg-amber-100 text-amber-800 border border-amber-200" :
+                    article.status === "IN_REVIEW" ? "bg-blue-100 text-blue-800" :
+                    "bg-gray-100 text-gray-800"
+                  }`}>
                     {article.status}
                   </span>
                 </td>

@@ -7,21 +7,27 @@ import styles from "./page.module.css";
 import { prisma } from "../lib/prisma";
 
 export default async function Home() {
-  const articlesData = await prisma.article.findMany({
-    where: { status: 'PUBLISHED' },
-    orderBy: { createdAt: 'desc' },
-    take: 4,
-    include: { authors: { orderBy: { sequence: 'asc' } } }
-  });
+  let LATEST_ARTICLES: any[] = [];
+  
+  try {
+    const articlesData = await prisma.article.findMany({
+      where: { status: 'PUBLISHED' },
+      orderBy: { createdAt: 'desc' },
+      take: 4,
+      include: { authors: { orderBy: { sequence: 'asc' } } }
+    });
 
-  const LATEST_ARTICLES = articlesData.map(a => ({
-    category: "Published Article",
-    title: a.title,
-    authors: a.authors.map(author => author.name).join(", "),
-    doi: "Pending",
-    id: a.id,
-    date: new Date(a.createdAt).toLocaleDateString()
-  }));
+    LATEST_ARTICLES = articlesData.map(a => ({
+      category: "Published Article",
+      title: a.title,
+      authors: a.authors.map(author => author.name).join(", "),
+      doi: "Pending",
+      id: a.id,
+      date: new Date(a.createdAt).toLocaleDateString()
+    }));
+  } catch (error) {
+    console.error("Home page database fetch error:", error);
+  }
 
   return (
     <div className={styles.home}>
@@ -32,11 +38,20 @@ export default async function Home() {
           <h2 className={styles.sectionTitle}>Latest Research</h2>
           <p className={styles.sectionSubtitle}>Discover the most recent peer-reviewed contributions to the pharmaceutical sciences.</p>
         </div>
-        <div className={styles.articlesGrid}>
-          {LATEST_ARTICLES.map((article) => (
-            <ArticleCard key={article.id} {...article} />
-          ))}
-        </div>
+
+        {LATEST_ARTICLES.length > 0 ? (
+          <div className={styles.articlesGrid}>
+            {LATEST_ARTICLES.map((article) => (
+              <ArticleCard key={article.id} {...article} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-20 bg-gray-50 border border-dashed border-gray-200 rounded min-h-[200px] flex flex-col items-center justify-center">
+            <p className="text-gray-500 font-medium">New research articles are currently being finalized.</p>
+            <p className="text-sm text-gray-400 mt-2 italic">Please check back soon or browse our full archive.</p>
+          </div>
+        )}
+
         <div className={styles.viewMore}>
           <Link href="/archive" className="btn btn-secondary">Browse Full Archive</Link>
         </div>
