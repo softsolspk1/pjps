@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import HeaderWrapper from "@/components/HeaderWrapper";
+import FooterWrapper from "@/components/FooterWrapper";
 import { Providers } from "@/components/Providers";
-import LayoutWrapper from "@/components/LayoutWrapper";
 
 export const metadata: Metadata = {
   title: "Pakistan Journal of Pharmaceutical Sciences (PJPS)",
@@ -15,11 +16,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased selection:bg-blue-100 selection:text-blue-900">
+      <body>
         <Providers>
-           <LayoutWrapper>
-             {children}
-           </LayoutWrapper>
+          <HeaderWrapper />
+          <main>{children}</main>
+          <FooterWrapper />
         </Providers>
       </body>
     </html>

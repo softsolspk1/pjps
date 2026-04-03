@@ -54,25 +54,27 @@ export default function TrackingPage() {
       </div>
 
       <div className="space-y-12">
-        {/* Simple Search Field */}
-        <section className="bg-white border p-10 rounded-xl shadow-sm">
-          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-4">Enter Reference ID</label>
-          <form onSubmit={handleSearch} className="flex gap-4">
-            <input 
-              type="text" 
-              className="flex-1 px-5 py-4 bg-slate-50 border border-slate-200 rounded-md outline-none focus:bg-white focus:border-blue-600 transition-all text-sm font-bold"
-              placeholder="e.g. clm7..."
-              value={refId}
-              onChange={(e) => setRefId(e.target.value)}
-            />
-            <button type="submit" className="px-10 py-4 bg-slate-900 hover:bg-black text-white rounded-md font-bold text-xs uppercase tracking-widest transition-all flex items-center gap-2" disabled={loading}>
-              {loading ? <Loader2 className="animate-spin" size={16} /> : "Analyze Status"}
+        {/* Simple Professional Search Field */}
+        <section className="bg-white border p-12 rounded-2xl shadow-sm">
+          <form onSubmit={handleSearch} className="flex flex-row gap-4 items-center">
+            <div className="flex-1">
+              <input 
+                type="text" 
+                className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:bg-white focus:border-blue-600 transition-all text-sm font-bold placeholder:text-slate-300"
+                placeholder="Enter unique digital reference ID (e.g. clm7...)"
+                value={refId}
+                onChange={(e) => setRefId(e.target.value)}
+              />
+            </div>
+            <button type="submit" className="px-12 py-4 bg-slate-900 hover:bg-black text-white rounded-lg font-bold text-xs uppercase tracking-widest transition-all" disabled={loading}>
+              {loading ? "Analyzing..." : "Analyze Status"}
             </button>
           </form>
 
           {error && (
-            <div className="mt-4 text-red-500 text-[10px] font-black uppercase tracking-widest">
-              Error: {error}
+            <div className="mt-4 text-red-500 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+              {error}
             </div>
           )}
         </section>

@@ -7,7 +7,7 @@ import {
   LayoutDashboard, FileText, Layers, 
   Users, LogOut, ExternalLink, Settings,
   ShieldCheck, Inbox, BarChart3, ClipboardCheck,
-  UserPlus, Mail, ChevronRight
+  UserPlus, Mail
 } from "lucide-react";
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
@@ -18,38 +18,35 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc] font-sans selection:bg-blue-100 selection:text-blue-900">
-      {/* PROFESSIONAL SIDEBAR */}
-      <aside className="w-80 bg-[#0f172a] text-slate-300 flex flex-col shadow-2xl relative z-30">
-        <div className="p-10 border-b border-slate-800/60">
-          <div className="flex items-center gap-4 mb-8">
-             <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center font-serif font-black text-2xl text-white shadow-xl shadow-blue-500/20 ring-4 ring-blue-500/10">
+    <div className="flex h-screen bg-slate-50 font-sans selection:bg-blue-100 selection:text-blue-900">
+      {/* Sidebar Navigation */}
+      <aside className="w-72 bg-slate-900 text-white flex flex-col shadow-2xl z-20">
+        <div className="p-8 border-b border-slate-800/50">
+          <div className="flex items-center gap-3 mb-6">
+             <div className="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center font-serif font-bold text-xl shadow-lg shadow-blue-500/20">
                P
              </div>
              <div>
-               <h1 className="text-xl font-serif font-black tracking-tight text-white">PJPS Admin</h1>
-               <div className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] mt-1">Management Portal</div>
+               <h1 className="text-lg font-serif font-bold tracking-tight">PJPS Portal</h1>
+               <div className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Editorial Admin</div>
              </div>
           </div>
           
-          <div className="bg-slate-800/30 rounded-2xl p-5 flex items-center gap-4 border border-slate-700/30 ring-1 ring-white/5">
-            <div className="w-10 h-10 bg-slate-700 rounded-xl flex items-center justify-center font-black text-slate-200 shadow-inner">
+          <div className="bg-slate-800/50 rounded-2xl p-4 flex items-center gap-3 border border-slate-700/30">
+            <div className="w-8 h-8 bg-slate-700 rounded-xl flex items-center justify-center text-xs font-bold uppercase">
               {session.user.name?.charAt(0)}
             </div>
             <div className="overflow-hidden">
-              <p className="text-sm font-bold text-slate-100 truncate tracking-tight">{session.user.name}</p>
-              <div className="flex items-center gap-2 mt-1">
-                 <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">{session.user.role}</p>
-              </div>
+              <p className="text-xs font-bold text-slate-200 truncate">{session.user.name}</p>
+              <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{session.user.role}</p>
             </div>
           </div>
         </div>
 
-        <nav className="flex-1 overflow-y-auto p-8 space-y-10 scrollbar-hide">
-          {/* EDITORIAL MODULES */}
-          <div className="space-y-4">
-            <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] px-4">Editorial Command</h3>
+        <nav className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+          {/* Main Group */}
+          <div>
+            <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 ml-4">Editorial</h3>
             <div className="space-y-1">
               <NavItem href="/admin/dashboard" icon={<LayoutDashboard size={18} />} label="Command Center" />
               <NavItem href="/admin/articles" icon={<Inbox size={18} />} label="Manuscript Registry" />
@@ -57,66 +54,63 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             </div>
           </div>
 
-          {/* MASTER REGISTRY */}
-          <div className="space-y-4">
-            <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] px-4">Scholarly Registry</h3>
+          {/* Catalog Group */}
+          <div>
+            <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 ml-4">Registry</h3>
             <div className="space-y-1">
               <NavItem href="/admin/issues" icon={<Layers size={18} />} label="Volumes & Issues" />
               <NavItem href="/admin/users" icon={<Users size={18} />} label="Expert Directory" />
-              <NavItem href="/admin/users/create" icon={<UserPlus size={18} />} label="Account Provisioning" />
+              <NavItem href="/admin/users/create" icon={<UserPlus size={18} />} label="Account Provision" />
             </div>
           </div>
 
-          {/* INSIGHTS */}
-          <div className="space-y-4">
-            <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] px-4">Decision Insights</h3>
+          {/* Deep Insight */}
+          <div>
+            <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 ml-4">Insights</h3>
             <div className="space-y-1">
               <NavItem href="/admin/analytics" icon={<BarChart3 size={18} />} label="Lifetime Analytics" />
             </div>
           </div>
 
-          {/* UTILITIES */}
-          <div className="space-y-4">
-            <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] px-4">System Utilities</h3>
+          {/* External Group */}
+          <div>
+            <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 ml-4">Public Tools</h3>
             <div className="space-y-1">
-              <NavItem href="/" icon={<ExternalLink size={18} />} label="Public Journal" external />
+              <NavItem href="/" icon={<ExternalLink size={18} />} label="View Journal Site" external />
             </div>
           </div>
         </nav>
 
-        <div className="p-8 border-t border-slate-800/80 bg-slate-950/20">
+        <div className="p-6 border-t border-slate-800/50">
           <Link 
             href="/api/auth/signout" 
-            className="flex items-center justify-center gap-3 w-full px-6 py-4 bg-red-600/10 text-red-500 rounded-2xl hover:bg-red-600 hover:text-white transition-all text-[11px] font-bold uppercase tracking-widest ring-1 ring-red-500/20 group"
+            className="flex items-center gap-3 w-full px-4 py-3 bg-red-500/10 text-red-400 rounded-2xl hover:bg-red-500 hover:text-white transition-all text-xs font-bold uppercase tracking-widest group"
           >
             <LogOut size={16} className="group-hover:rotate-12 transition-transform" />
-            De-authorize Session
+            Sign Out Session
           </Link>
         </div>
       </aside>
 
-      {/* VIEWPORT CONTENT AREA */}
+      {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto flex flex-col relative bg-[#f1f5f9]">
-        {/* EDITORIAL TOP BAR */}
-        <div className="h-20 bg-white border-b border-slate-200 sticky top-0 z-20 flex items-center px-12 justify-between backdrop-blur-md bg-white/80">
+        {/* Top Header Bar */}
+        <div className="h-16 bg-white border-b border-slate-200 sticky top-0 z-10 flex items-center px-10 justify-between">
            <div className="flex items-center gap-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
-              <ShieldCheck size={18} className="text-blue-600" />
-              <span className="text-slate-900">Institutional</span> 
-              <span className="opacity-40">|</span> 
+              <ShieldCheck size={16} className="text-blue-500" />
               Editorial Production System
            </div>
-           <div className="flex items-center gap-8">
-              <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 hover:text-blue-600 cursor-pointer transition-all">
-                <Mail size={16} /> Notifications
+           <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 group cursor-pointer hover:text-blue-600 transition-colors">
+                <Mail size={14} /> System Notifications
               </div>
-              <div className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-4 py-1.5 rounded-full border border-emerald-100 uppercase tracking-widest">
+              <div className="text-[10px] font-bold text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
                 v2.1.0 Stable
               </div>
            </div>
         </div>
 
-        {/* PAGE CONTENT CONTAINER */}
-        <div className="p-12 max-w-[1600px] w-full mx-auto animate-in fade-in duration-700">
+        <div className="p-10 max-w-7xl mx-auto w-full">
           {children}
         </div>
       </main>
@@ -129,13 +123,22 @@ function NavItem({ href, icon, label, external }: any) {
     <Link 
       href={href} 
       target={external ? "_blank" : undefined}
-      className={`flex items-center justify-between px-5 py-4 rounded-2xl text-slate-400 hover:text-white hover:bg-white/5 transition-all group`}
+      className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 hover:text-white hover:bg-white/5 transition-all group`}
     >
-      <div className="flex items-center gap-4">
-        <span className="text-slate-500 group-hover:text-blue-400 transition-colors">{icon}</span>
-        <span className="text-[13px] font-bold tracking-tight">{label}</span>
-      </div>
-      <ChevronRight size={14} className="opacity-0 group-hover:opacity-40 transition-opacity -translate-x-2 group-hover:translate-x-0 group-hover:block hidden" />
+      <span className="text-slate-500 group-hover:text-blue-400 transition-colors">{icon}</span>
+      <span className="text-xs font-bold tracking-wide">{label}</span>
+      {external && <ChevronRight size={12} className="ml-auto opacity-0 group-hover:opacity-40" />}
     </Link>
+  );
+}
+
+function ChevronRight({ size, className }: any) {
+  return (
+    <svg 
+      width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}
+    >
+      <path d="m9 18 6-6-6-6"/>
+    </svg>
   );
 }

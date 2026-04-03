@@ -121,8 +121,8 @@ export default function SubmissionPage() {
         {step === 1 && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
             <div className={styles.formGroup}>
-              <label className="text-[14px] font-medium text-slate-800 mb-4 block">Select Submission Track</label>
-              <div className="flex flex-wrap gap-8 items-center py-2">
+              <label className="text-sm font-medium text-slate-800 mb-4 block">Select Submission Track</label>
+              <div className="flex flex-row gap-10 items-center">
                 {[
                   { id: "REGULAR", label: "Regular" },
                   { id: "FAST", label: "Fast Track" },
@@ -130,23 +130,16 @@ export default function SubmissionPage() {
                 ].map((track) => (
                   <label 
                     key={track.id}
-                    className="flex items-center gap-3 cursor-pointer group transition-opacity"
+                    className="flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-700 hover:text-blue-600 transition-colors"
                   >
-                    <div className="relative flex items-center justify-center">
-                      <input 
-                        type="radio" 
-                        name="submissionTrack"
-                        checked={submissionType === track.id}
-                        onChange={() => setSubmissionType(track.id)}
-                        className="peer appearance-none w-5 h-5 border-2 border-slate-300 rounded-full checked:border-blue-600 transition-all cursor-pointer"
-                      />
-                      <div className="absolute w-2.5 h-2.5 bg-blue-600 rounded-full scale-0 peer-checked:scale-100 transition-transform" />
-                    </div>
-                    <span className={`text-[16px] font-medium transition-colors ${
-                      submissionType === track.id ? 'text-slate-900' : 'text-slate-600 group-hover:text-slate-900'
-                    }`}>
-                      {track.label}
-                    </span>
+                    <input 
+                      type="radio" 
+                      name="submissionTrack"
+                      checked={submissionType === track.id}
+                      onChange={() => setSubmissionType(track.id)}
+                      className="w-4 h-4 cursor-pointer"
+                    />
+                    <span>{track.label}</span>
                   </label>
                 ))}
               </div>
