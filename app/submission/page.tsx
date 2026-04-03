@@ -122,28 +122,32 @@ export default function SubmissionPage() {
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
             <div className={styles.formGroup}>
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6 block">Select Submission Track</label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex flex-wrap gap-10 items-center bg-slate-50 p-6 rounded-xl border border-slate-100">
                 {[
-                  { id: "REGULAR", label: "Regular", icon: <Clock size={20} />, color: "border-slate-200" },
-                  { id: "FAST", label: "Fast Track", icon: <Zap size={20} />, color: "border-blue-200" },
-                  { id: "ULTRAFAST", label: "Ultra Fast", icon: <Gauge size={20} />, color: "border-emerald-200" },
+                  { id: "REGULAR", label: "Regular" },
+                  { id: "FAST", label: "Fast Track" },
+                  { id: "ULTRAFAST", label: "Ultra Fast" },
                 ].map((track) => (
-                  <div 
+                  <label 
                     key={track.id}
-                    onClick={() => setSubmissionType(track.id)}
-                    className={`flex flex-col items-center justify-center text-center p-8 rounded-2xl border-2 cursor-pointer transition-all ${
-                      submissionType === track.id 
-                        ? `border-blue-600 bg-blue-50/10 shadow-lg shadow-blue-500/5 ring-4 ring-blue-50` 
-                        : "border-slate-100 bg-white hover:border-slate-200"
-                    }`}
+                    className="flex items-center gap-3 cursor-pointer group hover:opacity-80 transition-opacity"
                   >
-                    <div className={`p-3 rounded-xl mb-4 transition-all ${submissionType === track.id ? 'bg-blue-600 text-white' : 'bg-slate-50 text-slate-400'}`}>
-                      {track.icon}
+                    <div className="relative flex items-center justify-center">
+                      <input 
+                        type="radio" 
+                        name="submissionTrack"
+                        checked={submissionType === track.id}
+                        onChange={() => setSubmissionType(track.id)}
+                        className="peer appearance-none w-5 h-5 border-2 border-slate-300 rounded-full checked:border-blue-600 transition-all cursor-pointer"
+                      />
+                      <div className="absolute w-2.5 h-2.5 bg-blue-600 rounded-full scale-0 peer-checked:scale-100 transition-transform" />
                     </div>
-                    <div className={`text-md font-bold tracking-tight uppercase ${submissionType === track.id ? 'text-blue-600' : 'text-slate-500'}`}>
+                    <span className={`text-sm font-bold uppercase tracking-wide transition-colors ${
+                      submissionType === track.id ? 'text-blue-600' : 'text-slate-500 group-hover:text-slate-900'
+                    }`}>
                       {track.label}
-                    </div>
-                  </div>
+                    </span>
+                  </label>
                 ))}
               </div>
             </div>
