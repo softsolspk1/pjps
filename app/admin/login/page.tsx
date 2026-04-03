@@ -3,6 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import styles from "./LoginPage.module.css";
 
 export default function LoginPage() {
@@ -79,6 +80,10 @@ export default function LoginPage() {
             {loading ? "Verifying Credentials..." : "Authenticate"}
           </button>
         </form>
+
+        <div className={styles.signupPrompt}>
+          <p>New scholarly contributor? <Link href="/signup" className={styles.signupLink}>Create an Author Account</Link></p>
+        </div>
 
         <div className={styles.footer}>
           <p>For technical assistance, please contact the <br/> <span className={styles.footerLink}>Editorial IT Support Team</span></p>
