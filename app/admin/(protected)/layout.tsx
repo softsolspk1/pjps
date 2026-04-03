@@ -26,11 +26,11 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         <div style={{ padding: '32px' }}>
            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
               <div style={{ width: '40px', height: '40px', backgroundColor: '#0061ff', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900, fontSize: '20px', fontFamily: 'var(--font-serif)' }}>
-                 K
+                 P
               </div>
               <div>
-                <h1 style={{ fontSize: '15px', fontWeight: 900, color: '#1a202c', letterSpacing: '0.02em', textTransform: 'uppercase' }}>FOP UOK</h1>
-                <div style={{ fontSize: '9px', fontWeight: 700, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Faculty of Pharmacy</div>
+                <h1 style={{ fontSize: '15px', fontWeight: 900, color: '#1a202c', letterSpacing: '0.02em', textTransform: 'uppercase' }}>PJPS</h1>
+                <div style={{ fontSize: '9px', fontWeight: 700, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pakistan Journal of Pharmaceutical Sciences</div>
               </div>
            </div>
 

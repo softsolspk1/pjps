@@ -1,0 +1,144 @@
+.container {
+  padding: 40px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 40px;
+}
+
+.titleGroup h1 {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: 800;
+  color: #1a202c;
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
+}
+
+.titleGroup p {
+  font-size: 11px;
+  font-weight: 700;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.tableWrapper {
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #edf2f7;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-sans);
+}
+
+.table th {
+  background-color: #fcfdfe;
+  padding: 18px 24px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 800;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.table td {
+  padding: 20px 24px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a202c;
+  border-bottom: 1px solid #edf2f7;
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover {
+  background-color: #f7fafc;
+}
+
+.badge {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badgeSuccess {
+  background-color: #ecfdf5;
+  color: #10b981;
+}
+
+.badgePending {
+  background-color: #fff7ed;
+  color: #f59e0b;
+}
+
+.badgeError {
+  background-color: #fff5f5;
+  color: #ef4444;
+}
+
+.badgeInfo {
+  background-color: #ebf4ff;
+  color: #0061ff;
+}
+
+.actionBtn {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #edf2f7;
+  background: white;
+  color: #718096;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionBtn:hover {
+  border-color: #0061ff;
+  color: #0061ff;
+  background-color: #ebf4ff;
+}
+
+.pagination {
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #edf2f7;
+  background-color: #fcfdfe;
+}
+
+.paginationInfo {
+  font-size: 12px;
+  font-weight: 600;
+  color: #a0aec0;
+}
+
+.paginationBtns {
+  display: flex;
+  gap: 8px;
+}

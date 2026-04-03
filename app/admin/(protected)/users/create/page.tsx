@@ -9,6 +9,7 @@ import {
   Loader2
 } from "lucide-react";
 import Link from "next/link";
+import styles from "@/components/AdminTable.module.css";
 
 export default function CreateUserPage() {
   const router = useRouter();
@@ -52,123 +53,118 @@ export default function CreateUserPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center justify-between">
-        <Link href="/admin/users" className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-blue-600 transition-colors group">
-          <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Back to Registry
+    <div className={styles.container} style={{ maxWidth: '900px', margin: '0 auto' }}>
+      <div style={{ marginBottom: '32px' }}>
+        <Link href="/admin/users" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em', textDecoration: 'none' }}>
+          <ChevronLeft size={16} /> Back to Expert Registry
         </Link>
       </div>
 
-      <header className="bg-slate-900 text-white p-12 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-12 text-blue-500/20">
-          <UserPlus size={120} strokeWidth={1} />
+      <header className={styles.header} style={{ backgroundColor: '#1a202c', padding: '60px', borderRadius: '32px', color: 'white', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.1, color: 'white' }}>
+          <UserPlus size={180} />
         </div>
-        <div className="relative z-10">
-          <h2 className="text-4xl font-serif font-bold tracking-tight mb-2">Expert Provisioning</h2>
-          <p className="text-blue-300 font-medium">Create and authorize scholarly accounts for editors and peer reviewers.</p>
+        <div style={{ position: 'relative', zIndex: 10 }}>
+           <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '36px', fontWeight: 800, color: 'white', marginBottom: '8px' }}>Expert Provisioning</h1>
+           <p style={{ color: '#718096', fontWeight: 600, fontSize: '14px' }}>Authorize and enroll new institutional contributors into the editorial ecosystem.</p>
         </div>
       </header>
 
-      <form onSubmit={handleSubmit} className="bg-white border border-slate-200 rounded-[2.5rem] shadow-premium p-12 space-y-10">
+      <div style={{ backgroundColor: 'white', borderRadius: '32px', border: '1px solid #edf2f7', padding: '60px', marginTop: '40px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.05)' }}>
         {error && (
-          <div className="p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl flex items-center gap-3 animate-in shake-in">
-            <AlertCircle size={20} />
-            <span className="text-sm font-bold tracking-wide">{error}</span>
+          <div style={{ padding: '20px', borderRadius: '16px', marginBottom: '40px', backgroundColor: '#fff5f5', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '12px', fontWeight: 800, fontSize: '12px', textTransform: 'uppercase' }}>
+            <AlertCircle size={20} /> {error}
           </div>
         )}
 
         {success && (
-          <div className="p-4 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-2xl flex items-center gap-3 animate-in zoom-in">
-            <CheckCircle size={20} />
-            <span className="text-sm font-bold tracking-wide">Scholarly account provisioning complete. Access granted.</span>
+          <div style={{ padding: '20px', borderRadius: '16px', marginBottom: '40px', backgroundColor: '#ecfdf5', color: '#10b981', display: 'flex', alignItems: 'center', gap: '12px', fontWeight: 800, fontSize: '12px', textTransform: 'uppercase' }}>
+            <CheckCircle size={20} /> Scholarly account provisioning complete.
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-           <div className="space-y-2">
-             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-2 block mb-2">Full Identity Name</label>
-             <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input 
-                  type="text" required 
-                  value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-sm font-medium"
-                  placeholder="e.g. Prof. Dr. Ahmed Khan"
-                />
-             </div>
-           </div>
+        <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
+          <div style={{ gridColumn: 'span 1' }}>
+            <label style={{ fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: '10px' }}>Full Identity Name</label>
+            <div style={{ position: 'relative' }}>
+               <User style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#a0aec0' }} size={18} />
+               <input 
+                 type="text" required 
+                 value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})}
+                 style={{ width: '100%', padding: '16px 16px 16px 50px', backgroundColor: '#fcfdfe', border: '1px solid #edf2f7', borderRadius: '14px', outline: 'none', fontWeight: 600, fontSize: '14px' }}
+                 placeholder="e.g. Dr. Ahmed Khan"
+               />
+            </div>
+          </div>
 
-           <div className="space-y-2">
-             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-2 block mb-2">Institutional Email</label>
-             <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input 
-                  type="email" required 
-                  value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-sm font-medium"
-                  placeholder="name@university.edu.pk"
-                />
-             </div>
-           </div>
+          <div style={{ gridColumn: 'span 1' }}>
+            <label style={{ fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: '10px' }}>Institutional Email</label>
+            <div style={{ position: 'relative' }}>
+               <Mail style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#a0aec0' }} size={18} />
+               <input 
+                 type="email" required 
+                 value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})}
+                 style={{ width: '100%', padding: '16px 16px 16px 50px', backgroundColor: '#fcfdfe', border: '1px solid #edf2f7', borderRadius: '14px', outline: 'none', fontWeight: 600, fontSize: '14px' }}
+                 placeholder="name@university.edu.pk"
+               />
+            </div>
+          </div>
 
-           <div className="space-y-2">
-             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-2 block mb-2">System Password</label>
-             <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input 
-                  type="password" required 
-                  value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-sm font-medium"
-                  placeholder="Temporary password..."
-                />
-             </div>
-           </div>
+          <div style={{ gridColumn: 'span 1' }}>
+            <label style={{ fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: '10px' }}>Registry Password</label>
+            <div style={{ position: 'relative' }}>
+               <Lock style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#a0aec0' }} size={18} />
+               <input 
+                 type="password" required 
+                 value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})}
+                 style={{ width: '100%', padding: '16px 16px 16px 50px', backgroundColor: '#fcfdfe', border: '1px solid #edf2f7', borderRadius: '14px', outline: 'none', fontWeight: 600, fontSize: '14px' }}
+                 placeholder="••••••••••••"
+               />
+            </div>
+          </div>
 
-           <div className="space-y-2">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-2 block mb-2">System Access Role</label>
-              <div className="relative">
-                <Shield className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <select 
-                  value={formData.role} onChange={(e) => setFormData({...formData, role: e.target.value})}
-                  className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-sm font-bold uppercase tracking-widest appearance-none"
-                >
-                  <option value="EDITOR">SECTION EDITOR</option>
-                  <option value="REVIEWER">PEER REVIEWER</option>
-                  <option value="ADMIN">ADMINISTRATOR</option>
-                  <option value="AUTHOR">AUTHOR</option>
-                </select>
-              </div>
-           </div>
+          <div style={{ gridColumn: 'span 1' }}>
+            <label style={{ fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: '10px' }}>System Access Role</label>
+            <div style={{ position: 'relative' }}>
+               <Shield style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#a0aec0' }} size={18} />
+               <select 
+                 value={formData.role} onChange={(e) => setFormData({...formData, role: e.target.value})}
+                 style={{ width: '100%', padding: '16px 16px 16px 50px', backgroundColor: '#fcfdfe', border: '1px solid #edf2f7', borderRadius: '14px', outline: 'none', fontWeight: 800, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.1em', appearance: 'none' }}
+               >
+                 <option value="SECTION_EDITOR">SECTION EDITOR</option>
+                 <option value="REVIEWER">PEER REVIEWER</option>
+                 <option value="ADMIN">ADMINISTRATOR</option>
+                 <option value="AUTHOR">AUTHOR</option>
+               </select>
+            </div>
+          </div>
 
-           <div className="col-span-2 space-y-2">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-2 block mb-2">Primary Institutional Affiliation</label>
-              <div className="relative">
-                <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input 
-                  type="text" required 
-                  value={formData.affiliation} onChange={(e) => setFormData({...formData, affiliation: e.target.value})}
-                  className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-sm font-medium"
-                  placeholder="University Department / Research Center"
-                />
-              </div>
-           </div>
-        </div>
+          <div style={{ gridColumn: 'span 2' }}>
+            <label style={{ fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: '10px' }}>Primary Institutional Affiliation</label>
+            <div style={{ position: 'relative' }}>
+               <Building2 style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#a0aec0' }} size={18} />
+               <input 
+                 type="text" required 
+                 value={formData.affiliation} onChange={(e) => setFormData({...formData, affiliation: e.target.value})}
+                 style={{ width: '100%', padding: '16px 16px 16px 50px', backgroundColor: '#fcfdfe', border: '1px solid #edf2f7', borderRadius: '14px', outline: 'none', fontWeight: 600, fontSize: '14px' }}
+                 placeholder="University / Research Institute"
+               />
+            </div>
+          </div>
 
-        <div className="pt-8 border-t border-slate-100 flex items-center justify-between">
-           <p className="text-xs text-slate-400 max-w-xs leading-relaxed font-medium">
-             An official invitation and credential notice will be generated for the expert upon successful provisioning.
-           </p>
-           <button 
-             type="submit" 
-             disabled={loading}
-             className="px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold transition-all shadow-xl shadow-blue-500/20 flex items-center gap-3 active:scale-95 disabled:grayscale"
-           >
-             {loading ? <Loader2 className="animate-spin" size={18} /> : (
-               <>Authorize & Create Profile <ArrowRight size={18} /></>
-             )}
-           </button>
-        </div>
-      </form>
+          <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', paddingTop: '20px', borderTop: '1px solid #edf2f7' }}>
+            <button 
+              type="submit" 
+              disabled={loading}
+              style={{ padding: '18px 40px', backgroundColor: '#0061ff', color: 'white', borderRadius: '14px', fontWeight: 800, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.1em', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 10px 15px -3px rgba(0, 97, 255, 0.2)' }}
+            >
+              {loading ? <Loader2 className="animate-spin" size={18} /> : (
+                <>Authorize & Provision Expert <ArrowRight size={18} /></>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
