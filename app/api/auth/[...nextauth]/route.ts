@@ -1,5 +1,7 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
+import { prisma } from "@/lib/prisma";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -14,7 +16,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials");
         }
         
-        // Single Admin verification via Phase 1 requirement
+        // 1. Check Environment-Based Admin
         const adminUsername = process.env.ADMIN_USERNAME;
         const adminPassword = process.env.ADMIN_PASSWORD;
 
@@ -25,11 +27,28 @@ export const authOptions: NextAuthOptions = {
           credentials.password === adminPassword
         ) {
           return {
-            id: "admin-1",
-            name: "Admin User",
+            id: "admin-static",
+            name: "System Admin",
             email: "admin@pjps.pk",
             role: "ADMIN"
           };
+        }
+
+        // 2. Check Database Users (New Demo System)
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.username }
+        });
+
+        if (user) {
+          const isValid = await bcrypt.compare(credentials.password, user.password);
+          if (isValid) {
+            return {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              role: user.role
+            };
+          }
         }
 
         throw new Error("Invalid access credentials");

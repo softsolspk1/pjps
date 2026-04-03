@@ -59,11 +59,50 @@
 
 .authorInput {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   margin-bottom: 10px;
   border: 1px solid var(--border-medium);
   border-radius: 4px;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  font-family: var(--font-sans);
+}
+
+.titleField {
+  width: 100%;
+  padding: 16px 20px;
+  border: 1px solid var(--border-medium);
+  border-radius: 6px;
+  font-size: 1.5rem;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  color: var(--primary-navy);
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.titleField:focus {
+  border-color: var(--primary-navy);
+  box-shadow: 0 0 0 4px rgba(0, 45, 94, 0.05);
+}
+
+.textArea {
+  width: 100%;
+  min-height: 200px;
+  padding: 20px;
+  border: 1px solid var(--border-medium);
+  border-radius: 6px;
+  font-size: 1rem;
+  line-height: 1.6;
+  font-family: var(--font-sans);
+  color: #334155;
+  outline: none;
+  transition: all 0.3s ease;
+  resize: vertical;
+}
+
+.textArea:focus {
+  border-color: var(--primary-navy);
+  box-shadow: 0 0 0 4px rgba(0, 45, 94, 0.05);
 }
 
 /* PREVIEW / PRINT Styles */

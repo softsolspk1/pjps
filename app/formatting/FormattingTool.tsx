@@ -157,7 +157,7 @@ export default function FormattingTool() {
             <label className={styles.label}>Manuscript Full Title</label>
             <input 
               type="text" value={title} onChange={(e) => setTitle(e.target.value)}
-              className="w-full text-2xl font-serif font-bold p-4 border rounded focus:ring-2 focus:ring-blue-500 outline-none"
+              className={styles.titleField}
               placeholder="e.g. Clinical characteristics and factors affecting quality of life in children..."
             />
           </div>
@@ -200,14 +200,13 @@ export default function FormattingTool() {
                    {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
                    {key === 'abstract' ? ' (Single Column)' : ' (Two Column Body)'}
                  </label>
-                 <div className="bg-white border rounded">
-                   <ReactQuill 
-                      theme="snow" 
-                      value={sections[key as keyof Sections]} 
-                      onChange={(v) => handleSectionChange(key as keyof Sections, v)}
-                      modules={modules}
-                    />
-                 </div>
+                 <textarea 
+                    value={sections[key as keyof Sections]} 
+                    onChange={(e) => handleSectionChange(key as keyof Sections, e.target.value)}
+                    className={styles.textArea}
+                    placeholder={`Enter ${key.replace(/([A-Z])/g, ' $1').toLowerCase()} content here...`}
+                    rows={8}
+                  />
                </div>
             ))}
           </div>
