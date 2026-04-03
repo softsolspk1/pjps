@@ -16,7 +16,20 @@ export async function GET(request: Request) {
         id: true,
         title: true,
         status: true,
-        updatedAt: true
+        updatedAt: true,
+        createdAt: true,
+        issue: {
+          select: {
+            number: true,
+            month: true,
+            volume: {
+              select: {
+                number: true,
+                year: true
+              }
+            }
+          }
+        }
       }
     });
 
