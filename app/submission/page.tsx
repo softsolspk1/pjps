@@ -121,8 +121,8 @@ export default function SubmissionPage() {
         {step === 1 && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
             <div className={styles.formGroup}>
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6 block">Select Submission Track</label>
-              <div className="flex flex-wrap gap-10 items-center bg-slate-50 p-6 rounded-xl border border-slate-100">
+              <label className="text-[14px] font-medium text-slate-800 mb-4 block">Select Submission Track</label>
+              <div className="flex flex-wrap gap-8 items-center py-2">
                 {[
                   { id: "REGULAR", label: "Regular" },
                   { id: "FAST", label: "Fast Track" },
@@ -130,7 +130,7 @@ export default function SubmissionPage() {
                 ].map((track) => (
                   <label 
                     key={track.id}
-                    className="flex items-center gap-3 cursor-pointer group hover:opacity-80 transition-opacity"
+                    className="flex items-center gap-3 cursor-pointer group transition-opacity"
                   >
                     <div className="relative flex items-center justify-center">
                       <input 
@@ -142,8 +142,8 @@ export default function SubmissionPage() {
                       />
                       <div className="absolute w-2.5 h-2.5 bg-blue-600 rounded-full scale-0 peer-checked:scale-100 transition-transform" />
                     </div>
-                    <span className={`text-sm font-bold uppercase tracking-wide transition-colors ${
-                      submissionType === track.id ? 'text-blue-600' : 'text-slate-500 group-hover:text-slate-900'
+                    <span className={`text-[16px] font-medium transition-colors ${
+                      submissionType === track.id ? 'text-slate-900' : 'text-slate-600 group-hover:text-slate-900'
                     }`}>
                       {track.label}
                     </span>

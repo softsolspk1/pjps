@@ -3,14 +3,21 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
 import { User as UserIcon, LogOut, LayoutDashboard, UserCircle } from 'lucide-react';
 import styles from './Header.module.css';
 
 export default function Header() {
+  const pathname = usePathname();
   const { data: session } = useSession();
   const [scrolled, setScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Suppress Header on Admin & Reviewer routes to prevent catastrophic layout overlaps
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/reviewer')) {
+    return null;
+  }
 
   useEffect(() => {
     const handleScroll = () => {

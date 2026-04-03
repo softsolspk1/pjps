@@ -1,9 +1,18 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import styles from './Footer.module.css';
 
 export default function Footer() {
+  const pathname = usePathname();
   const currentYear = new Date().getFullYear();
   
+  // Suppress Footer on Admin & Reviewer routes
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/reviewer')) {
+    return null;
+  }
+
   return (
     <footer className={styles.footer}>
       <div className={`container ${styles.footerContent}`}>
