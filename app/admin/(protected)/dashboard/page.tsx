@@ -1,5 +1,5 @@
 export const dynamic = 'force-dynamic';
-import { prisma } from "@/lib/prisma";
+import { prisma } from "../../../../lib/prisma";
 
 export default async function DashboardPage() {
   const articleCount = await prisma.article.count();
