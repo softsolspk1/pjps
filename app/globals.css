@@ -38,20 +38,6 @@
   --transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0e17;
-    --foreground: #f8fafc;
-    --text-main: #cbd5e1;
-    --text-muted: #94a3b8;
-    --border-light: #1e293b;
-    --border-medium: #334155;
-    --bg-soft: #111827;
-    --bg-accent-light: #0f172a;
-    --primary-navy: #60a5fa; /* More sophisticated sky blue for dark mode */
-    --accent-gold: #d4af37;
-  }
-}
 
 * {
   box-sizing: border-box;
@@ -96,11 +82,6 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.01em;
 }
 
-@media (prefers-color-scheme: dark) {
-  h1, h2, h3, h4, h5, h6 {
-    color: var(--foreground);
-  }
-}
 
 /* Base Component Classes */
 .container {
@@ -221,10 +202,4 @@ h1, h2, h3, h4, h5, h6 {
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-@media (prefers-color-scheme: dark) {
-  .glass {
-    background: rgba(10, 15, 26, 0.7);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  }
-}
 
