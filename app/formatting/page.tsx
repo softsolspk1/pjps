@@ -7,15 +7,15 @@ export const metadata = {
 
 export default function FormattingPage() {
   return (
-    <div className="bg-slate-50 min-h-screen py-20">
+    <div className="bg-slate-50 min-h-screen pb-20" style={{ paddingTop: '180px' }}>
       <div className="container">
         <div className="max-w-7xl mx-auto">
           <div className="mb-12 text-center">
-            <span className="text-blue-600 font-bold tracking-[0.2em] uppercase text-xs block mb-4">Researcher Tools</span>
-            <h1 className="text-5xl font-serif font-black text-slate-900 mb-6 italic">Manuscript Architect</h1>
-            <p className="text-slate-500 max-w-2xl mx-auto text-lg leading-relaxed">
-              Format your research according to elite academic standards. Prepare your manuscript for 
-              international peer review with our professional typesetting engine.
+            <span className="text-blue-600 font-bold tracking-[0.2em] uppercase text-[10px] block mb-4">Official PJPS Researcher Suite</span>
+            <h1 className="text-6xl font-serif font-black text-slate-900 mb-6 italic tracking-tight">Manuscript Architect</h1>
+            <p className="text-slate-500 max-w-2xl mx-auto text-lg leading-relaxed font-medium">
+              Transform your research into professional, publication-ready manuscripts 
+              synchronized with PJPS world-class academic standards.
             </p>
           </div>
           
