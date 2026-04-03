@@ -66,20 +66,13 @@
   opacity: 0.3;
 }
 
-.topLinks {
-  display: flex;
-  gap: 20px;
-}
-
-.topLink {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  transition: var(--transition);
-}
-
-.topLink:hover {
-  color: var(--accent-gold);
+.journalBrandingTop {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: var(--font-serif);
 }
 
 .progressBar {

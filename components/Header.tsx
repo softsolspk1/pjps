@@ -33,9 +33,8 @@ export default function Header() {
             <span className={styles.divider}>|</span>
             <span>Faculty of Pharmacy</span>
           </div>
-          <div className={styles.topLinks}>
-            <Link href="/admin/login" className={styles.topLink}>Author Login</Link>
-            <Link href="/board" className={styles.topLink}>Editorial Board</Link>
+          <div className={styles.journalBrandingTop}>
+            Pakistan Journal of Pharmaceutical Sciences
           </div>
         </div>
       </div>
