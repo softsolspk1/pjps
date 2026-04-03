@@ -275,7 +275,43 @@
   .articlePreview { box-shadow: none; width: 100%; padding: 0; }
 }
 
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Rich Content Column Scaling & Tables */
+.rich-content img {
+  max-width: 100%;
+  height: auto;
+  margin: 15pt 0;
+  display: block;
+  border-radius: 2px;
+}
+
+/* Scientific Table Formatting */
+.rich-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15pt 0;
+  font-size: 8.5pt;
+  border-top: 1.5pt solid black;
+  border-bottom: 1.5pt solid black;
+}
+
+.rich-content th, .rich-content td {
+  padding: 6pt;
+  border-bottom: 0.5pt solid #eee;
+  text-align: left;
+}
+
+.rich-content th {
+  border-bottom: 1.2pt solid black;
+  font-weight: bold;
+  background: transparent;
+}
+
+.rich-content tr:last-child td {
+  border-bottom: none;
 }

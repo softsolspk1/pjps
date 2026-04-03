@@ -2,9 +2,12 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useSession, signOut } from 'next-auth/react';
+import { User as UserIcon, LogOut, LayoutDashboard, UserCircle } from 'lucide-react';
 import styles from './Header.module.css';
 
 export default function Header() {
+  const { data: session } = useSession();
   const [scrolled, setScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -90,8 +93,39 @@ export default function Header() {
           <button className={styles.searchBtn} aria-label="Search">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
           </button>
-          <Link href="/admin/login" className="btn btn-outline" style={{ padding: '0.6rem 1.5rem', fontSize: '0.8rem' }}>Login</Link>
-          <Link href="/submission" className={`btn btn-primary ${styles.cta}`}>Online Submission Portal</Link>
+          
+          {session ? (
+            <div className="flex items-center gap-4">
+              <Link 
+                href={
+                  session.user?.role === 'ADMIN' || session.user?.role === 'EDITOR' 
+                  ? "/admin/dashboard" 
+                  : session.user?.role === 'REVIEWER' 
+                  ? "/reviewer/dashboard" 
+                  : "/submission"
+                } 
+                className="btn btn-outline flex items-center gap-2"
+                style={{ padding: '0.6rem 1.2rem', fontSize: '0.75rem' }}
+              >
+                <LayoutDashboard size={14} /> Dashboard
+              </Link>
+              <Link href="/profile" className="text-slate-600 hover:text-blue-600 transition-colors" title="My Profile">
+                 <UserCircle size={28} />
+              </Link>
+              <button 
+                onClick={() => signOut()} 
+                className="text-slate-400 hover:text-red-500 transition-colors" 
+                title="Sign Out"
+              >
+                 <LogOut size={20} />
+              </button>
+            </div>
+          ) : (
+            <>
+              <Link href="/admin/login" className="btn btn-outline" style={{ padding: '0.6rem 1.5rem', fontSize: '0.8rem' }}>Login</Link>
+              <Link href="/submission" className={`btn btn-primary ${styles.cta}`}>Online Submission Portal</Link>
+            </>
+          )}
         </div>
       </div>
     </header>

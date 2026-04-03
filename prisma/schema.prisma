@@ -10,6 +10,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Volume {
+  id        String   @id @default(cuid())
+  number    Int      @unique
+  year      Int
+  issues    Issue[]
+  createdAt DateTime @default(now())
+}
+
+model Issue {
+  id              String   @id @default(cuid())
+  volumeId        String
+  number          Int
+  month           String   // e.g., "June"
+  isContinuous    Boolean  @default(false)
+  isPublished     Boolean  @default(false)
+  articles        Article[]
+  
+  volume          Volume   @relation(fields: [volumeId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+
+  @@unique([volumeId, number])
+}
+
 model Article {
   id              String   @id @default(cuid())
   title           String
@@ -23,6 +46,12 @@ model Article {
   
   submissionType  String?  @default("REGULAR") // REGULAR, FAST, ULTRAFAST
   status          String   @default("DRAFT") // DRAFT, SUBMITTED, IN_REVIEW, ACCEPTED, REJECTED, PUBLISHED
+  reviewType      String   @default("DOUBLE_BLIND") // SINGLE_BLIND, DOUBLE_BLIND, OPEN
+  copyeditingStatus String @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
+  
+  issueId         String?
+  issue           Issue?   @relation(fields: [issueId], references: [id])
+  
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   
@@ -81,8 +110,6 @@ model Media {
   @@index([articleId])
 }
 
-// Admin Users are primarily managed via Environment Variables for this phase 
-// but we include a User model in case we need database-level editors/reviewers later.
 model Analytics {
   id              String   @id @default("global")
   formattingCount Int      @default(0)
@@ -95,7 +122,14 @@ model User {
   email     String   @unique
   password  String   // hashed
   name      String?
-  role      String   @default("AUTHOR") // ADMIN, EDITOR, REVIEWER, AUTHOR
+  role      String   @default("AUTHOR") // ADMIN, EDITOR, REVIEWER, AUTHOR, READER_SUBSCRIBER
+  
+  // Professional Profile
+  orcid           String?
+  affiliation     String?
+  biography       String?  @db.Text
+  interests       String?  // Research interests / Reviewer expertise
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

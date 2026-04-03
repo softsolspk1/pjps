@@ -240,15 +240,50 @@ export default function FormattingTool() {
                    {key === 'abstract' ? ' (Full Width)' : ' (Scientific Column)'}
                  </label>
                  <div className="bg-white border rounded-lg overflow-hidden shadow-sm">
-                   <ReactQuill 
-                      theme="snow"
-                      value={sections[key as keyof Sections]} 
-                      onChange={(val) => handleSectionChange(key as keyof Sections, val)}
-                      modules={modules}
-                      formats={formats}
-                      placeholder={`Draft ${key.replace(/([A-Z])/g, ' $1').toLowerCase()} content with images and tables...`}
-                      className="min-h-[250px]"
-                    />
+                    <div className="bg-slate-50 border-b p-2 flex gap-2">
+                       <button 
+                         type="button"
+                         onClick={() => {
+                           const tableHtml = `
+                             <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                               <thead>
+                                 <tr style="border-top: 2px solid black; border-bottom: 1px solid black;">
+                                   <th style="padding: 8px; text-align: left;">Header 1</th>
+                                   <th style="padding: 8px; text-align: left;">Header 2</th>
+                                   <th style="padding: 8px; text-align: left;">Header 3</th>
+                                 </tr>
+                               </thead>
+                               <tbody>
+                                 <tr style="border-bottom: 1px solid #eee;">
+                                   <td style="padding: 8px;">Data</td>
+                                   <td style="padding: 8px;">Data</td>
+                                   <td style="padding: 8px;">Data</td>
+                                 </tr>
+                                 <tr style="border-bottom: 2px solid black;">
+                                   <td style="padding: 8px;">Data</td>
+                                   <td style="padding: 8px;">Data</td>
+                                   <td style="padding: 8px;">Data</td>
+                                 </tr>
+                               </tbody>
+                             </table>
+                           `;
+                           // @ts-ignore
+                           handleSectionChange(key, sections[key as keyof Sections] + tableHtml);
+                         }}
+                         className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 bg-white border rounded hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                       >
+                         + Insert Table Template
+                       </button>
+                    </div>
+                    <ReactQuill 
+                       theme="snow"
+                       value={sections[key as keyof Sections]} 
+                       onChange={(val) => handleSectionChange(key as keyof Sections, val)}
+                       modules={modules}
+                       formats={formats}
+                       placeholder={`Draft ${key.replace(/([A-Z])/g, ' $1').toLowerCase()} content with images and tables...`}
+                       className="min-h-[250px]"
+                     />
                  </div>
                </div>
             ))}
@@ -278,7 +313,7 @@ export default function FormattingTool() {
                ))}
              </div>
 
-             <div className={styles.abstractBlock}>
+             <div className={`${styles.abstractBlock} rich-content`}>
                <div dangerouslySetInnerHTML={{ __html: `<b>Abstract: </b>` + sections.abstract }} />
              </div>
 
