@@ -57,10 +57,15 @@ export default async function AdminArticlesList() {
                 <td className="p-4 text-sm text-gray-600">
                   {format(new Date(article.createdAt), "MMM dd, yyyy")}
                 </td>
-                <td className="p-4">
+                <td className="p-4 space-x-3">
                   <Link href={`/admin/articles/${article.id}/edit`} className="text-blue-600 hover:underline">
                     Edit
                   </Link>
+                  {article.status === "SUBMITTED" && (
+                    <Link href={`/admin/articles/${article.id}/assign`} className="text-amber-600 font-bold hover:underline">
+                      Assign Reviewer
+                    </Link>
+                  )}
                 </td>
               </tr>
             ))}

@@ -27,6 +27,31 @@ model Article {
   
   authors         AuthorMapping[]
   media           Media[]
+  reviews         Review[]
+}
+
+model Review {
+  id              String   @id @default(cuid())
+  articleId       String
+  reviewerId      String
+  
+  // Scoring Criteria (1-10)
+  originality     Int      @default(0)
+  quality         Int      @default(0)
+  importance      Int      @default(0)
+  
+  comments        String?  @db.Text
+  recommendation  String   @default("PENDING") // PENDING, ACCEPT, REVISION, REJECT
+  status          String   @default("PENDING") // PENDING, COMPLETED
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  article         Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  reviewer        User     @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  @@index([articleId])
+  @@index([reviewerId])
 }
 
 model AuthorMapping {
@@ -65,4 +90,6 @@ model User {
   role      String   @default("AUTHOR") // ADMIN, EDITOR, REVIEWER, AUTHOR
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  reviews   Review[]
 }
