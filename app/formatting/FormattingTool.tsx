@@ -7,10 +7,10 @@ import { Document, Packer, Paragraph, TextRun, AlignmentType, HeadingLevel, Sect
 import { saveAs } from "file-saver";
 import { FileText, Download, Printer, Users, Layout, PlusCircle, Trash2, Eye, Edit3, BarChart3, Save } from "lucide-react";
 import styles from "./formatting.module.css";
-import "react-quill/dist/quill.snow.css";
+import "react-quill-new/dist/quill.snow.css";
 
 // Dynamically import Quill
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
 const modules = {
   toolbar: [
@@ -101,7 +101,7 @@ export default function FormattingTool() {
           }),
           new Paragraph({
             children: [
-               new TextRun({ text: authors.map(a => a.affiliation).join(" | "), italic: true }),
+               new TextRun({ text: authors.map(a => a.affiliation).join(" | "), italics: true }),
             ],
             alignment: AlignmentType.CENTER,
             spacing: { after: 400 },
