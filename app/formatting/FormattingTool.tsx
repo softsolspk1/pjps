@@ -43,27 +43,26 @@ type Sections = {
 
 export default function FormattingTool() {
   const [view, setView] = useState<"EDIT" | "PREVIEW">("EDIT");
-  const [title, setTitle] = useState("Clinical characteristics and factors affecting quality of life in children with congenital adrenal hyperplasia");
-  const [doi, setDoi] = useState("doi.org/10.36721/PJPS.2026.39.6.151.1");
+  const [title, setTitle] = useState("");
+  const [doi, setDoi] = useState("");
   const [dates, setDates] = useState({
-    submitted: "27-08-2024",
-    revised: "31-10-2024",
-    accepted: "31-10-2024"
+    submitted: "",
+    revised: "",
+    accepted: ""
   });
-  const [keywords, setKeywords] = useState("Congenital adrenal hyperplasia; Hormonal control; 21-Hydroxylase deficiency; Pediatric endocrinology; Quality of life");
-  const [currAuthor, setCurrAuthor] = useState("Shiyi Xu et al");
+  const [keywords, setKeywords] = useState("");
+  const [currAuthor, setCurrAuthor] = useState("");
   const [authors, setAuthors] = useState<Author[]>([
-    { name: "Shiyi Xu", affiliation: "Department of Endocrinology, Fujian Children's Hospital, China" },
-    { name: "Hui Liu*", affiliation: "College of Clinical Medicine, Fujian Medical University, China" }
+    { name: "", affiliation: "" }
   ]);
   const [sections, setSections] = useState<Sections>({
-    abstract: "Congenital Adrenal Hyperplasia (CAH) is a group of disorders characterized by impaired adrenal steroid hormone synthesis...",
-    introduction: "Congenital adrenal hyperplasia (CAH) is a group of genetic disorders caused by defects in the steroidogenic pathway...",
-    materialsMethods: "This retrospective study included 30 pediatric patients diagnosed with CAH who were admitted to the hospital between June 2021 and June 2023...",
-    results: "The results of the clinical characterization showed significant variation in quality of life scores...",
-    discussion: "The study explores the multifaceted impact of CAH on long-term patient outcomes...",
-    conclusion: "In conclusion, early diagnosis and customized treatment regimens are the cornerstone of CAH management...",
-    references: "[1] Robinson et al. (2002). J. Clin. Endocr. Metab.<br/>[2] Musa et al. (2020). PJPS Vol 33.",
+    abstract: "",
+    introduction: "",
+    materialsMethods: "",
+    results: "",
+    discussion: "",
+    conclusion: "",
+    references: "",
   });
 
   const printRef = useRef(null);
@@ -103,7 +102,7 @@ export default function FormattingTool() {
         properties: { type: SectionType.CONTINUOUS },
         children: [
           new Paragraph({
-            text: title.toUpperCase(),
+            text: (title || "UNTITLED").toUpperCase(),
             heading: HeadingLevel.HEADING_1,
             alignment: AlignmentType.CENTER,
             spacing: { after: 400 },
@@ -126,7 +125,7 @@ export default function FormattingTool() {
     });
 
     const blob = await Packer.toBlob(doc);
-    saveAs(blob, `${title.replace(/\s+/g, '_')}.docx`);
+    saveAs(blob, `${(title || "PJPS_Article").replace(/\s+/g, '_')}.docx`);
   };
 
   return (
@@ -159,7 +158,7 @@ export default function FormattingTool() {
         </div>
       </div>
 
-      {view === "EDIT" ? (
+      <div className={view === "EDIT" ? "block" : "hidden"}>
         <div className="space-y-10">
           <div className={styles.editorSection}>
             <label className={styles.label}>Full Manuscript Title (Official)</label>
@@ -167,18 +166,18 @@ export default function FormattingTool() {
               value={title} onChange={(e) => setTitle(e.target.value)}
               className={styles.titleField}
               rows={2}
-              placeholder="Enter full title..."
+              placeholder="Enter full title of your research paper..."
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className={styles.editorSection}>
               <label className={styles.label}>DOI / Reference ID</label>
-              <input type="text" value={doi} onChange={(e) => setDoi(e.target.value)} className={styles.authorInput} />
+              <input type="text" value={doi} onChange={(e) => setDoi(e.target.value)} className={styles.authorInput} placeholder="e.g. doi.org/10.36721..." />
             </div>
             <div className={styles.editorSection}>
               <label className={styles.label}>Keywords (Semi-colon separated)</label>
-              <input type="text" value={keywords} onChange={(e) => setKeywords(e.target.value)} className={styles.authorInput} />
+              <input type="text" value={keywords} onChange={(e) => setKeywords(e.target.value)} className={styles.authorInput} placeholder="Keyword 1; Keyword 2..." />
             </div>
           </div>
 
@@ -187,15 +186,15 @@ export default function FormattingTool() {
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <span className="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Submitted</span>
-                <input type="text" value={dates.submitted} onChange={(e) => setDates({...dates, submitted: e.target.value})} className={styles.authorInput} />
+                <input type="text" value={dates.submitted} onChange={(e) => setDates({...dates, submitted: e.target.value})} className={styles.authorInput} placeholder="DD-MM-YYYY" />
               </div>
               <div>
                 <span className="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Revised</span>
-                <input type="text" value={dates.revised} onChange={(e) => setDates({...dates, revised: e.target.value})} className={styles.authorInput} />
+                <input type="text" value={dates.revised} onChange={(e) => setDates({...dates, revised: e.target.value})} className={styles.authorInput} placeholder="DD-MM-YYYY" />
               </div>
               <div>
                 <span className="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Accepted</span>
-                <input type="text" value={dates.accepted} onChange={(e) => setDates({...dates, accepted: e.target.value})} className={styles.authorInput} />
+                <input type="text" value={dates.accepted} onChange={(e) => setDates({...dates, accepted: e.target.value})} className={styles.authorInput} placeholder="DD-MM-YYYY" />
               </div>
             </div>
           </div>
@@ -220,11 +219,11 @@ export default function FormattingTool() {
                   </div>
                   <input 
                     type="text" value={auth.name} onChange={(e) => handleAuthorChange(idx, "name", e.target.value)}
-                    className={styles.authorInput} placeholder="Full Name"
+                    className={styles.authorInput} placeholder="Author Full Name"
                   />
                   <textarea 
                     value={auth.affiliation} onChange={(e) => handleAuthorChange(idx, "affiliation", e.target.value)}
-                    className={styles.authorInput} placeholder="Institutional Affiliation"
+                    className={styles.authorInput} placeholder="Institutional Affiliation (Department, University, City, Country)"
                     rows={2}
                   />
                 </div>
@@ -289,67 +288,66 @@ export default function FormattingTool() {
             ))}
           </div>
         </div>
-      ) : (
-        <div className={styles.articleViewport}>
-          <div ref={printRef} className={styles.articlePreview}>
-             <div className={styles.journalHeader}>{doi}</div>
-             
-             <h1 className={styles.articleTitle}>{title}</h1>
-             
-             <p className={styles.articleAuthors}>
-               {authors.filter(a => a.name).map((a, i) => (
-                  <span key={i}>
-                    {a.name}<sup>{i + 1}</sup>{i < authors.length - 1 ? ', ' : ''}
-                  </span>
-               ))}
-               <span className="ml-1">*</span>
-             </p>
-             
-             <div className={styles.articleAffiliations}>
-               {authors.filter(a => a.affiliation).map((a, i) => (
-                  <div key={i} className="mb-1 leading-tight">
-                    <sup>{i + 1}</sup> {a.affiliation}
-                  </div>
-               ))}
-             </div>
+      </div>
 
-             <div className={`${styles.abstractBlock} rich-content`}>
-               <div dangerouslySetInnerHTML={{ __html: `<b>Abstract: </b>` + sections.abstract }} />
-             </div>
-
-             <div className={styles.keywordsBlock}>
-               <b>Keywords: </b> {keywords}
-             </div>
-
-             <div className={styles.dateLine}>
-               Submitted on {dates.submitted} — Revised on {dates.revised} — Accepted on {dates.accepted}
-             </div>
-
-             <div className={styles.scientificBody}>
-               {Object.entries(sections).filter(([k]) => k !== 'abstract').map(([key, content]) => (
-                  <div key={key} className={styles.scientificSection}>
-                    <span className={styles.sectionHeading}>
-                      {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
-                    </span>
-                    <div className="rich-content" dangerouslySetInnerHTML={{ __html: content }} />
-                  </div>
-               ))}
-             </div>
-
-             <div className={styles.footnoteArea}>
-                <div className="border-t border-black pt-2 w-1/2">
-                   *Corresponding author: e-mail: {authors[0]?.name.toLowerCase().replace(/\s+/g, '_')}@pjps.pk
+      <div className={view === "PREVIEW" ? styles.articleViewport : styles.hiddenForPrint}>
+        <div ref={printRef} className={styles.articlePreview}>
+           <div className={styles.journalHeader}>{doi || "doi.org/10.36721/PJPS..."}</div>
+           
+           <h1 className={styles.articleTitle}>{title || "Untitled Manuscript"}</h1>
+           
+           <p className={styles.articleAuthors}>
+             {authors.filter(a => a.name).map((a, i) => (
+                <span key={i}>
+                  {a.name}<sup>{i + 1}</sup>{i < authors.length - 1 ? ', ' : ''}
+                </span>
+             ))}
+             <span className="ml-1">*</span>
+           </p>
+           
+           <div className={styles.articleAffiliations}>
+             {authors.filter(a => a.affiliation).map((a, i) => (
+                <div key={i} className="mb-1 leading-tight">
+                  <sup>{i + 1}</sup> {a.affiliation}
                 </div>
-             </div>
+             ))}
+           </div>
 
-             <div className={styles.articleFooter}>
-                <span>{new Date().getFullYear() === 2026 ? "1602" : "Page No."}</span>
-                <span>Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610</span>
-             </div>
-          </div>
+           <div className={`${styles.abstractBlock} rich-content`}>
+             <div dangerouslySetInnerHTML={{ __html: `<b>Abstract: </b>` + sections.abstract }} />
+           </div>
+
+           <div className={styles.keywordsBlock}>
+             <b>Keywords: </b> {keywords || "Not specified"}
+           </div>
+
+           <div className={styles.dateLine}>
+             Submitted on {dates.submitted || "---"} — Revised on {dates.revised || "---"} — Accepted on {dates.accepted || "---"}
+           </div>
+
+           <div className={styles.scientificBody}>
+             {Object.entries(sections).filter(([k]) => k !== 'abstract').map(([key, content]) => (
+                <div key={key} className={styles.scientificSection}>
+                  <span className={styles.sectionHeading}>
+                    {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
+                  </span>
+                  <div className="rich-content" dangerouslySetInnerHTML={{ __html: content || "Content pending..." }} />
+                </div>
+             ))}
+           </div>
+
+           <div className={styles.footnoteArea}>
+              <div className="border-t border-black pt-2 w-1/2">
+                 *Corresponding author: e-mail: {authors[0]?.name ? authors[0].name.toLowerCase().replace(/\s+/g, '_') + "@pjps.pk" : "---"}
+              </div>
+           </div>
+
+           <div className={styles.articleFooter}>
+              <span>{new Date().getFullYear() === 2026 ? "1602" : "Page No."}</span>
+              <span>Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610</span>
+           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
-

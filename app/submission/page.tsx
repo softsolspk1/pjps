@@ -5,7 +5,8 @@ import styles from "./submission.module.css";
 import { 
   PlusCircle, Trash2, Upload, CheckCircle, 
   AlertCircle, FileText, Info, ShieldCheck,
-  FileArchive, FileCode, ChevronRight, Loader2
+  FileArchive, FileCode, ChevronRight, Loader2,
+  Clock, Zap, Gauge
 } from "lucide-react";
 
 type Author = {
@@ -120,18 +121,30 @@ export default function SubmissionPage() {
         {step === 1 && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
             <div className={styles.formGroup}>
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 block">Submission Track</label>
-              <div className="flex gap-8">
-                {["REGULAR", "FAST", "ULTRAFAST"].map((type) => (
-                  <label key={type} className="flex items-center gap-3 cursor-pointer group">
-                    <input 
-                      type="radio" name="submissionType" value={type} 
-                      checked={submissionType === type}
-                      onChange={(e) => setSubmissionType(e.target.value)}
-                      className="w-5 h-5 accent-blue-600"
-                    />
-                    <span className="text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors uppercase tracking-widest">{type}</span>
-                  </label>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 block">Select Submission Track</label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[
+                  { id: "REGULAR", label: "Regular", desc: "4-8 Weeks", icon: <Clock size={20} />, color: "border-slate-200" },
+                  { id: "FAST", label: "Fast Track", desc: "2-4 Weeks", icon: <Zap size={20} />, color: "border-blue-200" },
+                  { id: "ULTRAFAST", label: "Ultra Fast", desc: "7-12 Days", icon: <Gauge size={20} />, color: "border-emerald-200" },
+                ].map((track) => (
+                  <div 
+                    key={track.id}
+                    onClick={() => setSubmissionType(track.id)}
+                    className={`flex flex-col p-6 rounded-2xl border-2 cursor-pointer transition-all hover:shadow-md ${
+                      submissionType === track.id 
+                        ? `${track.color} bg-white ring-2 ring-blue-500/20` 
+                        : "border-slate-50 bg-slate-50/30 grayscale opacity-60 hover:opacity-100 hover:grayscale-0 hover:border-slate-200"
+                    }`}
+                  >
+                    <div className={`p-3 rounded-xl mb-4 w-fit ${submissionType === track.id ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-100'}`}>
+                      {track.icon}
+                    </div>
+                    <h3 className={`font-black uppercase tracking-widest text-xs mb-1 ${submissionType === track.id ? 'text-slate-900' : 'text-slate-400'}`}>
+                      {track.label}
+                    </h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Review: {track.desc}</p>
+                  </div>
                 ))}
               </div>
             </div>

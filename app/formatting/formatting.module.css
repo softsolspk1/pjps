@@ -121,6 +121,15 @@
   overflow-y: auto;
 }
 
+.hiddenForPrint {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+  visibility: hidden;
+  height: 0;
+  overflow: hidden;
+}
+
 .articlePreview {
   width: 210mm; /* A4 Width */
   background: white;
