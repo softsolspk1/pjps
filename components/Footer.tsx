@@ -55,7 +55,7 @@ export default function Footer() {
       
       <div className={styles.bottomBar}>
         <div className={`container ${styles.bottomContent}`}>
-          <p>© {currentYear} Pakistan Journal of Pharmaceutical Sciences. Published by the University of Karachi.</p>
+          <p>© {currentYear} Pakistan Journal of Pharmaceutical Sciences. Developed by Softsols Pakistan</p>
           <div className={styles.bottomLinks}>
             <Link href="/terms">Terms</Link>
             <span className={styles.separator}>|</span>
