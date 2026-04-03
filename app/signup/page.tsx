@@ -10,6 +10,7 @@ export default function SignupPage() {
   const [formData, setFormData] = useState({
     name: "",
     affiliation: "",
+    country: "Pakistan",
     email: "",
     password: "",
     confirmPassword: ""
@@ -37,6 +38,7 @@ export default function SignupPage() {
           email: formData.email,
           password: formData.password,
           affiliation: formData.affiliation,
+          country: formData.country,
           role: "AUTHOR" // Default role for new signups
         }),
       });
@@ -56,7 +58,7 @@ export default function SignupPage() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -99,6 +101,25 @@ export default function SignupPage() {
               value={formData.affiliation}
               onChange={handleChange}
             />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Country of Origin</label>
+            <select
+              name="country"
+              required
+              className={styles.input}
+              value={formData.country}
+              onChange={handleChange}
+            >
+              <option value="Pakistan">Pakistan</option>
+              <option value="International">International (Other)</option>
+              <option value="Afghanistan">Afghanistan</option>
+              <option value="China">China</option>
+              <option value="India">India</option>
+              <option value="Iran">Iran</option>
+              {/* Add more as needed, but standardizing on Pakistan vs International for pricing */}
+            </select>
           </div>
           
           <div className={styles.formGroup}>

@@ -1,12 +1,11 @@
-"use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import styles from "./submission.module.css";
 import { 
   PlusCircle, Trash2, Upload, CheckCircle, 
   AlertCircle, FileText, Info, ShieldCheck,
   FileArchive, FileCode, ChevronRight, Loader2,
-  Clock, Zap, Gauge
+  Clock, Zap, Gauge, CreditCard, DollarSign
 } from "lucide-react";
 
 type Author = {
@@ -16,6 +15,7 @@ type Author = {
 };
 
 export default function SubmissionPage() {
+  const { data: session } = useSession();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +28,33 @@ export default function SubmissionPage() {
   const [authors, setAuthors] = useState<Author[]>([{ name: "", email: "", affiliation: "" }]);
   const [manuscriptFile, setManuscriptFile] = useState<File | null>(null);
   const [supplementaryFile, setSupplementaryFile] = useState<File | null>(null);
+  const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null);
   const [guidelinesConfirmed, setGuidelinesConfirmed] = useState(false);
+
+  const [pricing, setPricing] = useState<any[]>([]);
+  const [userOrigin, setUserOrigin] = useState("PAKISTANI");
+
+  useEffect(() => {
+    fetch("/api/admin/pricing")
+      .then(res => res.json())
+      .then(data => setPricing(data))
+      .catch(err => console.error("Failed to load pricing", err));
+    
+    if (session?.user) {
+      // Assuming session might have country now after signup update
+      const country = (session.user as any).country || "Pakistan";
+      setUserOrigin(country.toLowerCase() === "pakistan" ? "PAKISTANI" : "INTERNATIONAL");
+    }
+  }, [session]);
+
+  const getCurrentFee = () => {
+    const p = pricing.find(item => item.origin === userOrigin);
+    if (!p) return 0;
+    if (submissionType === "REGULAR") return p.regular;
+    if (submissionType === "FAST") return p.fast;
+    if (submissionType === "ULTRAFAST") return p.ultraFast;
+    return 0;
+  };
 
   const addAuthor = () => setAuthors([...authors, { name: "", email: "", affiliation: "" }]);
   const removeAuthor = (index: number) => setAuthors(authors.filter((_, i) => i !== index));
@@ -41,6 +67,7 @@ export default function SubmissionPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!paymentProofFile) return setError("Proof of payment is mandatory for scholarly review.");
     if (!manuscriptFile) return setError("Principal manuscript file is required.");
     if (!guidelinesConfirmed) return setError("You must confirm adherence to PJPS formatting guidelines.");
     
@@ -53,8 +80,11 @@ export default function SubmissionPage() {
       formData.append("abstract", abstract);
       formData.append("keywords", keywords);
       formData.append("submissionType", submissionType);
+      formData.append("trackingType", submissionType);
+      formData.append("origin", userOrigin);
       formData.append("authors", JSON.stringify(authors));
       formData.append("file", manuscriptFile);
+      formData.append("paymentProof", paymentProofFile);
       if (supplementaryFile) formData.append("supplementary", supplementaryFile);
 
       const res = await fetch("/api/submissions", {
@@ -142,6 +172,15 @@ export default function SubmissionPage() {
                     <span>{track.label}</span>
                   </label>
                 ))}
+              </div>
+              <div className="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-between">
+                <div className="flex items-center gap-3 text-blue-900">
+                  <CreditCard size={18} />
+                  <span className="text-sm font-bold">Estimated Submission Fee</span>
+                </div>
+                <div className="text-xl font-serif font-black text-blue-600">
+                  {userOrigin === "PAKISTANI" ? "Rs. " : "$ "}{getCurrentFee().toLocaleString()}
+                </div>
               </div>
             </div>
             <div className={styles.formGroup}>
@@ -266,6 +305,31 @@ export default function SubmissionPage() {
                  </label>
               </div>
               {supplementaryFile && <p className="text-xs text-blue-600 font-medium ml-2 flex items-center gap-2"><CheckCircle size={12}/> {supplementaryFile.name} attached.</p>}
+            </div>
+
+            {/* Proof of Payment */}
+            <div className="space-y-4">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Proof of Payment (Mandatory)</label>
+              <div className="flex items-center gap-4 p-6 bg-emerald-50/50 border border-emerald-100 rounded-2xl">
+                 <div className="p-3 bg-emerald-100 rounded-xl text-emerald-600">
+                   <DollarSign size={20} />
+                 </div>
+                 <div className="flex-1">
+                    <p className="text-sm font-bold text-slate-700">Bank Receipt / Transaction Proof</p>
+                    <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">PDF or Image (Max 5MB)</p>
+                 </div>
+                 <input 
+                   type="file" 
+                   accept=".pdf,.jpg,.jpeg,.png"
+                   id="paymentInput"
+                   className="hidden"
+                   onChange={(e) => setPaymentProofFile(e.target.files ? e.target.files[0] : null)}
+                 />
+                 <label htmlFor="paymentInput" className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 cursor-pointer transition-colors">
+                   {paymentProofFile ? "Replace Proof" : "Upload Proof"}
+                 </label>
+              </div>
+              {paymentProofFile && <p className="text-xs text-emerald-600 font-medium ml-2 flex items-center gap-2"><CheckCircle size={12}/> {paymentProofFile.name} attached.</p>}
             </div>
 
             {/* Guidelines Checkbox */}

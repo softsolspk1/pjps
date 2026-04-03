@@ -45,6 +45,10 @@ model Article {
   references      String?  @db.Text
   
   submissionType  String?  @default("REGULAR") // REGULAR, FAST, ULTRAFAST
+  trackingType    String   @default("REGULAR") // REGULAR, FAST, ULTRA_FAST
+  origin          String?  @default("PAKISTANI") // PAKISTANI, INTERNATIONAL
+  paymentProofUrl String?
+  paymentStatus   String   @default("UNPAID") // UNPAID, PENDING, PAID
   status          String   @default("DRAFT") // DRAFT, SUBMITTED, IN_REVIEW, ACCEPTED, REJECTED, PUBLISHED
   reviewType      String   @default("DOUBLE_BLIND") // SINGLE_BLIND, DOUBLE_BLIND, OPEN
   copyeditingStatus String @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
@@ -127,6 +131,7 @@ model User {
   // Professional Profile
   orcid           String?
   affiliation     String?
+  country         String?  @default("Pakistan")
   biography       String?  @db.Text
   interests       String?  // Research interests / Reviewer expertise
   
@@ -134,4 +139,13 @@ model User {
   updatedAt DateTime @updatedAt
 
   reviews   Review[]
+}
+
+model Pricing {
+  id        String   @id @default(cuid())
+  origin    String   @unique // PAKISTANI, INTERNATIONAL
+  regular   Float
+  fast      Float
+  ultraFast Float
+  updatedAt DateTime @updatedAt
 }

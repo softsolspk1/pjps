@@ -133,11 +133,11 @@
 .articlePreview {
   width: 210mm; /* A4 Width */
   background: white;
-  padding: 20mm 15mm;
+  padding: 1.5in 1in; /* Standard Academic Margins */
   box-shadow: 0 0 30px rgba(0,0,0,0.2);
   font-family: "Times New Roman", Times, serif;
   color: black;
-  line-height: 1.45;
+  line-height: 1.25;
   position: relative;
   min-height: 297mm; /* A4 Height */
 }
@@ -198,12 +198,12 @@
 /* TWO COLUMN BODY */
 .scientificBody {
   column-count: 2;
-  column-gap: 25pt;
+  column-gap: 24pt;
   text-align: justify;
   text-justify: inter-word;
   hyphens: auto;
-  font-size: 9.2pt;
-  line-height: 1.4;
+  font-size: 10pt;
+  line-height: 1.2;
   orphans: 3;
   widows: 3;
 }

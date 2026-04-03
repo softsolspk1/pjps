@@ -14,40 +14,46 @@ export async function POST(req: Request) {
     const title = formData.get("title") as string;
     const abstract = formData.get("abstract") as string;
     const submissionType = formData.get("submissionType") as string || "REGULAR";
+    const trackingType = formData.get("trackingType") as string || "REGULAR";
+    const origin = formData.get("origin") as string || "PAKISTANI";
     const authorsJson = formData.get("authors") as string;
     const file = formData.get("file") as File;
+    const paymentProof = formData.get("paymentProof") as File;
 
-    if (!file || !title || !authorsJson) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    if (!file || !title || !authorsJson || !paymentProof) {
+      return NextResponse.json({ error: "Missing required scholarly fields" }, { status: 400 });
     }
 
     const authors = JSON.parse(authorsJson);
 
     // 1. Upload PDF to Cloudinary
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    const uploadResponse = await new Promise((resolve, reject) => {
+    const manuscriptBuffer = Buffer.from(await file.arrayBuffer());
+    const manuscriptUpload = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
-        {
-          resource_type: "raw",
-          folder: "pjps_submissions",
-          public_id: `${Date.now()}_${file.name.replace(/\.[^/.]+$/, "")}`,
-          format: "pdf",
-        },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      ).end(buffer);
+        { resource_type: "raw", folder: "pjps_submissions" },
+        (error, result) => error ? reject(error) : resolve(result)
+      ).end(manuscriptBuffer);
     }) as any;
 
-    // 2. Create Article and AuthorMapping in a transaction
+    // 2. Upload Payment Proof to Cloudinary
+    const paymentBuffer = Buffer.from(await paymentProof.arrayBuffer());
+    const paymentUpload = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        { resource_type: "auto", folder: "pjps_payments" },
+        (error, result) => error ? reject(error) : resolve(result)
+      ).end(paymentBuffer);
+    }) as any;
+
+    // 3. Create Article and AuthorMapping
     const newArticle = await prisma.article.create({
       data: {
         title,
         abstract,
         submissionType,
+        trackingType: trackingType as any,
+        origin,
+        paymentProofUrl: paymentUpload.secure_url,
+        paymentStatus: "PENDING",
         status: "SUBMITTED",
         authors: {
           create: authors.map((a: any, index: number) => ({
@@ -58,8 +64,8 @@ export async function POST(req: Request) {
         },
         media: {
           create: {
-            publicId: uploadResponse.public_id,
-            secureUrl: uploadResponse.secure_url,
+            publicId: manuscriptUpload.public_id,
+            secureUrl: manuscriptUpload.secure_url,
             resourceType: "raw",
             section: "MANUSCRIPT",
           },
@@ -67,9 +73,39 @@ export async function POST(req: Request) {
       },
       include: {
         authors: true,
-        media: true,
       },
     });
+
+    // 4. Send Thank You Email
+    try {
+      const { sendEmail } = await import("@/lib/mail");
+      await sendEmail({
+        to: authors[0].email,
+        subject: "PJPS Manuscript Submission Confirmation",
+        html: `
+          <div style="font-family: 'Times New Roman', Times, serif; color: #002d5e; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; padding: 40px; border-radius: 8px;">
+            <h1 style="border-bottom: 2px solid #002d5e; padding-bottom: 15px; margin-bottom: 25px;">Submission Received</h1>
+            <p>Dear <strong>${authors[0].name}</strong>,</p>
+            <p>Thank you for submitting your research titled "<strong>${title}</strong>" to the <strong>Pakistan Journal of Pharmaceutical Sciences (PJPS)</strong>.</p>
+            <p>Your manuscript has been successfully cataloged and is now entering the editorial screening phase. Our editorial board will review the submission and the provided proof of payment.</p>
+            <div style="margin: 30px 0; padding: 20px; background-color: #f8fafc; border-radius: 6px;">
+              <p style="margin: 0; font-weight: bold;">Submission Details:</p>
+              <p style="margin: 5px 0;">Reference ID: ${newArticle.id}</p>
+              <p style="margin: 5px 0;">Track: ${trackingType}</p>
+              <p style="margin: 5px 0;">Status: SUBMITTED (Review Pending)</p>
+            </div>
+            <p>You can track the live progress of your manuscript through the Online Submission Portal.</p>
+            <p style="margin-top: 40px; border-top: 1px solid #e2e8f0; pt: 20px; font-size: 0.9em; color: #64748b;">
+              Best regards,<br/>
+              <strong>The Editorial Office</strong><br/>
+              Pakistan Journal of Pharmaceutical Sciences
+            </p>
+          </div>
+        `
+      });
+    } catch (emailErr) {
+      console.error("Failed to send submission email:", emailErr);
+    }
 
     return NextResponse.json({ success: true, articleId: newArticle.id });
   } catch (error: any) {

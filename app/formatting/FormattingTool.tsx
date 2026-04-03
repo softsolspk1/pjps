@@ -98,27 +98,77 @@ export default function FormattingTool() {
     };
 
     const doc = new Document({
+      creator: "PJPS Manuscript Architect",
+      title: title || "Scholarly Article",
       sections: [{
         properties: { type: SectionType.CONTINUOUS },
         children: [
           new Paragraph({
-            text: (title || "UNTITLED").toUpperCase(),
+            text: (doi || "doi.org/10.36721/PJPS...").toUpperCase(),
+            alignment: AlignmentType.RIGHT,
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            text: (title || "UNTITLED MANUSCRIPT").toUpperCase(),
             heading: HeadingLevel.HEADING_1,
             alignment: AlignmentType.CENTER,
-            spacing: { after: 400 },
+            spacing: { before: 400, after: 400 },
           }),
           new Paragraph({
             children: [
-               new TextRun({ text: authors.map(a => a.name).join(", "), bold: true }),
+              new TextRun({ 
+                text: authors.filter(a => a.name).map((a, i) => `${a.name}${i + 1}`).join(", "), 
+                bold: true,
+                size: 24 // 12pt
+              }),
             ],
             alignment: AlignmentType.CENTER,
-            spacing: { after: 200 },
+            spacing: { after: 100 },
           }),
-          new Paragraph({ text: "ABSTRACT", heading: HeadingLevel.HEADING_2, spacing: { before: 200, after: 100 } }),
-          new Paragraph({ text: stripHtml(sections.abstract), alignment: AlignmentType.JUSTIFIED, spacing: { after: 300 } }),
+          ...authors.filter(a => a.affiliation).map((a, i) => new Paragraph({
+            text: `${i + 1} ${a.affiliation}`,
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 50 },
+            style: "small",
+          })),
+          new Paragraph({ text: "", spacing: { after: 400 } }),
+          new Paragraph({ 
+            children: [
+              new TextRun({ text: "Abstract: ", bold: true }),
+              new TextRun({ text: stripHtml(sections.abstract) }),
+            ],
+            alignment: AlignmentType.JUSTIFIED,
+            spacing: { after: 200 } 
+          }),
+          new Paragraph({ 
+            children: [
+              new TextRun({ text: "Keywords: ", bold: true }),
+              new TextRun({ text: keywords }),
+            ],
+            spacing: { after: 400 } 
+          }),
+          new Paragraph({ 
+            children: [
+              new TextRun({ 
+                text: `Submitted: ${dates.submitted} — Revised: ${dates.revised} — Accepted: ${dates.accepted}`,
+                italics: true,
+              }),
+            ],
+            alignment: AlignmentType.LEFT,
+            spacing: { after: 400 },
+          }),
           ...Object.entries(sections).filter(([k]) => k !== 'abstract').flatMap(([key, value]) => [
-             new Paragraph({ text: key.toUpperCase(), heading: HeadingLevel.HEADING_2, spacing: { before: 300, after: 100 } }),
-             new Paragraph({ text: stripHtml(value), alignment: AlignmentType.JUSTIFIED, spacing: { after: 200 } })
+             new Paragraph({ 
+               text: key.toUpperCase(), 
+               heading: HeadingLevel.HEADING_2,
+               alignment: AlignmentType.LEFT,
+               spacing: { before: 400, after: 200 } 
+             }),
+             new Paragraph({ 
+               text: stripHtml(value), 
+               alignment: AlignmentType.JUSTIFIED, 
+               spacing: { after: 200 } 
+             })
           ])
         ],
       }],

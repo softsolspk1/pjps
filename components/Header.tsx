@@ -67,6 +67,7 @@ export default function Header() {
 
         <nav className={`${styles.nav} ${isMenuOpen ? styles.navOpen : ''}`}>
           <ul className={styles.navList}>
+            <li><Link href="/" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Home</Link></li>
             <li className={styles.navItemDropdown}>
               <Link href="#" className={styles.navLink} onClick={(e) => e.preventDefault()}>About PJPS</Link>
               <ul className={styles.dropdownMenu}>
