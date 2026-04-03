@@ -16,10 +16,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body className="antialiased text-slate-900 bg-white min-h-screen flex flex-col">
         <Providers>
           <HeaderWrapper />
-          <main>{children}</main>
+          {/* Main content wrapper to handle global padding if needed, although HeaderWrapper handles visibility */}
+          <main className="flex-1 flex flex-col">
+            {children}
+          </main>
           <FooterWrapper />
         </Providers>
       </body>
