@@ -1,10 +1,10 @@
 .hero {
   position: relative;
-  min-height: 85vh;
+  min-height: 70vh;
   background-color: var(--background);
   display: flex;
   align-items: center;
-  padding-top: 150px;
+  padding-top: 40px;
   padding-bottom: 60px;
   overflow: hidden;
   border-bottom: 1px solid var(--border-light);
@@ -14,23 +14,29 @@
   position: absolute;
   top: 0;
   right: 0;
-  width: 50%;
+  width: 60%;
   height: 100%;
-  background: radial-gradient(circle at 70% 30%, var(--bg-accent-light) 0%, transparent 70%);
+  background-image: url('/pharma-hero.png');
+  background-size: cover;
+  background-position: center left;
   z-index: 1;
+  opacity: 0.15;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.8) 50%, black 100%);
+  mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.8) 50%, black 100%);
 }
 
 .heroDecorative::after {
   content: "";
   position: absolute;
   top: 0;
-  right: -10%;
+  right: -5%;
   width: 100%;
   height: 100%;
-  background-image: radial-gradient(var(--border-medium) 1px, transparent 1px);
-  background-size: 40px 40px;
-  transform: skewX(-15deg);
-  opacity: 0.4;
+  background-image: radial-gradient(var(--accent-gold) 1.5px, transparent 1.5px);
+  background-size: 50px 50px;
+  transform: skewX(-10deg);
+  opacity: 0.15;
+  z-index: 2;
 }
 
 .heroContent {
@@ -50,7 +56,7 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .badgeLine {
@@ -61,12 +67,12 @@
 
 .heroTitle {
   font-family: var(--font-serif);
-  font-size: 4.5rem;
+  font-size: 4.2rem;
   font-weight: 800;
   line-height: 1.1;
   color: var(--primary-navy);
-  margin-bottom: 32px;
-  letter-spacing: -0.03em;
+  margin-bottom: 24px;
+  letter-spacing: -0.02em;
 }
 
 .titleAccent {
@@ -76,11 +82,11 @@
 }
 
 .heroSubtitle {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   line-height: 1.7;
   color: var(--text-muted);
-  margin-bottom: 48px;
-  max-width: 700px;
+  margin-bottom: 40px;
+  max-width: 650px;
 }
 
 .heroActions {
