@@ -67,17 +67,35 @@ export default function Header() {
 
         <nav className={`${styles.nav} ${isMenuOpen ? styles.navOpen : ''}`}>
           <ul className={styles.navList}>
-            <li><Link href="/" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Home</Link></li>
-            <li><Link href="/issues" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Issues</Link></li>
-            <li><Link href="/archive" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Archive</Link></li>
+            <li className={styles.navItemDropdown}>
+              <Link href="#" className={styles.navLink} onClick={(e) => e.preventDefault()}>About PJPS</Link>
+              <ul className={styles.dropdownMenu}>
+                <li><Link href="/about/board" onClick={() => setIsMenuOpen(false)}>Editorial Board</Link></li>
+                <li><Link href="/board" onClick={() => setIsMenuOpen(false)}>Editor-in-Chief Message</Link></li>
+              </ul>
+            </li>
             <li className={styles.navItemDropdown}>
               <Link href="/submission" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Submission</Link>
               <ul className={styles.dropdownMenu}>
                 <li><Link href="/submission" onClick={() => setIsMenuOpen(false)}>Online Submission Portal</Link></li>
+                <li><Link href="/submission/instructions" onClick={() => setIsMenuOpen(false)}>Instruction for Authors</Link></li>
+                <li><Link href="/submission/peer-review" onClick={() => setIsMenuOpen(false)}>Peer Review Guidelines</Link></li>
+                <li><Link href="/submission/conflict-of-interest" onClick={() => setIsMenuOpen(false)}>Conflict of Interest</Link></li>
                 <li><Link href="/formatting" onClick={() => setIsMenuOpen(false)}>Article Formatting Tool</Link></li>
                 <li><Link href="/tracking" onClick={() => setIsMenuOpen(false)}>Track Manuscript</Link></li>
               </ul>
             </li>
+            <li className={styles.navItemDropdown}>
+              <Link href="#" className={styles.navLink} onClick={(e) => e.preventDefault()}>Publication</Link>
+              <ul className={styles.dropdownMenu}>
+                <li><Link href="/publication/current" onClick={() => setIsMenuOpen(false)}>Current Issue</Link></li>
+                <li><Link href="/publication/previous" onClick={() => setIsMenuOpen(false)}>Previous Issues</Link></li>
+                <li><Link href="/publication/special" onClick={() => setIsMenuOpen(false)}>Special Issues</Link></li>
+                <li><Link href="/publication/supplementary" onClick={() => setIsMenuOpen(false)}>Supplementary Issues</Link></li>
+                <li><Link href="/issues" onClick={() => setIsMenuOpen(false)}>Browse by Year</Link></li>
+              </ul>
+            </li>
+            <li><Link href="/archive" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Archive</Link></li>
             <li><Link href="/contact" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Contact</Link></li>
             {/* Mobile-only links */}
             <li className={styles.mobileOnly}><Link href="/admin/login" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Author Login</Link></li>
