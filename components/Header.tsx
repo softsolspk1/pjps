@@ -32,9 +32,9 @@ export default function Header() {
       <div className={styles.topBar}>
         <div className={`container-full ${styles.topBarContent}`}>
           <div className={styles.institutionalBranding}>
-            <span>University of Karachi</span>
-            <span className={styles.divider}>|</span>
             <span>Faculty of Pharmacy</span>
+            <span className={styles.divider}>|</span>
+            <span>University of Karachi</span>
           </div>
           <div className={styles.journalBrandingTop}>
             Pakistan Journal of Pharmaceutical Sciences
