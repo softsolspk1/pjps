@@ -5,7 +5,7 @@ import styles from "./submission.module.css";
 import { 
   PlusCircle, Trash2, Upload, CheckCircle, 
   AlertCircle, FileText, Info, ShieldCheck,
-  FileArchive, FileCode
+  FileArchive, FileCode, ChevronRight, Loader2
 } from "lucide-react";
 
 type Author = {
