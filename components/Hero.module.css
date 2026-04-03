@@ -86,14 +86,14 @@
 .heroActions {
   display: flex;
   gap: 24px;
-  margin-bottom: 100px;
+  margin-bottom: 60px;
 }
 
 .statsStrip {
   display: flex;
   align-items: center;
   gap: 40px;
-  padding-top: 50px;
+  padding-top: 40px;
   border-top: 1px solid var(--border-light);
 }
 
