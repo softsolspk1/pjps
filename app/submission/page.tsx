@@ -19,6 +19,7 @@ export default function SubmissionPage() {
   const [title, setTitle] = useState("");
   const [abstract, setAbstract] = useState("");
   const [keywords, setKeywords] = useState("");
+  const [submissionType, setSubmissionType] = useState("REGULAR");
   const [authors, setAuthors] = useState<Author[]>([{ name: "", email: "", affiliation: "" }]);
   const [file, setFile] = useState<File | null>(null);
 
@@ -42,6 +43,7 @@ export default function SubmissionPage() {
       formData.append("title", title);
       formData.append("abstract", abstract);
       formData.append("keywords", keywords);
+      formData.append("submissionType", submissionType);
       formData.append("authors", JSON.stringify(authors));
       formData.append("file", file);
 
@@ -109,6 +111,24 @@ export default function SubmissionPage() {
 
         {step === 1 && (
           <div className="space-y-6">
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Submission Type</label>
+              <div className="flex gap-6 mt-2">
+                {["REGULAR", "FAST", "ULTRAFAST"].map((type) => (
+                  <label key={type} className="flex items-center gap-2 cursor-pointer">
+                    <input 
+                      type="radio" 
+                      name="submissionType" 
+                      value={type} 
+                      checked={submissionType === type}
+                      onChange={(e) => setSubmissionType(e.target.value)}
+                      className="w-4 h-4 accent-blue-600"
+                    />
+                    <span className="text-sm font-medium text-slate-700 capitalize">{type.toLowerCase()}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
             <div className={styles.formGroup}>
               <label className={styles.label}>Manuscript Title</label>
               <input 

@@ -61,28 +61,40 @@ export default async function Home() {
           </div>
           <div className={styles.indexingGrid}>
             <a href="https://www.scopus.com" target="_blank" rel="noopener noreferrer" className={styles.indexItem}>
-              <div className={styles.indexIcon}>S</div>
+              <div className={styles.indexIcon}>
+                <img src="/scopus.png" alt="Scopus" className={styles.indexLogo} />
+              </div>
               <span>Scopus (Elsevier)</span>
             </a>
             <a href="https://www.webofscience.com" target="_blank" rel="noopener noreferrer" className={styles.indexItem}>
-              <div className={styles.indexIcon}>W</div>
+              <div className={styles.indexIcon}>
+                <img src="/web1.png" alt="Web of Science" className={styles.indexLogo} />
+              </div>
               <span>Web of Science</span>
             </a>
             <a href="https://pubmed.ncbi.nlm.nih.gov" target="_blank" rel="noopener noreferrer" className={styles.indexItem}>
-              <div className={styles.indexIcon}>P</div>
+              <div className={styles.indexIcon}>
+                <img src="/pubmed.png" alt="PubMed" className={styles.indexLogo} />
+              </div>
               <span>PubMed / MEDLINE</span>
             </a>
             <a href="https://www.embase.com" target="_blank" rel="noopener noreferrer" className={styles.indexItem}>
-              <div className={styles.indexIcon}>E</div>
-              <span>EMBASE</span>
+              <div className={styles.indexIcon}>
+                <img src="/EMBASE.jpg" alt="JATSTECH" className={styles.indexLogo} />
+              </div>
+              <span>JATSTECH</span>
             </a>
             <a href="https://doaj.org" target="_blank" rel="noopener noreferrer" className={styles.indexItem}>
-              <div className={styles.indexIcon}>D</div>
-              <span>DOAJ</span>
+              <div className={styles.indexIcon}>
+                <img src="/DOAJ.png" alt="i-FUTURE" className={styles.indexLogo} />
+              </div>
+              <span>i-FUTURE</span>
             </a>
             <a href="https://www.cabi.org" target="_blank" rel="noopener noreferrer" className={styles.indexItem}>
-              <div className={styles.indexIcon}>C</div>
-              <span>CABI</span>
+              <div className={styles.indexIcon}>
+                <img src="/CABI.png" alt="i-FOCUS" className={styles.indexLogo} />
+              </div>
+              <span>i-FOCUS</span>
             </a>
           </div>
         </div>

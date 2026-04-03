@@ -13,6 +13,7 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     const title = formData.get("title") as string;
     const abstract = formData.get("abstract") as string;
+    const submissionType = formData.get("submissionType") as string || "REGULAR";
     const authorsJson = formData.get("authors") as string;
     const file = formData.get("file") as File;
 
@@ -46,6 +47,7 @@ export async function POST(req: Request) {
       data: {
         title,
         abstract,
+        submissionType,
         status: "SUBMITTED",
         authors: {
           create: authors.map((a: any, index: number) => ({

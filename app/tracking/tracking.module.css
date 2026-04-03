@@ -1,0 +1,92 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 80px 20px;
+  min-height: 70vh;
+}
+
+.searchBox {
+  background: white;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 45, 94, 0.08);
+  border: 1px solid var(--border-light);
+  margin-top: 30px;
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: 2.5rem;
+  color: var(--primary-navy);
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  margin-bottom: 30px;
+}
+
+.inputGroup {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.input {
+  flex: 1;
+  padding: 14px 20px;
+  border: 1px solid var(--border-medium);
+  border-radius: 4px;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary-navy);
+}
+
+.result {
+  margin-top: 40px;
+  padding-top: 30px;
+  border-top: 1px solid var(--border-light);
+  animation: fadeIn 0.5s ease-out;
+}
+
+.statusCard {
+  background: var(--bg-soft);
+  padding: 24px;
+  border-radius: 6px;
+  border-left: 4px solid var(--accent-gold);
+}
+
+.statusTitle {
+  font-weight: 700;
+  color: var(--primary-navy);
+  display: block;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.8rem;
+}
+
+.statusValue {
+  font-size: 1.2rem;
+  color: var(--primary-navy);
+  font-weight: 600;
+}
+
+.error {
+  color: #ef4444;
+  background: #fef2f2;
+  padding: 12px 20px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-top: 20px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -67,7 +67,14 @@ export default function Header() {
             <li><Link href="/" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Home</Link></li>
             <li><Link href="/issues" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Issues</Link></li>
             <li><Link href="/archive" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Archive</Link></li>
-            <li><Link href="/submission" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Submission</Link></li>
+            <li className={styles.navItemDropdown}>
+              <Link href="/submission" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Submission</Link>
+              <ul className={styles.dropdownMenu}>
+                <li><Link href="/submission" onClick={() => setIsMenuOpen(false)}>Online Submission Portal</Link></li>
+                <li><Link href="/formatting" onClick={() => setIsMenuOpen(false)}>Article Formatting Tool</Link></li>
+                <li><Link href="/tracking" onClick={() => setIsMenuOpen(false)}>Track Manuscript</Link></li>
+              </ul>
+            </li>
             <li><Link href="/contact" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Contact</Link></li>
             {/* Mobile-only links */}
             <li className={styles.mobileOnly}><Link href="/admin/login" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Author Login</Link></li>
