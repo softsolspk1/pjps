@@ -27,7 +27,7 @@ export default function Header() {
   return (
     <header className={`${styles.header} ${scrolled ? styles.scrolled : ''} ${isMenuOpen ? styles.menuActive : ''}`}>
       <div className={styles.topBar}>
-        <div className={`container ${styles.topBarContent}`}>
+        <div className={`container-full ${styles.topBarContent}`}>
           <div className={styles.institutionalBranding}>
             <span>University of Karachi</span>
             <span className={styles.divider}>|</span>
@@ -42,7 +42,7 @@ export default function Header() {
       
       <div className={styles.progressBar} style={{ width: `${scrollProgress}%` }}></div>
       
-      <div className={`container ${styles.headerContent}`}>
+      <div className={`container-full ${styles.headerContent}`}>
         <Link href="/" className={styles.logo} onClick={() => setIsMenuOpen(false)}>
           <div className={styles.logoBadge}>PJPS</div>
           <div className={styles.logoText}>

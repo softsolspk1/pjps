@@ -37,7 +37,8 @@
   position: relative;
   z-index: 2;
   color: var(--text-main);
-  max-width: 900px;
+  width: 100%;
+  max-width: none;
 }
 
 .heroBadge {

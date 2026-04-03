@@ -109,6 +109,19 @@ h1, h2, h3, h4, h5, h6 {
   padding: 0 2.5rem;
 }
 
+.container-full {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0 5vw;
+}
+
+@media (max-width: 768px) {
+  .container-full {
+    padding: 0 2rem;
+  }
+}
+
 .section-padding {
   padding: var(--spacing-xl) 0;
 }
