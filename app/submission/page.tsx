@@ -122,7 +122,7 @@ export default function SubmissionPage() {
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
             <div className={styles.formGroup}>
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6 block">Select Submission Track</label>
-              <div className="flex flex-col gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
                   { id: "REGULAR", label: "Regular", icon: <Clock size={20} />, color: "border-slate-200" },
                   { id: "FAST", label: "Fast Track", icon: <Zap size={20} />, color: "border-blue-200" },
@@ -131,19 +131,18 @@ export default function SubmissionPage() {
                   <div 
                     key={track.id}
                     onClick={() => setSubmissionType(track.id)}
-                    className={`flex items-center gap-6 p-5 rounded-2xl border-2 cursor-pointer transition-all ${
+                    className={`flex flex-col items-center justify-center text-center p-8 rounded-2xl border-2 cursor-pointer transition-all ${
                       submissionType === track.id 
-                        ? `${track.color} bg-white shadow-md ring-2 ring-blue-500/10` 
-                        : "border-slate-50 bg-slate-50/50 hover:bg-white hover:border-slate-200 opacity-70 hover:opacity-100"
+                        ? `border-blue-600 bg-blue-50/10 shadow-lg shadow-blue-500/5 ring-4 ring-blue-50` 
+                        : "border-slate-100 bg-white hover:border-slate-200"
                     }`}
                   >
-                    <div className={`p-3 rounded-xl ${submissionType === track.id ? 'bg-blue-600 text-white' : 'bg-white text-slate-400'}`}>
+                    <div className={`p-3 rounded-xl mb-4 transition-all ${submissionType === track.id ? 'bg-blue-600 text-white' : 'bg-slate-50 text-slate-400'}`}>
                       {track.icon}
                     </div>
-                    <div className={`text-lg font-bold tracking-tight ${submissionType === track.id ? 'text-slate-900' : 'text-slate-500'}`}>
+                    <div className={`text-md font-bold tracking-tight uppercase ${submissionType === track.id ? 'text-blue-600' : 'text-slate-500'}`}>
                       {track.label}
                     </div>
-                    {submissionType === track.id && <CheckCircle size={18} className="ml-auto text-blue-600 animate-in zoom-in" />}
                   </div>
                 ))}
               </div>
