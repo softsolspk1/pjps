@@ -6,7 +6,8 @@ import { redirect } from "next/navigation";
 import { 
   LayoutDashboard, FileText, Layers, 
   Users, LogOut, ExternalLink, Settings,
-  ShieldCheck, Inbox
+  ShieldCheck, Inbox, BarChart3, ClipboardCheck,
+  UserPlus, Mail
 } from "lucide-react";
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
@@ -42,13 +43,14 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           </div>
         </div>
 
-        <nav className="flex-1 overflow-y-auto p-6 space-y-8">
+        <nav className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
           {/* Main Group */}
           <div>
             <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 ml-4">Editorial</h3>
             <div className="space-y-1">
               <NavItem href="/admin/dashboard" icon={<LayoutDashboard size={18} />} label="Command Center" />
               <NavItem href="/admin/articles" icon={<Inbox size={18} />} label="Manuscript Registry" />
+              <NavItem href="/admin/reviews" icon={<ClipboardCheck size={18} />} label="Peer Review Hub" />
             </div>
           </div>
 
@@ -58,6 +60,15 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             <div className="space-y-1">
               <NavItem href="/admin/issues" icon={<Layers size={18} />} label="Volumes & Issues" />
               <NavItem href="/admin/users" icon={<Users size={18} />} label="Expert Directory" />
+              <NavItem href="/admin/users/create" icon={<UserPlus size={18} />} label="Account Provision" />
+            </div>
+          </div>
+
+          {/* Deep Insight */}
+          <div>
+            <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 ml-4">Insights</h3>
+            <div className="space-y-1">
+              <NavItem href="/admin/analytics" icon={<BarChart3 size={18} />} label="Lifetime Analytics" />
             </div>
           </div>
 
@@ -82,15 +93,20 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto flex flex-col relative">
-        {/* Top Header Bar (Optional, for secondary navigation/search) */}
+      <main className="flex-1 overflow-y-auto flex flex-col relative bg-[#f1f5f9]">
+        {/* Top Header Bar */}
         <div className="h-16 bg-white border-b border-slate-200 sticky top-0 z-10 flex items-center px-10 justify-between">
            <div className="flex items-center gap-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
               <ShieldCheck size={16} className="text-blue-500" />
-              Secure Editorial Environment
+              Editorial Production System
            </div>
-           <div className="text-[10px] font-bold text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
-              v2.0.0 Stable
+           <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 group cursor-pointer hover:text-blue-600 transition-colors">
+                <Mail size={14} /> System Notifications
+              </div>
+              <div className="text-[10px] font-bold text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
+                v2.1.0 Stable
+              </div>
            </div>
         </div>
 
@@ -107,7 +123,7 @@ function NavItem({ href, icon, label, external }: any) {
     <Link 
       href={href} 
       target={external ? "_blank" : undefined}
-      className="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
+      className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 hover:text-white hover:bg-white/5 transition-all group`}
     >
       <span className="text-slate-500 group-hover:text-blue-400 transition-colors">{icon}</span>
       <span className="text-xs font-bold tracking-wide">{label}</span>
