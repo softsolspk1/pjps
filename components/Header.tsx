@@ -63,7 +63,8 @@ export default function Header() {
           <button className={styles.searchBtn} aria-label="Search">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
           </button>
-          <Link href="/submission" className={`btn btn-primary ${styles.cta}`}>Submit Manuscript</Link>
+          <Link href="/login" className="btn btn-outline" style={{ padding: '0.6rem 1.5rem', fontSize: '0.8rem' }}>Login</Link>
+          <Link href="/submission" className={`btn btn-primary ${styles.cta}`}>Online Submission Portal</Link>
         </div>
       </div>
     </header>

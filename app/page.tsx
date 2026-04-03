@@ -33,7 +33,7 @@ export default async function Home() {
     <div className={styles.home}>
       <Hero />
       
-      <section className={`${styles.reveal} section-padding container`}>
+      <section className={`section-padding container`}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Latest Research</h2>
           <p className={styles.sectionSubtitle}>Discover the most recent peer-reviewed contributions to the pharmaceutical sciences.</p>
@@ -57,7 +57,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className={`${styles.indexingSection} ${styles.reveal} section-padding`}>
+      <section className={`${styles.indexingSection} section-padding`}>
         <div className="container">
           <div className={styles.sectionHeader}>
             <span className={styles.preTitle}>Trusted Globally</span>
@@ -93,7 +93,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className={`${styles.reveal} section-padding container`}>
+      <section className={`section-padding container`}>
         <div className={styles.aboutJournal}>
           <div className={styles.aboutText}>
             <span className={styles.preTitle}>Our Heritage</span>

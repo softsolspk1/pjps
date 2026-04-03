@@ -5,7 +5,7 @@ export default function Hero() {
   return (
     <section className={styles.hero}>
       <div className={styles.heroDecorative}></div>
-      <div className={`container ${styles.heroContent} reveal`}>
+      <div className={`container ${styles.heroContent}`}>
         <div className={styles.heroBadge}>
           <span className={styles.badgeLine}></span>
           Academic Excellence Since 1988
