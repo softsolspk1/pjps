@@ -3,6 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import styles from "./LoginPage.module.css";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -32,34 +33,39 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="max-w-md w-full bg-white p-8 rounded shadow-md border border-gray-200">
-        <h2 className="text-2xl font-serif font-bold text-center mb-6 text-slate-800">PJPS Admin Portal</h2>
+    <div className={styles.loginWrapper}>
+      <div className={styles.loginCard}>
+        <div className={styles.headerArea}>
+          <h2 className={styles.title}>PJPS Admin</h2>
+          <span className={styles.subtitle}>Journal Management Portal</span>
+        </div>
         
         {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm border border-red-200">
+          <div className={styles.error}>
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Username</label>
+        <form onSubmit={handleSubmit}>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Identifier / Username</label>
             <input
               type="text"
               required
-              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+              className={styles.input}
+              placeholder="e.g. administrator"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
           </div>
           
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Security Password</label>
             <input
               type="password"
               required
-              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+              className={styles.input}
+              placeholder="••••••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -68,11 +74,15 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-slate-800 text-white font-semibold py-2 rounded hover:bg-slate-900 transition-colors disabled:opacity-50"
+            className={`btn btn-primary ${styles.submitBtn}`}
           >
-            {loading ? "Authenticating..." : "Sign In"}
+            {loading ? "Verifying Credentials..." : "Authenticate"}
           </button>
         </form>
+
+        <div className={styles.footer}>
+          <p>For technical assistance, please contact the <br/> <span className={styles.footerLink}>Editorial IT Support Team</span></p>
+        </div>
       </div>
     </div>
   );

@@ -99,9 +99,9 @@ export default function SubmissionPage() {
 
       {renderStepIndicator()}
 
-      <form onSubmit={handleSubmit} className="bg-white border border-slate-200 p-8 md:p-12 shadow-premium rounded-xl">
+      <form onSubmit={handleSubmit} className={styles.submissionForm}>
         {error && (
-          <div className="mb-8 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg flex items-center gap-3">
+          <div className={styles.errorBanner}>
             <AlertCircle size={20} />
             <span className="text-sm font-medium">{error}</span>
           </div>
@@ -109,27 +109,27 @@ export default function SubmissionPage() {
 
         {step === 1 && (
           <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Manuscript Title</label>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Manuscript Title</label>
               <input 
                 type="text" required value={title} onChange={(e) => setTitle(e.target.value)}
-                className="w-full p-4 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-lg"
+                className={styles.input}
                 placeholder="Full title of your research paper..."
               />
             </div>
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Abstract</label>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Abstract</label>
               <textarea 
                 required value={abstract} onChange={(e) => setAbstract(e.target.value)}
-                className="w-full p-4 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all h-60 text-base"
+                className={styles.textarea}
                 placeholder="Brief summary of your research findings (max 400 words)..."
               />
             </div>
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Keywords</label>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Keywords</label>
               <input 
                 type="text" required value={keywords} onChange={(e) => setKeywords(e.target.value)}
-                className="w-full p-4 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                className={styles.input}
                 placeholder="Separated by commas (e.g. Pharmacology, Clinical Trials, Drug Delivery)"
               />
             </div>
@@ -139,40 +139,40 @@ export default function SubmissionPage() {
         {step === 2 && (
           <div className="space-y-8">
             <div className="flex justify-between items-center mb-2">
-              <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Author Information</label>
+              <label className={styles.label}>Author Information</label>
               <button type="button" onClick={addAuthor} className="text-blue-600 hover:text-blue-700 flex items-center gap-1 text-sm font-bold">
                 <PlusCircle size={16} /> Add Co-author
               </button>
             </div>
             {authors.map((author, idx) => (
-              <div key={idx} className="p-6 bg-slate-50 border border-slate-200 rounded-xl relative group">
+              <div key={idx} className={styles.authorCard}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="col-span-2 md:col-span-1">
-                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Full Name (Author {idx + 1})</label>
+                    <label className={styles.subLabel}>Full Name (Author {idx + 1})</label>
                     <input 
                       type="text" required value={author.name} onChange={(e) => updateAuthor(idx, "name", e.target.value)}
-                      className="w-full p-3 border border-slate-200 rounded-lg outline-none focus:border-blue-500"
+                      className={styles.inputSmall}
                     />
                   </div>
                   <div className="col-span-2 md:col-span-1">
-                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Email Address</label>
+                    <label className={styles.subLabel}>Email Address</label>
                     <input 
                       type="email" required value={author.email} onChange={(e) => updateAuthor(idx, "email", e.target.value)}
-                      className="w-full p-3 border border-slate-200 rounded-lg outline-none focus:border-blue-500"
+                      className={styles.inputSmall}
                     />
                   </div>
                   <div className="col-span-2">
-                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Affiliation / Institution</label>
+                    <label className={styles.subLabel}>Affiliation / Institution</label>
                     <input 
                       type="text" required value={author.affiliation} onChange={(e) => updateAuthor(idx, "affiliation", e.target.value)}
-                      className="w-full p-3 border border-slate-200 rounded-lg outline-none focus:border-blue-500"
+                      className={styles.inputSmall}
                     />
                   </div>
                 </div>
                 {authors.length > 1 && (
                   <button 
                     type="button" onClick={() => removeAuthor(idx)} 
-                    className="absolute -top-3 -right-3 w-8 h-8 bg-white border border-red-200 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-sm hover:bg-red-50"
+                    className={styles.removeBtn}
                   >
                     <Trash2 size={14} />
                   </button>
@@ -184,7 +184,7 @@ export default function SubmissionPage() {
 
         {step === 3 && (
           <div className="space-y-8">
-            <div className="text-center p-12 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-all cursor-pointer relative">
+            <div className={styles.uploadArea}>
               <input 
                 type="file" 
                 accept=".pdf,.doc,.docx"
@@ -192,7 +192,7 @@ export default function SubmissionPage() {
                 onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
               />
               <div className="flex flex-col items-center">
-                <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4">
+                <div className={styles.uploadIcon}>
                   <Upload size={28} />
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-2">
@@ -207,7 +207,7 @@ export default function SubmissionPage() {
               </div>
             </div>
 
-            <div className="p-6 bg-blue-50 rounded-xl border border-blue-100 flex gap-4">
+            <div className={styles.notice}>
               <AlertCircle className="text-blue-500 shrink-0" size={24} />
               <div className="text-sm text-blue-800 leading-relaxed">
                 <strong>Important Note:</strong> Please ensure that your manuscript is anonymized if the journal requires double-blind review. Remove author names or affiliations from the document file before uploading.
@@ -216,9 +216,9 @@ export default function SubmissionPage() {
           </div>
         )}
 
-        <div className="mt-12 flex justify-between items-center border-t border-slate-100 pt-8">
+        <div className={styles.formActions}>
           {step > 1 ? (
-            <button type="button" onClick={() => setStep(step - 1)} className="btn btn-secondary">
+            <button type="button" onClick={() => setStep(step - 1)} className="btn btn-outline">
               Back
             </button>
           ) : <div />}

@@ -1,0 +1,135 @@
+.articleContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 160px 40px 80px; /* Account for 120px header */
+}
+
+.backLink {
+  color: var(--primary-navy);
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 0.9rem;
+  margin-bottom: 40px;
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.header {
+  margin-bottom: 60px;
+  border-bottom: 2px solid var(--border-light);
+  padding-bottom: 40px;
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--primary-navy);
+  margin-bottom: 24px;
+  letter-spacing: -0.02em;
+}
+
+.authorsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.authorItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.authorName {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.authorAffiliation {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.meta {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.abstractSection {
+  margin-bottom: 60px;
+  padding: 40px;
+  background: var(--bg-soft);
+  border-left: 4px solid var(--accent-gold);
+  border-radius: 0 8px 8px 0;
+}
+
+.sectionTitle {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary-navy);
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 8px;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.bodyGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px 60px;
+  align-items: start;
+}
+
+.section {
+  grid-column: span 1;
+}
+
+/* Ensure references always take full width if they are very long or standard */
+.referencesContainer {
+  grid-column: span 2;
+  margin-top: 40px;
+  padding-top: 40px;
+  border-top: 2px solid var(--border-light);
+}
+
+.content {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--text-main);
+}
+
+.content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 20px 0;
+  box-shadow: var(--shadow-subtle);
+}
+
+.content h3 {
+  font-size: 1.2rem;
+  margin: 24px 0 12px;
+  color: var(--primary-navy);
+}
+
+@media (max-width: 900px) {
+  .bodyGrid {
+    grid-template-columns: 1fr;
+  }
+  .section, .referencesContainer {
+    grid-column: span 1;
+  }
+  .title {
+    font-size: 2.5rem;
+  }
+}

@@ -35,25 +35,20 @@ export default async function Home() {
       
       <section className={`section-padding container`}>
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Latest Research</h2>
-          <p className={styles.sectionSubtitle}>Discover the most recent peer-reviewed contributions to the pharmaceutical sciences.</p>
+          <p className={styles.sectionSubtitle}>Explore the historical progression of pharmaceutical research at PJPS.</p>
         </div>
 
-        {LATEST_ARTICLES.length > 0 ? (
-          <div className={styles.articlesGrid}>
-            {LATEST_ARTICLES.map((article) => (
-              <ArticleCard key={article.id} {...article} />
-            ))}
+        <div className={styles.archiveGrid}>
+          <div className={styles.archiveCard}>
+            <h3 className={styles.cardTitle}>Current Issues (2020 - Present)</h3>
+            <p>Access the latest research and most recent volumes of PJPS.</p>
+            <Link href="/issues" className="btn btn-primary">Browse Recent Issues</Link>
           </div>
-        ) : (
-          <div className="text-center py-20 bg-gray-50 border border-dashed border-gray-200 rounded min-h-[200px] flex flex-col items-center justify-center">
-            <p className="text-gray-500 font-medium">New research articles are currently being finalized.</p>
-            <p className="text-sm text-gray-400 mt-2 italic">Please check back soon or browse our full archive.</p>
+          <div className={styles.archiveCard}>
+            <h3 className={styles.cardTitle}>Legacy Archive (1988 - 2019)</h3>
+            <p>Decades of groundbreaking research digitized for global access.</p>
+            <Link href="/archive" className="btn btn-outline">Explore Legacy Volumes</Link>
           </div>
-        )}
-
-        <div className={styles.viewMore}>
-          <Link href="/archive" className="btn btn-secondary">Browse Full Archive</Link>
         </div>
       </section>
 

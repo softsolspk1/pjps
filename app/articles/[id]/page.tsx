@@ -1,7 +1,7 @@
-export const dynamic = 'force-dynamic';
 import { prisma } from "../../../lib/prisma";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import styles from "./ArticleView.module.css";
 
 export default async function ArticleReaderPage({ params }: { params: { id: string } }) {
   const article = await prisma.article.findUnique({
@@ -14,43 +14,54 @@ export default async function ArticleReaderPage({ params }: { params: { id: stri
   }
 
   const sections = [
-    { title: "Abstract", id: "abstract", content: article.abstract },
     { title: "Introduction", id: "introduction", content: article.introduction },
     { title: "Materials and Methods", id: "materials", content: article.materialsMethods },
     { title: "Results", id: "results", content: article.results },
     { title: "Discussion", id: "discussion", content: article.discussion },
     { title: "Conclusion", id: "conclusion", content: article.conclusion },
-    { title: "References", id: "references", content: article.references },
   ];
 
   return (
-    <div className="container mx-auto p-4 md:p-8 max-w-5xl">
-      <div className="mb-4">
-        <Link href="/" className="text-blue-600 hover:underline">&larr; Back to Home</Link>
-      </div>
+    <div className={styles.articleContainer}>
+      <Link href="/" className={styles.backLink}>
+        &larr; Back to Scientific Portal
+      </Link>
       
-      <header className="mb-8 border-b pb-6">
-        <h1 className="text-3xl md:text-5xl font-serif font-bold text-gray-900 mb-4 tracking-tight leading-snug">
-          {article.title}
-        </h1>
-        <p className="text-lg text-gray-600 mb-2">
-          {article.authors.map(a => <span key={a.id} className="mr-3 inline-block"><strong>{a.name}</strong> <span className="text-sm">({a.address || 'Independent'})</span></span>)}
-        </p>
-        <div className="text-sm text-gray-500">
-          Published: {new Date(article.createdAt).toLocaleDateString()}
+      <header className={styles.header}>
+        <h1 className={styles.title}>{article.title}</h1>
+        <div className={styles.authorsList}>
+          {article.authors.map(a => (
+            <div key={a.id} className={styles.authorItem}>
+                <span className={styles.authorName}>{a.name}</span>
+                <span className={styles.authorAffiliation}>{a.address || "PJPS Researcher"}</span>
+            </div>
+          ))}
+        </div>
+        <div className={styles.meta}>
+          Date Published: {new Date(article.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
         </div>
       </header>
 
-      <article className="prose prose-lg max-w-none text-slate-800 space-y-12">
+      <section className={styles.abstractSection}>
+        <h2 className={styles.sectionTitle}>ABSTRACT</h2>
+        <div className={styles.content} dangerouslySetInnerHTML={{ __html: article.abstract || '' }} />
+      </section>
+
+      <div className={styles.bodyGrid}>
         {sections.filter(s => s.content).map(sec => (
-          <section key={sec.id} id={sec.id} className="scroll-mt-24">
-            <h2 className="text-2xl font-serif font-bold border-b border-gray-200 pb-2 mb-4 text-slate-900">
-              {sec.title}
-            </h2>
-            <div dangerouslySetInnerHTML={{ __html: sec.content || '' }} />
+          <section key={sec.id} id={sec.id} className={styles.section}>
+            <h2 className={styles.sectionTitle}>{sec.title}</h2>
+            <div className={styles.content} dangerouslySetInnerHTML={{ __html: sec.content || '' }} />
           </section>
         ))}
-      </article>
+      </div>
+
+      {article.references && (
+        <section className={styles.referencesContainer}>
+          <h2 className={styles.sectionTitle}>REFERENCES</h2>
+          <div className={styles.content} dangerouslySetInnerHTML={{ __html: article.references || '' }} />
+        </section>
+      )}
 
     </div>
   );

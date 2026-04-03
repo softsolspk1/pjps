@@ -17,6 +17,8 @@ const modules = {
   ],
 };
 
+import styles from "./ArticleEditor.module.css";
+
 export default function ArticleEditor() {
   const [title, setTitle] = useState("");
   const [status, setStatus] = useState("PUBLISHED");
@@ -53,7 +55,6 @@ export default function ArticleEditor() {
   };
 
   const submitArticle = async () => {
-    // Basic API integration - we'll implement this route next
     const payload = {
       title, status, authors, ...sections
     };
@@ -72,74 +73,88 @@ export default function ArticleEditor() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 bg-white p-6 shadow border rounded">
+    <div className={styles.editorContainer}>
       
       {/* Settings Row */}
-      <div className="flex justify-between items-center bg-slate-50 p-4 rounded border">
-        <h2 className="text-xl font-bold font-serif text-slate-800">Article Details</h2>
-        <div className="flex gap-4">
-          <select value={status} onChange={(e) => setStatus(e.target.value)} className="border px-3 py-1 rounded outline-none border-gray-300">
+      <div className={styles.settingsRow}>
+        <div className={styles.settingsHeader}>
+          <h2 className={styles.sectionTitle}>Article Management CMS</h2>
+          <p className="text-gray-500 text-sm">Drafting and publishing your research.</p>
+        </div>
+        <div className={styles.actions}>
+          <select value={status} onChange={(e) => setStatus(e.target.value)} className={styles.statusSelect}>
             <option value="DRAFT">Draft</option>
             <option value="SUBMITTED">Submitted</option>
             <option value="IN_REVIEW">In Review</option>
             <option value="PUBLISHED">Published</option>
           </select>
-          <button onClick={submitArticle} className="bg-green-600 text-white px-4 py-2 font-bold rounded hover:bg-green-700 transition">Save Article</button>
+          <button onClick={submitArticle} className="btn btn-primary">Save & Publish</button>
         </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-bold text-gray-700 mb-1">Article Title</label>
+      <div className={styles.formSection}>
+        <label className={styles.label}>Manuscript Title</label>
         <input 
           type="text" value={title} onChange={(e) => setTitle(e.target.value)}
-          className="w-full border border-gray-300 rounded p-2 text-lg font-serif outline-none focus:ring-2 focus:ring-blue-500" 
+          className={styles.titleInput}
           placeholder="Enter the title of the article..."
         />
       </div>
 
-      <div className="bg-blue-50 p-4 rounded border border-blue-100">
-        <div className="flex justify-between items-center mb-4">
-          <label className="block text-sm font-bold text-gray-700">Authors ({authors.length}/8)</label>
-          {authors.length < 8 && (
-            <button onClick={addAuthor} className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">+ Add Author</button>
-          )}
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {authors.map((author, idx) => (
-            <div key={idx} className="bg-white p-3 rounded border border-gray-200 relative">
-              {authors.length > 1 && (
-                <button onClick={() => removeAuthor(idx)} className="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold">&times;</button>
-              )}
-              <h4 className="text-xs font-bold text-gray-400 mb-2 uppercase">Author {idx + 1}</h4>
-              <input 
-                type="text" placeholder="Full Name" value={author.name} onChange={(e) => handleAuthorChange(idx, 'name', e.target.value)}
-                className="w-full border rounded p-1 mb-2 text-sm outline-none focus:border-blue-400"
-              />
-              <input 
-                type="text" placeholder="Affiliation / Address" value={author.address} onChange={(e) => handleAuthorChange(idx, 'address', e.target.value)}
-                className="w-full border rounded p-1 text-sm outline-none focus:border-blue-400"
-              />
-            </div>
-          ))}
+      <div className={styles.formSection}>
+        <div className={styles.authorsContainer}>
+          <div className={styles.authorsHeader}>
+            <label className={styles.label}>Research Authors ({authors.length}/8)</label>
+            {authors.length < 8 && (
+              <button onClick={addAuthor} className="btn btn-outline" style={{ padding: '0.4rem 1.2rem', fontSize: '0.75rem' }}>+ Add Author</button>
+            )}
+          </div>
+          
+          <div className={styles.authorsGrid}>
+            {authors.map((author, idx) => (
+              <div key={idx} className={styles.authorCard}>
+                {authors.length > 1 && (
+                  <button onClick={() => removeAuthor(idx)} className={styles.removeAuthor}>&times;</button>
+                )}
+                <span className={styles.authorNum}>Author {idx + 1}</span>
+                <input 
+                  type="text" placeholder="Full Name (e.g. Dr. John Doe)" value={author.name} onChange={(e) => handleAuthorChange(idx, 'name', e.target.value)}
+                  className={styles.authorInput}
+                />
+                <input 
+                  type="text" placeholder="Institutional Affiliation / Address" value={author.address} onChange={(e) => handleAuthorChange(idx, 'address', e.target.value)}
+                  className={styles.authorInput}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {[{key: 'abstract', label: 'Abstract (Single Column)'}, {key: 'introduction', label: 'Introduction'}, {key: 'materialsMethods', label: 'Materials and Methods'}, {key: 'results', label: 'Results'}, {key: 'discussion', label: 'Discussion'}, {key: 'conclusion', label: 'Conclusion'}, {key: 'references', label: 'References'}].map((sec) => (
-        <div key={sec.key}>
-          <label className="block text-sm font-bold text-gray-700 mb-1">{sec.label}</label>
-          <div className="bg-white">
-            {/* @ts-ignore */}
-            <ReactQuill 
-              theme="snow" 
-              modules={modules}
-              value={sections[sec.key as keyof typeof sections]} 
-              onChange={(v: string) => handleSectionChange(sec.key as keyof typeof sections, v)} 
-              className="h-64 mb-12"
-            />
+      <div className={styles.sectionsList}>
+        {[
+          {key: 'abstract', label: 'Abstract (Single Column)'}, 
+          {key: 'introduction', label: 'Introduction'}, 
+          {key: 'materialsMethods', label: 'Materials and Methods'}, 
+          {key: 'results', label: 'Results'}, 
+          {key: 'discussion', label: 'Discussion'}, 
+          {key: 'conclusion', label: 'Conclusion'}, 
+          {key: 'references', label: 'References'}
+        ].map((sec) => (
+          <div key={sec.key} className={styles.formSection}>
+            <label className={styles.label}>{sec.label}</label>
+            <div className={styles.quillWrapper}>
+              {/* @ts-ignore */}
+              <ReactQuill 
+                theme="snow" 
+                modules={modules}
+                value={sections[sec.key as keyof typeof sections]} 
+                onChange={(v: string) => handleSectionChange(sec.key as keyof typeof sections, v)} 
+              />
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
     </div>
   );

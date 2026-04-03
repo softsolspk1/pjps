@@ -195,11 +195,98 @@
   box-shadow: 0 4px 15px rgba(0, 45, 94, 0.15);
 }
 
+.menuToggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--primary-navy);
+  cursor: pointer;
+  padding: 8px;
+  z-index: 1002;
+  transition: var(--transition);
+}
+
+.mobileOnly {
+  display: none !important;
+}
+
+.mobileActions {
+  display: none;
+  flex-direction: column;
+  gap: 15px;
+  padding: 20px 40px;
+  width: 100%;
+}
+
 @media (max-width: 1100px) {
   .nav {
+    display: flex;
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 300px;
+    height: 100vh;
+    background: white;
+    flex-direction: column;
+    padding-top: 100px;
+    transition: var(--transition);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.05);
+    z-index: 1001;
+  }
+
+  .navOpen {
+    right: 0;
+  }
+
+  .navList {
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+  }
+
+  .navLink {
+    display: block;
+    padding: 20px 40px;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 0.9rem;
+  }
+
+  .menuToggle {
+    display: block;
+  }
+
+  .actions {
     display: none;
   }
+
+  .mobileActions {
+    display: flex;
+  }
+
+  .mobileOnly {
+    display: block !important;
+  }
+  
   .topLinks {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    height: 80px;
+  }
+  
+  .logoBadge {
+    padding: 5px 8px;
+    font-size: 1rem;
+  }
+  
+  .journalFull {
+    font-size: 0.85rem;
+  }
+  
+  .topBar {
     display: none;
   }
 }

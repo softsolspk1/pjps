@@ -42,6 +42,41 @@
   margin-bottom: 60px;
 }
 
+.archiveGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+  margin-top: 40px;
+}
+
+.archiveCard {
+  background: var(--bg-soft);
+  padding: 60px 40px;
+  border-radius: var(--border-radius);
+  text-align: center;
+  border: 1px solid var(--border-light);
+  transition: var(--transition);
+}
+
+.archiveCard:hover {
+  transform: translateY(-5px);
+  background: white;
+  border-color: var(--border-medium);
+  box-shadow: var(--shadow-premium);
+}
+
+.archiveCard h3 {
+  font-size: 2.2rem;
+  margin-bottom: 16px;
+  color: var(--primary-navy);
+}
+
+.archiveCard p {
+  color: var(--text-muted);
+  margin-bottom: 32px;
+  font-size: 1.1rem;
+}
+
 .viewMore {
   display: flex;
   justify-content: center;
