@@ -276,6 +276,7 @@ export default function SubmissionPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Primary Manuscript */}
               <div className={`${styles.fileVaultCard} ${manuscriptFile ? styles.hasFile : ""}`}>
+                <div className="absolute top-4 right-4 bg-red-50 text-red-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-red-100">Mandatory</div>
                 <div className={styles.fileCardHeader}>
                   <div className={styles.fileIconBox}>
                      {manuscriptFile ? <CheckCircle size={24} className="text-emerald-500" /> : <Upload size={24} />}
@@ -294,7 +295,7 @@ export default function SubmissionPage() {
                     onChange={(e) => setManuscriptFile(e.target.files ? e.target.files[0] : null)}
                   />
                   <div className="text-center">
-                    <p className="text-sm font-bold text-slate-900 mb-1">
+                    <p className="text-sm font-bold text-slate-900 mb-1 max-w-[200px] truncate mx-auto">
                       {manuscriptFile ? manuscriptFile.name : "Select Document Source"}
                     </p>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
@@ -306,13 +307,14 @@ export default function SubmissionPage() {
 
               {/* Proof of Payment */}
               <div className={`${styles.fileVaultCard} ${paymentProofFile ? styles.hasFilePayment : ""}`}>
+                <div className="absolute top-4 right-4 bg-red-50 text-red-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-red-100">Mandatory</div>
                 <div className={styles.fileCardHeader}>
                   <div className={styles.paymentIconBox}>
                      {paymentProofFile ? <CheckCircle size={24} className="text-emerald-500" /> : <DollarSign size={24} />}
                   </div>
                   <div>
                     <h4 className={styles.fileTitle}>Payment Proof</h4>
-                    <p className={styles.fileSubtitle}>Mandatory for processing</p>
+                    <p className={styles.fileSubtitle}>Institution Bank Receipt</p>
                   </div>
                 </div>
                 
@@ -324,8 +326,8 @@ export default function SubmissionPage() {
                     onChange={(e) => setPaymentProofFile(e.target.files ? e.target.files[0] : null)}
                   />
                   <div className="text-center">
-                    <p className="text-sm font-bold text-slate-900 mb-1">
-                      {paymentProofFile ? paymentProofFile.name : "Upload Bank Receipt"}
+                    <p className="text-sm font-bold text-slate-900 mb-1 max-w-[200px] truncate mx-auto">
+                      {paymentProofFile ? paymentProofFile.name : "Upload Confirmation"}
                     </p>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
                       {paymentProofFile ? "Receipt Attached" : "PDF or High-res Image"}
@@ -337,15 +339,20 @@ export default function SubmissionPage() {
 
             {/* Supplementary Data */}
             <div className={styles.supplementaryRow}>
-               <div className={styles.suppIcon}>
-                 <FileArchive size={20} />
-               </div>
-               <div className="flex-1">
-                  <p className="text-sm font-bold text-slate-800">Extended Datasets & Media (Optional)</p>
-                  <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">CSV, ZIP, or RAR versions</p>
+               <div className="flex-1 flex items-center gap-4">
+                  <div className={styles.suppIcon}>
+                    <FileArchive size={20} />
+                  </div>
+                  <div>
+                     <div className="flex items-center gap-2">
+                        <p className="text-sm font-bold text-slate-800 tracking-tight">Extended Datasets & Media</p>
+                        <span className="text-[8px] font-black bg-slate-100 text-slate-500 px-2 py-0.5 rounded uppercase tracking-widest">Optional</span>
+                     </div>
+                     <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">CSV, ZIP, or RAR versions</p>
+                  </div>
                </div>
                <div className="flex items-center gap-4">
-                 {supplementaryFile && <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-md uppercase tracking-tight">ATTACHED</span>}
+                 {supplementaryFile && <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-md uppercase tracking-tight">FILE ATTACHED</span>}
                  <input 
                    type="file" 
                    accept=".zip,.rar,.csv,.xlsx"
@@ -362,21 +369,30 @@ export default function SubmissionPage() {
             {/* Guidelines Checkbox */}
             <div className={styles.ethicsContainer}>
                <div className="flex gap-6 items-start">
-                  <div className="pt-2">
-                    <input 
-                      type="checkbox" 
-                      id="guidelines" 
-                      checked={guidelinesConfirmed}
-                      onChange={(e) => setGuidelinesConfirmed(e.target.checked)}
-                      className={styles.checkbox}
-                    />
+                  <div className="pt-1.5">
+                    <div className="w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-emerald-400">
+                       <ShieldCheck size={24} />
+                    </div>
                   </div>
-                  <label htmlFor="guidelines" className="cursor-pointer group">
-                    <h4 className="font-serif font-bold text-xl text-white mb-2 group-hover:text-blue-400 transition-colors">Ethics & Formatting Adherence</h4>
-                    <p className="text-slate-400 text-sm leading-relaxed font-medium">
-                      I confirm that the submitted manuscript adheres to the **PJPS Formatting Guidelines**, consists of original research not previously published, and complies with international ethical standards for scientific publication.
-                    </p>
-                  </label>
+                  <div className="flex-1">
+                    <label className="flex gap-4 items-start cursor-pointer group">
+                      <div className="pt-2 relative">
+                        <input 
+                          type="checkbox" 
+                          id="guidelines" 
+                          checked={guidelinesConfirmed}
+                          onChange={(e) => setGuidelinesConfirmed(e.target.checked)}
+                          className="w-5 h-5 rounded border-2 border-slate-600 bg-transparent text-emerald-500 focus:ring-emerald-500 transition-all cursor-pointer"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-white font-bold tracking-tight text-base group-hover:text-emerald-400 transition-colors">Ethics & Formatting Adherence</p>
+                        <p className="text-slate-200 text-sm leading-relaxed max-w-[600px]">
+                           I hereby confirm that this manuscript is our original work, has not been published elsewhere, and strictly adheres to the <span className="text-emerald-400 font-bold italic underline">PJPS Editorial Guidelines</span> and Ethical Standards.
+                        </p>
+                      </div>
+                    </label>
+                  </div>
                </div>
             </div>
           </div>

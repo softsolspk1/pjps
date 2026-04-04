@@ -208,7 +208,7 @@ export default function FormattingTool() {
         </div>
       </div>
 
-      <div className={view === "EDIT" ? "block" : "hidden"}>
+      <div style={{ display: view === "EDIT" ? "block" : "none" }}>
         <div className="space-y-10">
           <div className={styles.editorSection}>
             <label className={styles.label}>Full Manuscript Title (Official)</label>
@@ -298,7 +298,7 @@ export default function FormattingTool() {
                              if (file) {
                                const reader = new FileReader();
                                reader.onload = (re) => {
-                                 const img = `<img src="${re.target?.result}" alt="Section Image" style="max-width: 100%; display: block; margin: 15px 0; border-radius: 4px;" />`;
+                                 const img = `<img src="${re.target?.result}" className="img-inside-column" alt="Section Image" style="max-width: 100%; display: block; margin: 15px 0; border-radius: 4px;" />`;
                                  handleSectionChange(key as keyof Sections, sections[key as keyof Sections] + img);
                                };
                                reader.readAsDataURL(file);
@@ -321,7 +321,7 @@ export default function FormattingTool() {
                              if (file) {
                                const reader = new FileReader();
                                reader.onload = (re) => {
-                                 const img = `<div style="text-align: center; margin: 20px 0;"><img src="${re.target?.result}" alt="Table Image" style="max-width: 100%; border: 1px solid #ddd; padding: 4px; border-radius: 4px;" /><p style="font-weight: bold; margin-top: 8px; font-size: 11px;">Table ${new Date().getTime().toString().slice(-2)}</p></div>`;
+                                 const img = `<div class="full-width-asset" style="text-align: center; margin: 25px 0; break-inside: avoid; column-span: all;"><img src="${re.target?.result}" alt="Table Image" style="max-width: 100%; border: 1.5pt solid black; padding: 6px; border-radius: 0;" /><p style="font-weight: bold; margin-top: 10px; font-size: 11px;">Table ${new Date().getTime().toString().slice(-2)}</p></div>`;
                                  handleSectionChange(key as keyof Sections, sections[key as keyof Sections] + img);
                                };
                                reader.readAsDataURL(file);
@@ -331,7 +331,7 @@ export default function FormattingTool() {
                          }}
                          className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 bg-white border rounded hover:bg-emerald-50 hover:text-emerald-600 transition-colors flex items-center gap-1"
                        >
-                         <Layout size={10} /> Add Table (Image)
+                         <Layout size={10} /> Add Table (Full Width)
                        </button>
                        <button 
                          type="button"
@@ -344,7 +344,7 @@ export default function FormattingTool() {
                              if (file) {
                                const reader = new FileReader();
                                reader.onload = (re) => {
-                                 const img = `<div style="text-align: center; margin: 20px 0;"><img src="${re.target?.result}" alt="Graph Image" style="max-width: 100%;" /><p style="font-weight: bold; margin-top: 8px; font-size: 11px;">Fig. ${new Date().getTime().toString().slice(-2)}</p></div>`;
+                                 const img = `<div class="full-width-asset" style="text-align: center; margin: 25px 0; break-inside: avoid; column-span: all;"><img src="${re.target?.result}" alt="Graph Image" style="max-width: 100%;" /><p style="font-weight: bold; margin-top: 10px; font-size: 11px;">Fig. ${new Date().getTime().toString().slice(-2)}</p></div>`;
                                  handleSectionChange(key as keyof Sections, sections[key as keyof Sections] + img);
                                };
                                reader.readAsDataURL(file);
@@ -354,7 +354,7 @@ export default function FormattingTool() {
                          }}
                          className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 bg-white border rounded hover:bg-orange-50 hover:text-orange-600 transition-colors flex items-center gap-1"
                        >
-                         <BarChart3 size={10} /> Add Graph (Image)
+                         <BarChart3 size={10} /> Add Graph (Full Width)
                        </button>
                     </div>
                     <ReactQuill 
@@ -373,7 +373,7 @@ export default function FormattingTool() {
         </div>
       </div>
 
-      <div className={view === "PREVIEW" ? styles.articleViewport : styles.hiddenForPrint}>
+      <div style={{ display: view === "PREVIEW" ? "block" : "none" }} className={styles.articleViewport}>
         <div ref={printRef} className={styles.articlePreview}>
            <div className={styles.journalHeader}>{doi || "doi.org/10.36721/PJPS..."}</div>
            

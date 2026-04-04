@@ -12,13 +12,19 @@ export async function GET() {
 
   try {
     const reviewers = await prisma.user.findMany({
-      where: { role: "REVIEWER" },
+      where: { 
+        role: { in: ["REVIEWER", "ASSOCIATE_EDITOR", "EDITOR", "EDITOR_IN_CHIEF"] } 
+      },
       select: {
         id: true,
         name: true,
         email: true,
         interests: true,
         affiliation: true,
+        role: true,
+        _count: {
+          select: { reviewsGiven: { where: { status: "PENDING" } } }
+        }
       },
     });
 
