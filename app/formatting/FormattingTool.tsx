@@ -100,78 +100,86 @@ export default function FormattingTool() {
     const doc = new Document({
       creator: "PJPS Manuscript Architect",
       title: title || "Scholarly Article",
-      sections: [{
-        properties: { type: SectionType.CONTINUOUS },
-        children: [
-          new Paragraph({
-            text: (doi || "doi.org/10.36721/PJPS...").toUpperCase(),
-            alignment: AlignmentType.RIGHT,
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            text: (title || "UNTITLED MANUSCRIPT").toUpperCase(),
-            heading: HeadingLevel.HEADING_1,
-            alignment: AlignmentType.CENTER,
-            spacing: { before: 400, after: 400 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ 
-                text: authors.filter(a => a.name).map((a, i) => `${a.name}${i + 1}`).join(", "), 
-                bold: true,
-                size: 24 // 12pt
-              }),
-            ],
-            alignment: AlignmentType.CENTER,
-            spacing: { after: 100 },
-          }),
-          ...authors.filter(a => a.affiliation).map((a, i) => new Paragraph({
-            text: `${i + 1} ${a.affiliation}`,
-            alignment: AlignmentType.CENTER,
-            spacing: { after: 50 },
-            style: "small",
-          })),
-          new Paragraph({ text: "", spacing: { after: 400 } }),
-          new Paragraph({ 
-            children: [
-              new TextRun({ text: "Abstract: ", bold: true }),
-              new TextRun({ text: stripHtml(sections.abstract) }),
-            ],
-            alignment: AlignmentType.JUSTIFIED,
-            spacing: { after: 200 } 
-          }),
-          new Paragraph({ 
-            children: [
-              new TextRun({ text: "Keywords: ", bold: true }),
-              new TextRun({ text: keywords }),
-            ],
-            spacing: { after: 400 } 
-          }),
-          new Paragraph({ 
-            children: [
-              new TextRun({ 
-                text: `Submitted: ${dates.submitted} — Revised: ${dates.revised} — Accepted: ${dates.accepted}`,
-                italics: true,
-              }),
-            ],
-            alignment: AlignmentType.LEFT,
-            spacing: { after: 400 },
-          }),
-          ...Object.entries(sections).filter(([k]) => k !== 'abstract').flatMap(([key, value]) => [
-             new Paragraph({ 
-               text: key.toUpperCase(), 
-               heading: HeadingLevel.HEADING_2,
-               alignment: AlignmentType.LEFT,
-               spacing: { before: 400, after: 200 } 
-             }),
-             new Paragraph({ 
-               text: stripHtml(value), 
-               alignment: AlignmentType.JUSTIFIED, 
-               spacing: { after: 200 } 
-             })
-          ])
-        ],
-      }],
+      sections: [
+        {
+          properties: { type: SectionType.CONTINUOUS },
+          children: [
+            new Paragraph({
+              text: (doi || "doi.org/10.36721/PJPS...").toUpperCase(),
+              alignment: AlignmentType.RIGHT,
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              text: (title || "UNTITLED MANUSCRIPT").toUpperCase(),
+              heading: HeadingLevel.HEADING_1,
+              alignment: AlignmentType.CENTER,
+              spacing: { before: 400, after: 400 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({ 
+                  text: authors.filter(a => a.name).map((a, i) => `${a.name}${i + 1}`).join(", "), 
+                  bold: true,
+                  size: 22 
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 100 },
+            }),
+            ...authors.filter(a => a.affiliation).map((a, i) => new Paragraph({
+              text: `${i + 1} ${a.affiliation}`,
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 50 },
+            })),
+            new Paragraph({ text: "", spacing: { after: 400 } }),
+            new Paragraph({ 
+              children: [
+                new TextRun({ text: "Abstract: ", bold: true }),
+                new TextRun({ text: stripHtml(sections.abstract) }),
+              ],
+              alignment: AlignmentType.JUSTIFIED,
+              spacing: { after: 200 } 
+            }),
+            new Paragraph({ 
+              children: [
+                new TextRun({ text: "Keywords: ", bold: true }),
+                new TextRun({ text: keywords }),
+              ],
+              spacing: { after: 200 } 
+            }),
+            new Paragraph({ 
+              children: [
+                new TextRun({ 
+                  text: `Submitted: ${dates.submitted} — Revised: ${dates.revised} — Accepted: ${dates.accepted}`,
+                  italics: true,
+                  size: 18
+                }),
+              ],
+              alignment: AlignmentType.LEFT,
+              spacing: { after: 400 },
+            }),
+          ],
+        },
+        {
+          properties: { 
+            type: SectionType.CONTINUOUS,
+            column: { count: 2, spacing: 720 }, // 720 is 0.5 inch / ~36pt
+          },
+          children: Object.entries(sections).filter(([k]) => k !== 'abstract').flatMap(([key, value]) => [
+            new Paragraph({ 
+              text: key.toUpperCase(), 
+              heading: HeadingLevel.HEADING_2,
+              alignment: AlignmentType.LEFT,
+              spacing: { before: 300, after: 150 } 
+            }),
+            new Paragraph({ 
+              text: stripHtml(value), 
+              alignment: AlignmentType.JUSTIFIED, 
+              spacing: { after: 200 } 
+            })
+          ]),
+        }
+      ],
     });
 
     const blob = await Packer.toBlob(doc);
@@ -405,8 +413,9 @@ export default function FormattingTool() {
            </div>
 
            <div className={styles.dateLine}>
-             {dates.submitted && `Submitted on ${dates.submitted}`} {dates.revised && `— Revised on ${dates.revised}`} {dates.accepted && `— Accepted on ${dates.accepted}`}
-             {!dates.submitted && !dates.revised && !dates.accepted && "Chronology Pending Verification"}
+             {dates.submitted ? `Submitted on ${dates.submitted}` : "Submitted on 27-08-2024" } 
+             {dates.revised ? ` — Revised on ${dates.revised}` : " — Revised on 31-10-2024"} 
+             {dates.accepted ? ` — Accepted on ${dates.accepted}` : " — Accepted on 31-10-2024"}
            </div>
 
            <div className={styles.scientificBody}>

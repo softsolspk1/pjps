@@ -133,14 +133,15 @@
 .articlePreview {
   width: 210mm; 
   background: white;
-  padding: 2.5cm 2cm; /* Institutional Margins: 2.5cm Top/Bottom, 2cm Sides */
-  box-shadow: 0 0 30px rgba(0,0,0,0.2);
+  padding: 2.0cm 1.8cm; /* Consistent institutional margins */
+  box-shadow: 0 0 30px rgba(0,0,0,0.15);
   font-family: "Times New Roman", Times, serif;
   color: black;
-  line-height: 1.15;
+  line-height: 1.1;
   position: relative;
   min-height: 297mm;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 /* Journal Header Styles */
@@ -178,10 +179,10 @@
 
 /* Abstract & Keywords */
 .abstractBlock {
-  font-size: 9.5pt;
-  margin-bottom: 12pt;
+  font-size: 9pt;
+  margin-bottom: 8pt;
   text-align: justify;
-  line-height: 1.3;
+  line-height: 1.25;
 }
 
 .keywordsBlock {
@@ -198,20 +199,19 @@
   text-align: left;
 }
 
-/* TWO COLUMN BODY - OPTIMIZED FOR PDF */
+/* TWO COLUMN BODY - OPTIMIZED FOR SCHOLARLY JOURNALS */
 .scientificBody {
   column-count: 2;
-  column-gap: 20pt;
+  column-gap: 24pt;
   text-align: justify;
-  font-size: 10pt;
-  line-height: 1.3;
-  orphans: 3;
-  widows: 3;
+  font-size: 9.5pt;
+  line-height: 1.15;
+  orphans: 2;
+  widows: 2;
 }
 
 .scientificSection {
-  margin-bottom: 15pt;
-  break-inside: avoid-column;
+  margin-bottom: 12pt;
 }
 
 /* SUPPORT FOR FULL WIDTH ASSETS */
@@ -231,12 +231,10 @@
 .sectionHeading {
   font-weight: bold;
   text-transform: uppercase;
-  margin-bottom: 8pt;
-  font-size: 11pt;
+  margin-bottom: 6pt;
+  font-size: 10pt;
   display: block;
   break-after: avoid;
-  border-bottom: 0.25pt solid #ddd;
-  padding-bottom: 2pt;
 }
 
 /* FOOTNOTE & FOOTER */
