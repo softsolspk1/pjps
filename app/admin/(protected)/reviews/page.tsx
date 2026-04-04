@@ -18,11 +18,25 @@ export default async function ReviewPoolPage() {
   let debugError = "";
 
   try {
+    // Explicitly select only the columns existing in the Vercel DB to avoid schema mismatch
     reviews = await prisma.review.findMany({
       orderBy: { createdAt: "desc" },
-      include: {
-        article: true,
-        reviewer: true
+      select: {
+        id: true,
+        articleId: true,
+        status: true,
+        createdAt: true,
+        article: {
+          select: {
+            title: true
+          }
+        },
+        reviewer: {
+          select: {
+            name: true,
+            email: true
+          }
+        }
       }
     });
   } catch (error: any) {
@@ -37,10 +51,8 @@ export default async function ReviewPoolPage() {
         <div style={{ padding: '40px', textAlign: 'center', backgroundColor: '#fff5f5', borderRadius: '24px', border: '1px solid #feb2b2' }}>
            <AlertTriangle size={48} color="#e53e3e" style={{ margin: '0 auto 16px' }} />
            <h2 style={{ color: '#c53030', fontWeight: 900 }}>Registry Connection Failure</h2>
-           <p style={{ color: '#9b2c2c', fontSize: '14px', marginTop: '8px' }}>The scholarly database is currently unavailable.</p>
-           <div style={{ marginTop: '20px', padding: '12px', backgroundColor: '#fff', borderRadius: '8px', fontSize: '10px', color: '#718096', fontFamily: 'monospace', textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              System Log: {debugError.substring(0, 200)}...
-           </div>
+           <p style={{ color: '#9b2c2c', fontSize: '14px', marginTop: '8px' }}>The scholarly database is currently out of sync with the runtime schema.</p>
+           <p style={{ color: '#e53e3e', fontSize: '11px', marginTop: '12px', fontWeight: 700 }}>Action Required: Run 'npx prisma db push' on the production environment.</p>
         </div>
       </div>
     );
