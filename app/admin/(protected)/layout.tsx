@@ -24,8 +24,26 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       {/* Sidebar Component - Professional Institutional Isolation */}
       <aside style={{ width: '280px', backgroundColor: 'white', borderRight: '1px solid #edf2f7', display: 'flex', flexDirection: 'column', flexShrink: 0, height: '100%', position: 'relative', zIndex: 100 }}>
         
-        <div style={{ padding: '32px' }}>
-           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
+        {/* Custom Sleek Scrollbar Styling */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          #sidebar-nav::-webkit-scrollbar {
+            width: 4px;
+          }
+          #sidebar-nav::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          #sidebar-nav::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+          }
+          #sidebar-nav::-webkit-scrollbar-thumb:hover {
+            background: #cbd5e0;
+          }
+        `}} />
+
+        {/* 1. Fixed Institutional Branding */}
+        <div style={{ padding: '32px 32px 10px' }}>
+           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '30px' }}>
               <div style={{ width: '40px', height: '40px', backgroundColor: '#0061ff', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900, fontSize: '20px', fontFamily: 'var(--font-serif)' }}>
                  P
               </div>
@@ -34,11 +52,14 @@ export default async function AdminLayout({ children }: { children: ReactNode })
                 <div style={{ fontSize: '9px', fontWeight: 700, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pakistan Journal of Pharmaceutical Sciences</div>
               </div>
            </div>
+        </div>
 
+        {/* 2. Scrollable Navigation Area */}
+        <div id="sidebar-nav" style={{ flex: 1, overflowY: 'auto', padding: '0 32px 32px' }}>
            <nav style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
               {session.user.role !== "FINANCE_ADMIN" && (
                 <>
-                  <div style={{ padding: '20px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Journal Management</div>
+                  <div style={{ padding: '10px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Journal Management</div>
                   <SidebarLink href="/admin/dashboard" icon={<LayoutDashboard size={18} />} label="System Overview" />
                   <SidebarLink href="/admin/articles" icon={<Inbox size={18} />} label="Manuscripts" />
                   <SidebarLink href="/admin/reviews" icon={<ClipboardCheck size={18} />} label="Review Pool" />
@@ -47,17 +68,17 @@ export default async function AdminLayout({ children }: { children: ReactNode })
                 </>
               )}
               
-              <div style={{ padding: '20px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Scholarly Finance</div>
+              <div style={{ padding: '10px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Scholarly Finance</div>
               <SidebarLink href="/admin/payments" icon={<DollarSign size={18} />} label="Fee Verification" />
               <SidebarLink href="/admin/payments/reviewers" icon={<CreditCard size={18} />} label="Reviewer Rewards" />
               <SidebarLink href="/admin/pricing" icon={<CreditCard size={18} />} label="Global Pricing" />
               
               {session.user.role !== "FINANCE_ADMIN" && (
                 <>
-                  <div style={{ padding: '20px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Communication</div>
+                  <div style={{ padding: '10px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Communication</div>
                   <SidebarLink href="/admin/messages" icon={<Mail size={18} />} label="Editorial Dispatch" />
                   
-                  <div style={{ padding: '20px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>System</div>
+                  <div style={{ padding: '10px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>System</div>
                   <SidebarLink href="/admin/analytics" icon={<BarChart3 size={18} />} label="Lifetime Reports" />
                 </>
               )}
@@ -65,12 +86,14 @@ export default async function AdminLayout({ children }: { children: ReactNode })
            </nav>
         </div>
 
-        <div style={{ marginTop: 'auto', padding: '32px', borderTop: '1px solid #edf2f7' }}>
+        {/* 3. Fixed Institutional Footer */}
+        <div style={{ padding: '32px', borderTop: '1px solid #edf2f7' }}>
            <Link href="/api/auth/signout" style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#a0aec0', fontWeight: 700, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
               <LogOut size={18} /> System Logout
            </Link>
         </div>
       </aside>
+
 
       {/* Main Content Host */}
       <main style={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
