@@ -3,9 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import styles from "./ArticleView.module.css";
 
-export default async function ArticleReaderPage({ params }: { params: { id: string } }) {
+export default async function ArticleReaderPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const article = await prisma.article.findUnique({
-    where: { id: params.id },
+    where: { id: id },
     include: { authors: { orderBy: { sequence: 'asc' } }, media: true }
   });
 
