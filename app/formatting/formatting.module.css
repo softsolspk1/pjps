@@ -162,42 +162,54 @@
 /* Journal Header Styles */
 .journalHeader {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: flex-start;
   font-size: 9pt;
-  margin-bottom: 20pt;
+  margin-bottom: 25pt;
   color: #000;
+  border-bottom: 0.5pt solid #000;
+  padding-bottom: 5pt;
+}
+
+.journalHeaderLeft {
+  font-style: italic;
+  max-width: 70%;
+}
+
+.journalHeaderRight {
   font-weight: bold;
 }
 
 .articleTitle {
-  font-size: 18pt;
+  font-size: 16pt;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 15pt;
-  line-height: 1.2;
+  margin-bottom: 18pt;
+  line-height: 1.3;
+  text-transform: capitalize;
 }
 
 .articleAuthors {
   text-align: center;
-  font-size: 11pt;
+  font-size: 12pt;
   font-weight: bold;
-  margin-bottom: 6pt;
+  margin-bottom: 8pt;
 }
 
 .articleAffiliations {
   text-align: center;
-  font-size: 8.5pt;
-  margin-bottom: 20pt;
-  color: #333;
-  line-height: 1.3;
+  font-size: 10pt;
+  margin-bottom: 25pt;
+  color: #000;
+  line-height: 1.4;
 }
 
 /* Abstract & Keywords */
 .abstractBlock {
-  font-size: 9pt;
-  margin-bottom: 8pt;
+  font-size: 10pt;
+  margin-bottom: 12pt;
   text-align: justify;
-  line-height: 1.25;
+  line-height: 1.3;
 }
 
 .keywordsBlock {
@@ -206,31 +218,32 @@
 }
 
 .dateLine {
-  font-size: 8.5pt;
+  font-size: 9pt;
   font-style: italic;
-  margin-bottom: 20pt;
-  border-bottom: 0.5pt solid black;
-  padding-bottom: 6pt;
+  margin-bottom: 25pt;
+  border-bottom: 0.75pt solid black;
+  padding-bottom: 8pt;
   text-align: left;
 }
 
 /* TWO COLUMN BODY - OPTIMIZED FOR SCHOLARLY JOURNALS */
 .scientificBody {
   column-count: 2;
-  column-gap: 24pt;
-  column-fill: auto;
+  column-gap: 18pt; /* 0.6cm as per journal standard */
+  column-fill: balance; /* Balance columns for better visual in preview */
   text-align: justify;
-  font-size: 9.5pt;
-  line-height: 1.25;
-  orphans: 2;
-  widows: 2;
+  font-size: 10pt;
+  line-height: 1.35;
+  orphans: 3;
+  widows: 3;
   width: 100%;
 }
 
 .scientificSection {
-  margin-bottom: 15pt;
+  margin-bottom: 12pt;
   position: relative;
   width: 100%;
+  break-inside: avoid-column; /* Prevent headings from splitting */
 }
 
 /* SUPPORT FOR FULL WIDTH ASSETS */
@@ -250,10 +263,11 @@
 .sectionHeading {
   font-weight: bold;
   text-transform: uppercase;
-  margin-bottom: 6pt;
-  font-size: 10pt;
+  margin-bottom: 8pt;
+  font-size: 12pt;
   display: block;
   break-after: avoid;
+  margin-top: 5pt;
 }
 
 /* FOOTNOTE & FOOTER */
@@ -340,9 +354,16 @@
 .rich-content p {
   text-align: justify;
   text-justify: inter-word;
-  margin-bottom: 12pt;
+  margin-bottom: 10pt;
   line-height: 1.4;
   display: block;
+}
+
+/* References Hanging Indent Style (Targeting the last section which is References) */
+.scientificSection:last-child .rich-content p {
+  padding-left: 20pt;
+  text-indent: -20pt;
+  font-size: 9pt;
 }
 
 .rich-content img {
@@ -365,16 +386,11 @@
 
 .rich-content th, .rich-content td {
   padding: 6pt;
-  border-bottom: 0.5pt solid #eee;
+  border-bottom: 0.5pt solid #ccc;
   text-align: left;
 }
 
 .rich-content th {
   border-bottom: 1.2pt solid black;
   font-weight: bold;
-  background: transparent;
-}
-
-.rich-content tr:last-child td {
-  border-bottom: none;
 }

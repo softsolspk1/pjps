@@ -104,38 +104,38 @@ export default function FormattingTool() {
           const children: any[] = [];
           node.childNodes.forEach((child: any) => {
             if (child.nodeName === 'B' || child.nodeName === 'STRONG') {
-              children.push(new TextRun({ text: child.textContent, bold: true }));
+              children.push(new TextRun({ text: child.textContent, bold: true, font: "Times New Roman", size: 20 }));
             } else if (child.nodeName === 'I' || child.nodeName === 'EM') {
-              children.push(new TextRun({ text: child.textContent, italics: true }));
+              children.push(new TextRun({ text: child.textContent, italics: true, font: "Times New Roman", size: 20 }));
             } else if (child.nodeName === 'U') {
-              children.push(new TextRun({ text: child.textContent, underline: {} }));
+              children.push(new TextRun({ text: child.textContent, underline: {}, font: "Times New Roman", size: 20 }));
             } else if (child.nodeName === 'IMG') {
                const src = child.getAttribute('src');
                if (src?.startsWith('data:image')) {
                   children.push(new ImageRun({
                     data: src.split(',')[1],
-                    transformation: { width: 450, height: 300 },
+                    transformation: { width: 330, height: 220 },
                   }));
                }
             } else {
-              children.push(new TextRun(child.textContent || ""));
+              children.push(new TextRun({ text: child.textContent || "", font: "Times New Roman", size: 20 }));
             }
           });
-          paragraphs.push(new Paragraph({ children, alignment: AlignmentType.JUSTIFIED, spacing: { after: 200 } }));
+          paragraphs.push(new Paragraph({ children, alignment: AlignmentType.JUSTIFIED, spacing: { after: 120 } }));
         } else if (node.nodeName === 'IMG') {
           const src = node.getAttribute('src');
           if (src?.startsWith('data:image')) {
              paragraphs.push(new Paragraph({
                children: [new ImageRun({
                  data: src.split(',')[1],
-                 transformation: { width: 500, height: 350 },
+                 transformation: { width: 400, height: 280 },
                })],
                alignment: AlignmentType.CENTER,
                spacing: { before: 200, after: 200 }
              }));
           }
         } else if (node.nodeType === 3 && node.textContent?.trim()) {
-           paragraphs.push(new Paragraph({ children: [new TextRun(node.textContent)], alignment: AlignmentType.JUSTIFIED, spacing: { after: 200 } }));
+           paragraphs.push(new Paragraph({ children: [new TextRun({ text: node.textContent, font: "Times New Roman", size: 20 })], alignment: AlignmentType.JUSTIFIED, spacing: { after: 120 } }));
         }
       });
 
@@ -145,17 +145,42 @@ export default function FormattingTool() {
     const doc = new Document({
       creator: "PJPS Manuscript Architect",
       title: title || "Scholarly Article",
+      styles: {
+        default: {
+          document: {
+            run: {
+              font: "Times New Roman",
+            },
+          },
+        },
+      },
       sections: [
         {
           properties: { type: SectionType.CONTINUOUS },
           children: [
             new Paragraph({
-              text: (doi || "doi.org/10.36721/PJPS...").toUpperCase(),
-              alignment: AlignmentType.RIGHT,
-              spacing: { after: 200 },
+              children: [
+                new TextRun({
+                  text: `Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610`,
+                  italics: true,
+                  size: 18,
+                }),
+                new TextRun({
+                  text: `\t${(doi || "doi.org/10.36721/PJPS...").toUpperCase()}`,
+                  bold: true,
+                  size: 18,
+                }),
+              ],
+              tabStops: [
+                {
+                  type: "right",
+                  position: 9000,
+                },
+              ],
+              spacing: { after: 400 },
             }),
             new Paragraph({
-              text: (title || "UNTITLED MANUSCRIPT").toUpperCase(),
+              text: (title || "UNTITLED MANUSCRIPT"),
               heading: HeadingLevel.HEADING_1,
               alignment: AlignmentType.CENTER,
               spacing: { before: 400, after: 400 },
@@ -165,39 +190,49 @@ export default function FormattingTool() {
                 new TextRun({ 
                   text: authors.filter(a => a.name).map((a, i) => `${a.name}${i + 1}`).join(", "), 
                   bold: true,
-                  size: 22 
+                  size: 24, // 12pt
+                  font: "Times New Roman"
                 }),
               ],
               alignment: AlignmentType.CENTER,
-              spacing: { after: 100 },
+              spacing: { after: 150 },
             }),
             ...authors.filter(a => a.affiliation).map((a, i) => new Paragraph({
               text: `${i + 1} ${a.affiliation}`,
               alignment: AlignmentType.CENTER,
-              spacing: { after: 50 },
+              spacing: { after: 80 },
             })),
             new Paragraph({ text: "", spacing: { after: 400 } }),
             new Paragraph({ 
-              children: [new TextRun({ text: "Abstract: ", bold: true })],
+              children: [new TextRun({ text: "Abstract: ", bold: true, size: 20 })],
               alignment: AlignmentType.JUSTIFIED,
+              spacing: { after: 100 }
             }),
             ...parseHtmlToDocx(sections.abstract),
             new Paragraph({ 
               children: [
-                new TextRun({ text: "Keywords: ", bold: true }),
-                new TextRun({ text: keywords }),
+                new TextRun({ text: "Keywords: ", bold: true, size: 18 }),
+                new TextRun({ text: keywords, size: 18 }),
               ],
               spacing: { before: 200, after: 200 } 
             }),
             new Paragraph({ 
               children: [
                 new TextRun({ 
-                  text: `Submitted: ${dates.submitted} — Revised: ${dates.revised} — Accepted: ${dates.accepted}`,
+                  text: `Submitted: ${dates.submitted || "27-08-2024"} — Revised: ${dates.revised || "31-10-2024"} — Accepted: ${dates.accepted || "31-10-2024"}`,
                   italics: true,
                   size: 18
                 }),
               ],
               alignment: AlignmentType.LEFT,
+              border: {
+                bottom: {
+                  color: "auto",
+                  space: 10,
+                  value: "single",
+                  size: 6,
+                },
+              },
               spacing: { after: 400 },
             }),
           ],
@@ -205,7 +240,7 @@ export default function FormattingTool() {
         {
           properties: { 
             type: SectionType.CONTINUOUS,
-            column: { count: 2, space: 720 },
+            column: { count: 2, space: 400 },
           },
           children: Object.entries(sections).filter(([k]) => k !== 'abstract').flatMap(([key, value]) => [
             new Paragraph({ 
@@ -369,7 +404,7 @@ export default function FormattingTool() {
                              if (file) {
                                const reader = new FileReader();
                                reader.onload = (re) => {
-                                 const img = `<div class="full-width-asset" style="text-align: center; margin: 25px 0; break-inside: avoid; column-span: all;"><img src="${re.target?.result}" alt="Table Image" style="max-width: 100%; border: 1.5pt solid black; padding: 6px; border-radius: 0;" /><p style="font-weight: bold; margin-top: 10px; font-size: 11px;">Table ${new Date().getTime().toString().slice(-2)}</p></div>`;
+                                 const img = `<div class="full-width-asset" style="text-align: center; margin: 25px 0; break-inside: avoid; column-span: all;"><p style="font-weight: bold; margin-bottom: 10px; font-size: 11px;">Table ${new Date().getTime().toString().slice(-2)}: [Enter Table Description]</p><img src="${re.target?.result}" alt="Table Image" style="max-width: 100%; border-top: 1.5pt solid black; border-bottom: 1.5pt solid black; padding: 6px; border-radius: 0;" /></div>`;
                                  handleSectionChange(key as keyof Sections, (sections[key as keyof Sections] || "") + img);
                                };
                                reader.readAsDataURL(file);
@@ -423,7 +458,14 @@ export default function FormattingTool() {
 
       <div style={{ display: view === "PREVIEW" ? "block" : "none" }} className={styles.articleViewport}>
         <div ref={printRef} className={styles.articlePreview}>
-           <div className={styles.journalHeader}>{doi || "doi.org/10.36721/PJPS..."}</div>
+           <div className={styles.journalHeader}>
+             <div className={styles.journalHeaderLeft}>
+               Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610
+             </div>
+             <div className={styles.journalHeaderRight}>
+               {doi || "DOI: 10.36721/PJPS..."}
+             </div>
+           </div>
            
            <h1 className={styles.articleTitle}>{title || "Untitled Manuscript"}</h1>
            
