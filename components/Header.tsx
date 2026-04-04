@@ -78,6 +78,7 @@ export default function Header() {
             <li className={styles.navItemDropdown}>
               <Link href="/submission" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Submission</Link>
               <ul className={styles.dropdownMenu}>
+                <li><Link href="/submission/checklist" onClick={() => setIsMenuOpen(false)}>Submission Checklist & Fees</Link></li>
                 <li><Link href="/submission" onClick={() => setIsMenuOpen(false)}>Online Submission Portal</Link></li>
                 <li><Link href="/submission/instructions" onClick={() => setIsMenuOpen(false)}>Instruction for Authors</Link></li>
                 <li><Link href="/submission/peer-review" onClick={() => setIsMenuOpen(false)}>Peer Review Guidelines</Link></li>

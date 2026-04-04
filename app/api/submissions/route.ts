@@ -8,8 +8,14 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_URL?.split(':')[2].split('@')[0],
 });
 
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+
 export async function POST(req: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    const userId = (session?.user as any)?.id;
+
     const formData = await req.formData();
     const title = formData.get("title") as string;
     const abstract = formData.get("abstract") as string;
@@ -55,9 +61,11 @@ export async function POST(req: Request) {
         paymentProofUrl: paymentUpload.secure_url,
         paymentStatus: "PENDING",
         status: "SUBMITTED",
+        userId,
         authors: {
           create: authors.map((a: any, index: number) => ({
             name: a.name,
+            email: a.email, // Contact details for individual author notification
             address: a.affiliation,
             sequence: index + 1,
           })),

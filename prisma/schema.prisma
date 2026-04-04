@@ -56,6 +56,9 @@ model Article {
   issueId         String?
   issue           Issue?   @relation(fields: [issueId], references: [id])
   
+  userId          String?
+  submitter       User?    @relation("SubmittedArticles", fields: [userId], references: [id])
+  
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   
@@ -85,7 +88,7 @@ model Review {
   updatedAt       DateTime @updatedAt
 
   article         Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  reviewer        User     @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+  reviewer        User     @relation("ReviewAssignments", fields: [reviewerId], references: [id], onDelete: Cascade)
 
   @@index([articleId])
   @@index([reviewerId])
@@ -98,6 +101,8 @@ model AuthorMapping {
   address         String?
   sequence        Int      @default(0) // To order authors 1 to 8
 
+  email           String? // Contact for this specific author
+  
   article         Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
 
   @@index([articleId])
@@ -139,13 +144,14 @@ model User {
   orcid           String?
   affiliation     String?
   country         String?  @default("Pakistan")
+  
+  articles        Article[] @relation("SubmittedArticles")
+  reviewsGiven    Review[]  @relation("ReviewAssignments")
   biography       String?  @db.Text
   interests       String?  // Research interests / Reviewer expertise
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  reviews   Review[]
 }
 
 model Pricing {

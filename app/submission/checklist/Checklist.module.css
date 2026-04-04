@@ -1,0 +1,265 @@
+.container {
+  padding: 80px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Inter', 'Outfit', sans-serif;
+  background-color: #fcfdfe;
+}
+
+.header {
+  margin-bottom: 60px;
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  background-color: #ebf4ff;
+  color: #0061ff;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 8px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 44px;
+  font-weight: 900;
+  color: #1a202c;
+  letter-spacing: -0.01em;
+  margin-bottom: 12px;
+}
+
+.subtitle {
+  font-size: 18px;
+  color: #718096;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 60px;
+}
+
+.section {
+  background-color: white;
+  border: 1px solid #edf2f7;
+  border-radius: 32px;
+  padding: 40px;
+  margin-bottom: 40px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 20px;
+  font-weight: 900;
+  color: #1a202c;
+  margin-bottom: 24px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.checkList {
+  list-style: none;
+  padding: 0;
+}
+
+.checkList li {
+  display: flex;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid #f7fafc;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #4a5568;
+}
+
+.checkList li:last-child {
+  border-bottom: none;
+}
+
+.checkIcon {
+  color: #10b981;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.feeInfo {
+  background-color: #f8fafc;
+  border-radius: 20px;
+  padding: 24px;
+}
+
+.feeInfo p {
+  font-size: 13px;
+  font-weight: 600;
+  color: #a0aec0;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+.feeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.feeItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.feeLabel {
+  font-size: 11px;
+  font-weight: 800;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.feeValue {
+  font-size: 18px;
+  font-weight: 900;
+  color: #1a202c;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.pricingCard {
+  background-color: #1a202c;
+  border-radius: 32px;
+  padding: 40px;
+  color: white;
+  position: sticky;
+  top: 40px;
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 900;
+  margin-bottom: 24px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.trackList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.trackItem {
+  background-color: #2d3748;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.trackName {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 2px;
+}
+
+.trackPrice {
+  display: block;
+  font-size: 10px;
+  color: #a0aec0;
+  text-transform: uppercase;
+  font-weight: 900;
+}
+
+.trackTime {
+  font-size: 11px;
+  font-weight: 900;
+  background-color: #4a5568;
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+
+.warningBox {
+  display: flex;
+  gap: 12px;
+  background-color: #fff7ed1a;
+  border: 1px solid #ffedd533;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 32px;
+}
+
+.warningBox p {
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffedd5;
+  line-height: 1.5;
+}
+
+.submitBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  background-color: #0061ff;
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 20px;
+  border-radius: 16px;
+  transition: all 0.2s ease;
+}
+
+.submitBtn:hover {
+  background-color: #0056e0;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 97, 255, 0.4);
+}
+
+.resources {
+  padding: 0 12px;
+}
+
+.resTitle {
+  font-size: 12px;
+  font-weight: 900;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 20px;
+}
+
+.resLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+  color: #4a5568;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 12px 0;
+  border-bottom: 1px solid #edf2f7;
+  transition: color 0.2s ease;
+}
+
+.resLink:hover {
+  color: #0061ff;
+}
