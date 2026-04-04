@@ -26,6 +26,7 @@ export async function POST(req: Request) {
     const authorsJson = formData.get("authors") as string;
     const file = formData.get("file") as File;
     const paymentProof = formData.get("paymentProof") as File;
+    const parentId = formData.get("parentId") as string | null;
 
     if (!file || !title || !authorsJson || !paymentProof) {
       return NextResponse.json({ error: "Missing required scholarly fields" }, { status: 400 });
@@ -33,7 +34,7 @@ export async function POST(req: Request) {
 
     const authors = JSON.parse(authorsJson);
 
-    // 1. Upload PDF to Cloudinary
+    // 1. Upload manuscript (PDF/DOCX/LaTeX) to Cloudinary
     const manuscriptBuffer = Buffer.from(await file.arrayBuffer());
     const manuscriptUpload = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
@@ -51,7 +52,7 @@ export async function POST(req: Request) {
       ).end(paymentBuffer);
     }) as any;
 
-    // 3. Create Article and AuthorMapping
+    // 3. Create Article with Versioning & Status
     const newArticle = await prisma.article.create({
       data: {
         title,
@@ -61,12 +62,14 @@ export async function POST(req: Request) {
         origin,
         paymentProofUrl: paymentUpload.secure_url,
         paymentStatus: "PENDING",
-        status: "SUBMITTED",
+        status: "SCREENING",
         userId,
+        parentId: parentId || null,
+        version: parentId ? parseInt(formData.get("version") as string || "2") : 1,
         authors: {
           create: authors.map((a: any, index: number) => ({
             name: a.name,
-            email: a.email, // Contact details for individual author notification
+            email: a.email,
             address: a.affiliation,
             sequence: index + 1,
           })),
@@ -77,15 +80,16 @@ export async function POST(req: Request) {
             secureUrl: manuscriptUpload.secure_url,
             resourceType: "raw",
             section: "MANUSCRIPT",
+            version: parentId ? parseInt(formData.get("version") as string || "2") : 1,
           },
         },
-      },
+      } as any,
       include: {
         authors: true,
       },
     });
 
-    // Audit Log the Submission
+    // 4. Audit Log the Submission
     await logAction(
       "ARTICLE_SUBMITTED",
       "ARTICLE",
@@ -93,7 +97,7 @@ export async function POST(req: Request) {
       userId
     );
 
-    // 4. Send Thank You Email
+    // 5. Send Professional Notification
     try {
       const { sendEmail } = await import("@/lib/mail");
       await sendEmail({
@@ -104,19 +108,14 @@ export async function POST(req: Request) {
             <h1 style="border-bottom: 2px solid #002d5e; padding-bottom: 15px; margin-bottom: 25px;">Submission Received</h1>
             <p>Dear <strong>${authors[0].name}</strong>,</p>
             <p>Thank you for submitting your research titled "<strong>${title}</strong>" to the <strong>Pakistan Journal of Pharmaceutical Sciences (PJPS)</strong>.</p>
-            <p>Your manuscript has been successfully cataloged and is now entering the editorial screening phase. Our editorial board will review the submission and the provided proof of payment.</p>
+            <p>Your manuscript has been successfully cataloged and is now entering the editorial screening phase.</p>
             <div style="margin: 30px 0; padding: 20px; background-color: #f8fafc; border-radius: 6px;">
               <p style="margin: 0; font-weight: bold;">Submission Details:</p>
-              <p style="margin: 5px 0;">Reference ID: ${newArticle.id}</p>
-              <p style="margin: 5px 0;">Track: ${trackingType}</p>
-              <p style="margin: 5px 0;">Status: SUBMITTED (Review Pending)</p>
+               <p style="margin: 5px 0;">Reference ID: ${newArticle.id}</p>
+               <p style="margin: 5px 0;">Track: ${trackingType}</p>
+               <p style="margin: 5px 0;">Status: SCREENING (Evaluating Criteria)</p>
             </div>
             <p>You can track the live progress of your manuscript through the Online Submission Portal.</p>
-            <p style="margin-top: 40px; border-top: 1px solid #e2e8f0; pt: 20px; font-size: 0.9em; color: #64748b;">
-              Best regards,<br/>
-              <strong>The Editorial Office</strong><br/>
-              Pakistan Journal of Pharmaceutical Sciences
-            </p>
           </div>
         `
       });

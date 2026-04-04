@@ -58,6 +58,11 @@ model Article {
   userId            String?
   downloadCount     Int             @default(0)
   
+  version           Int             @default(1)
+  parentId          String?
+  parentArticle     Article?        @relation("ArticleVersions", fields: [parentId], references: [id])
+  revisions         Article[]       @relation("ArticleVersions")
+  
   issue             Issue?          @relation(fields: [issueId], references: [id])
   submitter         User?           @relation("SubmittedArticles", fields: [userId], references: [id])
   authors           AuthorMapping[]
@@ -75,6 +80,10 @@ model Review {
   comments       String?
   recommendation String   @default("PENDING")
   status         String   @default("PENDING")
+  rating         Int      @default(0) // 1-5 scale
+  dueDate        DateTime?
+  commentsToEditor String?
+  commentsToAuthor String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   paymentAmount  Float?   @default(0)
@@ -107,6 +116,7 @@ model Media {
   secureUrl    String
   resourceType String   @default("image")
   section      String?
+  version      Int      @default(1)
   createdAt    DateTime @default(now())
   article      Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
 

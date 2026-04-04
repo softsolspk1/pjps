@@ -10,11 +10,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { articleId, originality, quality, importance, comments, recommendation } = await req.json();
+    const { 
+      articleId, 
+      originality, 
+      quality, 
+      importance, 
+      rating, 
+      commentsToEditor, 
+      commentsToAuthor, 
+      recommendation 
+    } = await req.json();
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email! }
-    });
+      where: { id: (session.user as any).id! }
+    } as any);
 
     if (!user || user.role !== "REVIEWER") {
       return NextResponse.json({ error: "Unauthorized role" }, { status: 403 });
@@ -40,10 +49,13 @@ export async function POST(req: Request) {
         originality,
         quality,
         importance,
-        comments,
+        rating: rating || 0,
+        commentsToEditor: commentsToEditor || "",
+        commentsToAuthor: commentsToAuthor || "",
+        comments: commentsToAuthor, // Backward compatibility
         recommendation,
         status: "COMPLETED"
-      }
+      } as any
     });
 
     return NextResponse.json({ success: true });

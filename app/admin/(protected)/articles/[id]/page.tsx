@@ -7,7 +7,9 @@ import {
   RotateCcw, AlertCircle, Loader2, 
   ArrowLeft, Download, User, 
   Calendar, MessageSquare, Info,
-  TrendingUp, Award, Quote
+  TrendingUp, Award, Quote,
+  ShieldCheck, Eye, Search,
+  ChevronRight, ExternalLink
 } from "lucide-react";
 import styles from "./Decision.module.css";
 
@@ -38,7 +40,11 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
   }, [id]);
 
   const handleDecision = async (decision: string) => {
-    if (!confirm(`Are you sure you want to ${decision.toLowerCase()} this manuscript? This will notify the author.`)) return;
+    const confirmMsg = decision === "UNDER_REVIEW" 
+      ? "Start formal peer review? This will notify the authors."
+      : `Are you sure you want to ${decision.toLowerCase()} this manuscript? This will notify the author.`;
+      
+    if (!confirm(confirmMsg)) return;
     
     setSubmitting(true);
     setMessage(null);
@@ -51,10 +57,10 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
       });
 
       if (res.ok) {
-        setMessage({ type: 'success', text: `Manuscript successfully ${decision.toLowerCase()}ed.` });
+        setMessage({ type: 'success', text: `Manuscript successfully moved to ${decision.toLowerCase()} status.` });
         setArticle({ ...article, status: decision });
       } else {
-        throw new Error("Failed to record decision");
+        throw new Error("Failed to record decision in registry.");
       }
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message });
@@ -86,8 +92,10 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
   if (!article) return <div className={styles.errorState}>Manuscript entry not found in active registry.</div>;
 
   const averageScore = article.reviews?.length > 0 
-    ? (article.reviews.reduce((acc: number, r: any) => acc + (r.originality + r.quality + r.importance) / 3, 0) / article.reviews.length).toFixed(1)
+    ? (article.reviews.reduce((acc: number, r: any) => acc + (r.originality + r.quality + r.importance + (r.rating || 0)) / 4, 0) / article.reviews.length).toFixed(1)
     : "N/A";
+
+  const manuscriptMedia = article.media?.find((m: any) => m.section === "MANUSCRIPT");
 
   return (
     <div className={styles.container}>
@@ -101,7 +109,14 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
           <div className={styles.meta}>
             <div className={styles.metaItem}><User size={14} /> {article.authors?.[0]?.name || "Lead Author"}</div>
             <div className={styles.metaItem}><Calendar size={14} /> Registered {new Date(article.createdAt).toLocaleDateString()}</div>
-            <div className={`${styles.statusBadge} ${styles[article.status.toLowerCase()]}`}>{article.status}</div>
+            <div className={`${styles.statusBadge} ${styles[article.status.toLowerCase()] || styles.pending}`}>
+               {article.status.replace('_', ' ')}
+            </div>
+            {article.version > 1 && (
+               <div className="flex items-center gap-2 bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                  Version {article.version}
+               </div>
+            )}
           </div>
         </div>
       </header>
@@ -124,12 +139,18 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
           </div>
           
           <div className={styles.downloadCard}>
-             <div className={styles.downloadIcon}><Download size={24} /></div>
-             <div className={styles.downloadText}>
-                <h4>Full Text Access</h4>
-                <p>Scholarly PDF Manuscript</p>
+             <div className={styles.downloadIcon}>
+                <FileText size={24} />
              </div>
-             <a href={article.media?.find((m: any) => m.type === 'DOC' || m.section === "MANUSCRIPT")?.url} target="_blank" className={styles.downloadBtn}>Download Registry File</a>
+             <div className={styles.downloadText}>
+                <h4>
+                   {manuscriptMedia?.secureUrl?.endsWith('.zip') || manuscriptMedia?.secureUrl?.endsWith('.tex') ? 'Source (LaTeX/Archive)' : 'Scholarly Manuscript'}
+                </h4>
+                <p>Version {article.version || 1} • {new Date(manuscriptMedia?.createdAt || article.createdAt).toLocaleDateString()}</p>
+             </div>
+             {manuscriptMedia && (
+               <a href={manuscriptMedia.secureUrl} target="_blank" className={styles.downloadBtn}>Download Registry File</a>
+             )}
           </div>
 
           <div style={{ marginTop: '30px', padding: '30px', backgroundColor: '#fcfdfe', borderRadius: '16px', border: '1px solid #edf2f7' }}>
@@ -166,19 +187,19 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
         <aside className={styles.decisionSection}>
           <div className={styles.statsGrid}>
              <div className={styles.statCard}>
-                <div className={styles.statLabel}>Expert Consensus</div>
+                <div className={styles.statLabel}>Expert Consistency</div>
                 <div className={styles.statValue}>{averageScore} / 10</div>
                 <TrendingUp size={16} className={styles.statIcon} />
              </div>
              <div className={styles.statCard}>
-                <div className={styles.statLabel}>Review Count</div>
+                <div className={styles.statLabel}>Review Pool</div>
                 <div className={styles.statValue}>{article.reviews?.length || 0}</div>
                 <Award size={16} className={styles.statIcon} />
              </div>
           </div>
 
           <div className={styles.reviewList}>
-             <h3 className={styles.subTitle}><MessageSquare size={18} /> Peer Feedback</h3>
+             <h3 className={styles.subTitle}><MessageSquare size={18} /> Reviewer Scorecards</h3>
              {article.reviews?.length === 0 ? (
                <div className={styles.emptyReviews}>No expert reviews have been submitted for this stage.</div>
              ) : (
@@ -188,14 +209,63 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
                        <span className={styles.reviewerName}>Expert Referee</span>
                        <span className={styles.reviewRec}>{review.recommendation}</span>
                     </div>
-                    <p className={styles.reviewComments}>"{review.comments}"</p>
+                    <div className="mt-4 mb-4 grid grid-cols-4 gap-2">
+                       <div className="text-center p-2 bg-slate-50 rounded-lg">
+                          <p className="text-[8px] font-black text-slate-400 uppercase">Orig</p>
+                          <p className="text-xs font-bold text-slate-700">{review.originality}</p>
+                       </div>
+                       <div className="text-center p-2 bg-slate-50 rounded-lg">
+                          <p className="text-[8px] font-black text-slate-400 uppercase">Qual</p>
+                          <p className="text-xs font-bold text-slate-700">{review.quality}</p>
+                       </div>
+                       <div className="text-center p-2 bg-slate-50 rounded-lg">
+                          <p className="text-[8px] font-black text-slate-400 uppercase">Sign</p>
+                          <p className="text-xs font-bold text-slate-700">{review.importance}</p>
+                       </div>
+                       <div className="text-center p-2 bg-blue-50 rounded-lg">
+                          <p className="text-[8px] font-black text-blue-400 uppercase">Rate</p>
+                          <p className="text-xs font-bold text-blue-700">{review.rating || 0}</p>
+                       </div>
+                    </div>
+                    
+                    {/* Private Comments for Editors */}
+                    <div className="bg-slate-900/5 p-4 rounded-xl mb-4 border border-slate-200/50">
+                       <div className="flex items-center gap-2 mb-2 text-slate-500">
+                          <ShieldCheck size={12} />
+                          <span className="text-[9px] font-black uppercase tracking-widest">Confidential (Editor Only)</span>
+                       </div>
+                       <p className="text-xs italic text-slate-600">"{review.commentsToEditor || "No private remarks provided."}"</p>
+                    </div>
+
+                    {/* Author Feedback */}
+                    <div className="p-4 bg-blue-50/20 rounded-xl border border-blue-100/50">
+                       <div className="flex items-center gap-2 mb-2 text-blue-500">
+                          <MessageSquare size={12} />
+                          <span className="text-[9px] font-black uppercase tracking-widest">Public Feedback</span>
+                       </div>
+                       <p className="text-xs text-slate-700">"{review.commentsToAuthor || review.comments || "No author feedback provided."}"</p>
+                    </div>
                  </div>
                ))
              )}
           </div>
 
           <div className={styles.decisionActions}>
-             <h3 className={styles.subTitle}><Info size={18} /> Final Decision</h3>
+             <h3 className={styles.subTitle}><CheckCircle size={18} /> Editorial Workflow Control</h3>
+             
+             {article.status === "SCREENING" && (
+                <div className="mb-6">
+                   <button 
+                     onClick={() => handleDecision("UNDER_REVIEW")}
+                     disabled={submitting}
+                     className="w-full bg-blue-600 hover:bg-blue-700 text-white p-5 rounded-2xl font-black uppercase text-xs tracking-widest flex items-center justify-center gap-3 transition-all shadow-xl active:scale-95"
+                   >
+                     <Search size={18} /> Initiate Peer Review
+                   </button>
+                   <p className="text-[10px] text-center text-slate-400 font-bold uppercase mt-3 tracking-widest">Manuscript has passed criteria screening</p>
+                </div>
+             )}
+
              <div className={styles.actionGrid}>
                 <button 
                   onClick={() => handleDecision("ACCEPTED")}
@@ -209,7 +279,7 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
                   disabled={submitting}
                   className={`${styles.actionBtn} ${styles.revision}`}
                 >
-                  <RotateCcw size={18} /> Revision
+                  <RotateCcw size={18} /> Request Revision
                 </button>
                 <button 
                   onClick={() => handleDecision("REJECTED")}
@@ -219,6 +289,21 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
                   <XCircle size={18} /> Reject
                 </button>
              </div>
+             
+             {article.status === "REVISION" && (
+                <div className="mt-8 p-6 bg-slate-900 rounded-3xl text-white">
+                   <div className="flex items-center gap-3 mb-4">
+                      <RotateCcw size={18} className="text-blue-400" />
+                      <h4 className="text-xs font-black uppercase tracking-widest">Awaiting Author Revision</h4>
+                   </div>
+                   <p className="text-xs text-slate-400 mb-6 leading-relaxed">The author must upload a revised manuscript (v{article.version + 1}) through their dashboard to proceed.</p>
+                   {/* Simplified deep link to the submission portal for the author if they were here */}
+                   <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
+                      <Info size={14} className="text-blue-400" />
+                      <span className="text-[10px] font-bold text-slate-300">Revision link issued to ${article.submitter?.email || "Author"}</span>
+                   </div>
+                </div>
+             )}
           </div>
         </aside>
       </div>

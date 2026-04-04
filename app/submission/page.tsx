@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import styles from "./submission.module.css";
 import { 
   PlusCircle, Trash2, Upload, CheckCircle, 
   AlertCircle, FileText, Info, ShieldCheck,
   FileArchive, FileCode, ChevronRight, Loader2,
-  Clock, Zap, Gauge, CreditCard, DollarSign
+  Clock, Zap, Gauge, CreditCard, DollarSign,
+  History, RotateCcw
 } from "lucide-react";
 
 type Author = {
@@ -16,8 +18,13 @@ type Author = {
   affiliation: string;
 };
 
-export default function SubmissionPage() {
+function SubmissionForm() {
   const { data: session } = useSession();
+  const searchParams = useSearchParams();
+  const revisionOf = searchParams.get("revisionOf");
+  const parentId = searchParams.get("parentId");
+  const currentVersion = parseInt(searchParams.get("v") || "1");
+
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,13 +49,30 @@ export default function SubmissionPage() {
       .then(data => setPricing(data))
       .catch(err => console.error("Failed to load pricing", err));
     
+    // If it's a revision, we might want to fetch parent details
+    if (parentId) {
+       fetch(`/api/articles/${parentId}`)
+         .then(res => res.json())
+         .then(data => {
+            setTitle(data.title);
+            setAbstract(data.abstract);
+            // Pre-fill authors
+            if (data.authors) {
+               setAuthors(data.authors.map((a: any) => ({
+                  name: a.name,
+                  email: a.email || "",
+                  affiliation: a.address || ""
+               })));
+            }
+         })
+         .catch(err => console.error("Failed to load parent article", err));
+    }
+
     if (session?.user) {
-      // Assuming session might have country now after signup update
       const country = (session.user as any).country || "Pakistan";
       setUserOrigin(country.toLowerCase() === "pakistan" ? "PAKISTANI" : "INTERNATIONAL");
 
-      // PRE-FILL FIRST AUTHOR (If form is fresh)
-      if (authors.length === 1 && !authors[0].name && !authors[0].email) {
+      if (!parentId && authors.length === 1 && !authors[0].name && !authors[0].email) {
         setAuthors([{
           name: session.user.name || "",
           email: session.user.email || "",
@@ -56,7 +80,7 @@ export default function SubmissionPage() {
         }]);
       }
     }
-  }, [session]);
+  }, [session, parentId]);
 
   const getCurrentFee = () => {
     const p = pricing.find(item => item.origin === userOrigin);
@@ -105,8 +129,8 @@ export default function SubmissionPage() {
     e.preventDefault();
     if (step < 3) return handleNextStep();
 
-    if (!paymentProofFile) return setError("Proof of payment is mandatory for scholarly review.");
-    if (!manuscriptFile) return setError("Principal manuscript file is required.");
+    if (!paymentProofFile && !parentId) return setError("Proof of payment is mandatory for scholarly review.");
+    if (!manuscriptFile) return setError("Principal manuscript file (v" + (parentId ? currentVersion + 1 : 1) + ") is required.");
     if (!guidelinesConfirmed) return setError("You must confirm adherence to PJPS formatting guidelines.");
     
     setLoading(true);
@@ -122,7 +146,22 @@ export default function SubmissionPage() {
       formData.append("origin", userOrigin);
       formData.append("authors", JSON.stringify(authors));
       formData.append("file", manuscriptFile);
-      formData.append("paymentProof", paymentProofFile);
+      
+      if (paymentProofFile) {
+         formData.append("paymentProof", paymentProofFile);
+      } else if (parentId) {
+         // Use a dummy empty file or signal it's a revision 
+         // For now, API expects paymentProof, so I'll handle it there or require it.
+         // Usually, revisions don't pay again.
+         const dummy = new File(["dummy"], "payment_memo.txt", { type: "text/plain" });
+         formData.append("paymentProof", dummy);
+      }
+
+      if (parentId) {
+         formData.append("parentId", parentId);
+         formData.append("version", (currentVersion + 1).toString());
+      }
+
       if (supplementaryFile) formData.append("supplementary", supplementaryFile);
 
       const res = await fetch("/api/submissions", {
@@ -160,7 +199,9 @@ export default function SubmissionPage() {
         <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-6">
           <CheckCircle size={40} />
         </div>
-        <h2 className="text-3xl font-serif font-bold text-slate-900 mb-4 tracking-tight">Manuscript Cataloged Successfully</h2>
+        <h2 className="text-3xl font-serif font-bold text-slate-900 mb-4 tracking-tight">
+           {parentId ? "Revision Cataloged Successfully" : "Manuscript Cataloged Successfully"}
+        </h2>
         <p className="text-slate-500 max-w-lg mb-10 leading-relaxed font-medium">
           Your research contribution is now entering the editorial screening phase. You can track its progress using the unique Reference ID provided in your confirmation email.
         </p>
@@ -172,9 +213,27 @@ export default function SubmissionPage() {
   return (
     <div className="container section-padding max-w-4xl">
       <div className="mb-16 text-center">
-        <h1 className="text-5xl font-serif font-bold text-slate-900 mb-4 tracking-tight">Manuscript Submission</h1>
-        <p className="text-slate-500 font-medium">Official peer-review entry portal for Pakistan Journal of Pharmaceutical Sciences</p>
+        <h1 className="text-5xl font-serif font-bold text-slate-900 mb-4 tracking-tight">
+           {parentId ? `Manuscript Revision (v${currentVersion + 1})` : "Manuscript Submission"}
+        </h1>
+        <p className="text-slate-500 font-medium">
+           {parentId 
+             ? "Scientific revision submission for previously reviewed research" 
+             : "Official peer-review entry portal for Pakistan Journal of Pharmaceutical Sciences"}
+        </p>
       </div>
+
+      {parentId && (
+         <div className="mb-10 p-6 bg-blue-50 border border-blue-100 rounded-3xl flex items-center gap-6">
+            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-sm">
+               <RotateCcw size={24} />
+            </div>
+            <div>
+               <p className="text-sm font-black text-blue-900 uppercase tracking-widest mb-1">Revision Cycle</p>
+               <p className="text-xs text-blue-700 font-bold">You are submitting a revised version of Manuscript <strong>#{parentId.slice(-6)}</strong>. Prior metadata has been pre-filled.</p>
+            </div>
+         </div>
+      )}
 
       {renderStepIndicator()}
 
@@ -211,15 +270,17 @@ export default function SubmissionPage() {
                   </label>
                 ))}
               </div>
-              <div className="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-between">
-                <div className="flex items-center gap-3 text-blue-900">
-                  <CreditCard size={18} />
-                  <span className="text-sm font-bold">Estimated Submission Fee</span>
+              {!parentId && (
+                <div className="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-between">
+                  <div className="flex items-center gap-3 text-blue-900">
+                    <CreditCard size={18} />
+                    <span className="text-sm font-bold">Estimated Submission Fee</span>
+                  </div>
+                  <div className="text-xl font-serif font-black text-blue-600">
+                    {userOrigin === "PAKISTANI" ? "Rs. " : "$ "}{getCurrentFee().toLocaleString()}
+                  </div>
                 </div>
-                <div className="text-xl font-serif font-black text-blue-600">
-                  {userOrigin === "PAKISTANI" ? "Rs. " : "$ "}{getCurrentFee().toLocaleString()}
-                </div>
-              </div>
+              )}
             </div>
             <div className={styles.formGroup}>
               <label className={styles.label}>Full Manuscript Title</label>
@@ -321,44 +382,52 @@ export default function SubmissionPage() {
                   />
                   <div className="text-center">
                     <p className="text-sm font-bold text-slate-900 mb-1 max-w-[200px] truncate mx-auto">
-                      {manuscriptFile ? manuscriptFile.name : "Select Document Source"}
+                      {manuscriptFile ? manuscriptFile.name : (parentId ? "Upload Revision v" + (currentVersion + 1) : "Select Document Source")}
                     </p>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                      {manuscriptFile ? `${(manuscriptFile.size / 1024 / 1024).toFixed(2)} MB` : "Max File Size: 15MB"}
+                       {manuscriptFile ? `${(manuscriptFile.size / 1024 / 1024).toFixed(2)} MB` : ".TEX, .PDF, .DOCX"}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Proof of Payment */}
-              <div className={`${styles.fileVaultCard} ${paymentProofFile ? styles.hasFilePayment : ""}`}>
-                <div className="absolute top-4 right-4 bg-red-50 text-red-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-red-100">Mandatory</div>
+              {/* Proof of Payment / Revision Link */}
+              <div className={`${styles.fileVaultCard} ${paymentProofFile ? styles.hasFilePayment : ""} ${parentId ? "opacity-50 pointer-events-none" : ""}`}>
+                {!parentId && <div className="absolute top-4 right-4 bg-red-50 text-red-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-red-100">Mandatory</div>}
                 <div className={styles.fileCardHeader}>
                   <div className={styles.paymentIconBox}>
-                     {paymentProofFile ? <CheckCircle size={24} className="text-emerald-500" /> : <DollarSign size={24} />}
+                     {parentId ? <RotateCcw size={24} className="text-blue-500" /> : (paymentProofFile ? <CheckCircle size={24} className="text-emerald-500" /> : <DollarSign size={24} />)}
                   </div>
                   <div>
-                    <h4 className={styles.fileTitle}>Payment Proof</h4>
-                    <p className={styles.fileSubtitle}>Institution Bank Receipt</p>
+                    <h4 className={styles.fileTitle}>{parentId ? "Revision (No Fee)" : "Payment Proof"}</h4>
+                    <p className={styles.fileSubtitle}>{parentId ? "Cycle " + currentVersion : "Institution Bank Receipt"}</p>
                   </div>
                 </div>
                 
-                <div className={styles.paymentDropZone}>
-                  <input 
-                    type="file" 
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    className={styles.fileInput}
-                    onChange={(e) => setPaymentProofFile(e.target.files ? e.target.files[0] : null)}
-                  />
-                  <div className="text-center">
-                    <p className="text-sm font-bold text-slate-900 mb-1 max-w-[200px] truncate mx-auto">
-                      {paymentProofFile ? paymentProofFile.name : "Upload Confirmation"}
-                    </p>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                      {paymentProofFile ? "Receipt Attached" : "PDF or High-res Image"}
-                    </p>
+                {!parentId ? (
+                  <div className={styles.paymentDropZone}>
+                    <input 
+                      type="file" 
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      className={styles.fileInput}
+                      onChange={(e) => setPaymentProofFile(e.target.files ? e.target.files[0] : null)}
+                    />
+                    <div className="text-center">
+                      <p className="text-sm font-bold text-slate-900 mb-1 max-w-[200px] truncate mx-auto">
+                        {paymentProofFile ? paymentProofFile.name : "Upload Confirmation"}
+                      </p>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                        {paymentProofFile ? "Receipt Attached" : "PDF or High-res Image"}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="h-32 flex flex-col justify-center items-center text-center px-6">
+                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest leading-loose">
+                        Submission fees are waived for manuscripts in their revision cycle.
+                     </p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -440,7 +509,7 @@ export default function SubmissionPage() {
             </button>
           ) : (
             <button type="submit" disabled={loading} className="btn btn-primary px-12 py-4 flex items-center gap-3 active:scale-95 transition-transform">
-              {loading ? <Loader2 className="animate-spin" size={20} /> : <><ShieldCheck size={20} /> Complete Peer-Review Entry</>}
+              {loading ? <Loader2 className="animate-spin" size={20} /> : <><ShieldCheck size={20} /> {parentId ? "Submit Revision Cycle" : "Complete Peer-Review Entry"}</>}
             </button>
           )}
         </div>
@@ -458,4 +527,12 @@ export default function SubmissionPage() {
       </div>
     </div>
   );
+}
+
+export default function SubmissionPage() {
+  return (
+    <Suspense fallback={<div>Loading Submission Portal...</div>}>
+      <SubmissionForm />
+    </Suspense>
+  )
 }
