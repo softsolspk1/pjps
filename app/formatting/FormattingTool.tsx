@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import dynamic from "next/dynamic";
 import { useReactToPrint } from "react-to-print";
-import { Document, Packer, Paragraph, TextRun, AlignmentType, HeadingLevel, SectionType } from "docx";
+import { Document, Packer, Paragraph, TextRun, AlignmentType, HeadingLevel, SectionType, ImageRun } from "docx";
 import { saveAs } from "file-saver";
 import { FileText, Download, Printer, Users, Layout, PlusCircle, Trash2, Eye, Edit3, BarChart3, Save, Calendar, Globe } from "lucide-react";
 import styles from "./formatting.module.css";
@@ -22,6 +22,9 @@ const modules = {
     ["link", "image", "video"],
     ["clean"],
   ],
+  clipboard: {
+    matchVisual: false, // Cleaner pasting
+  },
 };
 
 const formats = [
@@ -91,10 +94,52 @@ export default function FormattingTool() {
   });
 
   const exportToWord = async () => {
-    const stripHtml = (html: string) => {
-       if (typeof window === 'undefined') return html;
-       const doc = new DOMParser().parseFromString(html, 'text/html');
-       return doc.body.textContent || "";
+    const parseHtmlToDocx = (html: string): (Paragraph)[] => {
+      if (typeof window === 'undefined') return [];
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const paragraphs: Paragraph[] = [];
+
+      doc.body.childNodes.forEach((node: any) => {
+        if (node.nodeName === 'P' || node.nodeName === 'DIV') {
+          const children: any[] = [];
+          node.childNodes.forEach((child: any) => {
+            if (child.nodeName === 'B' || child.nodeName === 'STRONG') {
+              children.push(new TextRun({ text: child.textContent, bold: true }));
+            } else if (child.nodeName === 'I' || child.nodeName === 'EM') {
+              children.push(new TextRun({ text: child.textContent, italics: true }));
+            } else if (child.nodeName === 'U') {
+              children.push(new TextRun({ text: child.textContent, underline: {} }));
+            } else if (child.nodeName === 'IMG') {
+               const src = child.getAttribute('src');
+               if (src?.startsWith('data:image')) {
+                  children.push(new ImageRun({
+                    data: src.split(',')[1],
+                    transformation: { width: 450, height: 300 },
+                  }));
+               }
+            } else {
+              children.push(new TextRun(child.textContent || ""));
+            }
+          });
+          paragraphs.push(new Paragraph({ children, alignment: AlignmentType.JUSTIFIED, spacing: { after: 200 } }));
+        } else if (node.nodeName === 'IMG') {
+          const src = node.getAttribute('src');
+          if (src?.startsWith('data:image')) {
+             paragraphs.push(new Paragraph({
+               children: [new ImageRun({
+                 data: src.split(',')[1],
+                 transformation: { width: 500, height: 350 },
+               })],
+               alignment: AlignmentType.CENTER,
+               spacing: { before: 200, after: 200 }
+             }));
+          }
+        } else if (node.nodeType === 3 && node.textContent?.trim()) {
+           paragraphs.push(new Paragraph({ children: [new TextRun(node.textContent)], alignment: AlignmentType.JUSTIFIED, spacing: { after: 200 } }));
+        }
+      });
+
+      return paragraphs;
     };
 
     const doc = new Document({
@@ -133,19 +178,16 @@ export default function FormattingTool() {
             })),
             new Paragraph({ text: "", spacing: { after: 400 } }),
             new Paragraph({ 
-              children: [
-                new TextRun({ text: "Abstract: ", bold: true }),
-                new TextRun({ text: stripHtml(sections.abstract) }),
-              ],
+              children: [new TextRun({ text: "Abstract: ", bold: true })],
               alignment: AlignmentType.JUSTIFIED,
-              spacing: { after: 200 } 
             }),
+            ...parseHtmlToDocx(sections.abstract),
             new Paragraph({ 
               children: [
                 new TextRun({ text: "Keywords: ", bold: true }),
                 new TextRun({ text: keywords }),
               ],
-              spacing: { after: 200 } 
+              spacing: { before: 200, after: 200 } 
             }),
             new Paragraph({ 
               children: [
@@ -163,7 +205,7 @@ export default function FormattingTool() {
         {
           properties: { 
             type: SectionType.CONTINUOUS,
-            column: { count: 2, space: 720 }, // 720 is 0.5 inch / ~36pt
+            column: { count: 2, space: 720 },
           },
           children: Object.entries(sections).filter(([k]) => k !== 'abstract').flatMap(([key, value]) => [
             new Paragraph({ 
@@ -172,11 +214,7 @@ export default function FormattingTool() {
               alignment: AlignmentType.LEFT,
               spacing: { before: 300, after: 150 } 
             }),
-            new Paragraph({ 
-              text: stripHtml(value), 
-              alignment: AlignmentType.JUSTIFIED, 
-              spacing: { after: 200 } 
-            })
+            ...parseHtmlToDocx(value),
           ]),
         }
       ],

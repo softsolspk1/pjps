@@ -147,7 +147,7 @@
 .articlePreview {
   width: 210mm; 
   background: white;
-  padding: 2.0cm 1.8cm; /* Consistent institutional margins */
+  padding: 2.5cm 2cm; /* Professional A4 Margins */
   box-shadow: 0 0 30px rgba(0,0,0,0.15);
   font-family: "Times New Roman", Times, serif;
   color: black;
@@ -156,6 +156,7 @@
   min-height: 297mm;
   margin: 0 auto;
   box-sizing: border-box;
+  overflow: visible;
 }
 
 /* Journal Header Styles */
@@ -217,17 +218,18 @@
 .scientificBody {
   column-count: 2;
   column-gap: 24pt;
+  column-fill: auto;
   text-align: justify;
   font-size: 9.5pt;
-  line-height: 1.15;
+  line-height: 1.25;
   orphans: 2;
   widows: 2;
+  width: 100%;
 }
 
 .scientificSection {
-  margin-bottom: 20pt;
-  break-inside: avoid-column;
-  display: block;
+  margin-bottom: 15pt;
+  position: relative;
   width: 100%;
 }
 
@@ -338,7 +340,9 @@
 .rich-content p {
   text-align: justify;
   text-justify: inter-word;
-  margin-bottom: 8pt;
+  margin-bottom: 12pt;
+  line-height: 1.4;
+  display: block;
 }
 
 .rich-content img {
