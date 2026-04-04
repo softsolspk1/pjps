@@ -150,6 +150,7 @@ export default function FormattingTool() {
           document: {
             run: {
               font: "Times New Roman",
+              size: 20, // 10pt
             },
           },
         },
@@ -166,7 +167,7 @@ export default function FormattingTool() {
                   size: 18,
                 }),
                 new TextRun({
-                  text: `\t${(doi || "doi.org/10.36721/PJPS...").toUpperCase()}`,
+                  text: `\t${(doi || "10.36721/PJPS...").toUpperCase()}`,
                   bold: true,
                   size: 18,
                 }),
@@ -177,13 +178,19 @@ export default function FormattingTool() {
                   position: 9000,
                 },
               ],
-              spacing: { after: 400 },
+              spacing: { after: 300 },
             }),
             new Paragraph({
-              text: (title || "UNTITLED MANUSCRIPT"),
-              heading: HeadingLevel.HEADING_1,
+              children: [
+                new TextRun({
+                  text: (title || "UNTITLED MANUSCRIPT").toUpperCase(),
+                  bold: true,
+                  size: 32, // 16pt
+                  font: "Times New Roman"
+                }),
+              ],
               alignment: AlignmentType.CENTER,
-              spacing: { before: 400, after: 400 },
+              spacing: { before: 200, after: 400 },
             }),
             new Paragraph({
               children: [
@@ -198,7 +205,12 @@ export default function FormattingTool() {
               spacing: { after: 150 },
             }),
             ...authors.filter(a => a.affiliation).map((a, i) => new Paragraph({
-              text: `${i + 1} ${a.affiliation}`,
+              children: [
+                new TextRun({
+                  text: `${i + 1} ${a.affiliation}`,
+                  size: 20, // 10pt
+                })
+              ],
               alignment: AlignmentType.CENTER,
               spacing: { after: 80 },
             })),
@@ -244,8 +256,13 @@ export default function FormattingTool() {
           },
           children: Object.entries(sections).filter(([k]) => k !== 'abstract').flatMap(([key, value]) => [
             new Paragraph({ 
-              text: key.toUpperCase(), 
-              heading: HeadingLevel.HEADING_2,
+              children: [
+                new TextRun({
+                  text: key.toUpperCase(),
+                  bold: true,
+                  size: 24, // 12pt
+                })
+              ],
               alignment: AlignmentType.LEFT,
               spacing: { before: 300, after: 150 } 
             }),
@@ -463,7 +480,7 @@ export default function FormattingTool() {
                Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610
              </div>
              <div className={styles.journalHeaderRight}>
-               {doi || "DOI: 10.36721/PJPS..."}
+               {doi || "10.36721/PJPS..."}
              </div>
            </div>
            
