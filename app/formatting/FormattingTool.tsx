@@ -163,7 +163,7 @@ export default function FormattingTool() {
         {
           properties: { 
             type: SectionType.CONTINUOUS,
-            column: { count: 2, spacing: 720 }, // 720 is 0.5 inch / ~36pt
+            column: { count: 2, space: 720 }, // 720 is 0.5 inch / ~36pt
           },
           children: Object.entries(sections).filter(([k]) => k !== 'abstract').flatMap(([key, value]) => [
             new Paragraph({ 
