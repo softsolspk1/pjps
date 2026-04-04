@@ -30,7 +30,7 @@ export default function LoginPage() {
     setError("");
 
     const res = await signIn("credentials", {
-      email,
+      username: email,
       password,
       redirect: false,
     });
@@ -206,6 +206,44 @@ export default function LoginPage() {
              <ShieldCheck size={16} />
              <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Secure Academic Identity</span>
           </div>
+        </div>
+
+        {/* Demo Credentials Table */}
+        <div className="mt-6 bg-[#f4f2e6] rounded-xl overflow-hidden border border-[#dcd8c9] shadow-sm">
+          <table className="w-full text-[13px] text-left border-collapse">
+            <thead className="bg-[#e3e1d1] text-slate-500 font-semibold tracking-wide border-b border-[#dcd8c9]">
+              <tr>
+                <th className="px-4 py-3 border-r border-[#dcd8c9]">Institutional Identity</th>
+                <th className="px-4 py-3 border-r border-[#dcd8c9]">Role Sovereignty</th>
+                <th className="px-4 py-3">Access Key</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { email: "eic@pjps.pk", role: "Editor-in-Chief" },
+                { email: "finance@pjps.pk", role: "Finance Admin" },
+                { email: "editor@pjps.pk", role: "Associate Editor" },
+                { email: "reviewer@pjps.pk", role: "Peer Reviewer" },
+                { email: "author@pjps.pk", role: "Scholarly Author" },
+              ].map((demo, idx) => (
+                <tr key={idx} className="border-b border-[#dcd8c9] last:border-0 hover:bg-[#ebe8db] transition-colors">
+                  <td className="px-4 py-2.5 border-r border-[#dcd8c9]">
+                    <span className="px-2 py-1 bg-[#dcdad0] text-[#ba2a2a] rounded-md font-mono text-[12px] tracking-tight">
+                      {demo.email}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2.5 border-r border-[#dcd8c9] font-bold text-slate-600">
+                    {demo.role}
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <span className="px-2 py-1 bg-[#dcdad0] text-[#ba2a2a] rounded-md font-mono text-[12px] tracking-tight">
+                      Softsols@123
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

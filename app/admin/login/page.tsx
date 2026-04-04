@@ -93,7 +93,46 @@ export default function LoginPage() {
         <div className={styles.footer}>
           <p>For technical assistance, please contact the <br/> <span className={styles.footerLink}>Editorial IT Support Team</span></p>
         </div>
+
+        {/* Demo Credentials Table */}
+        <div style={{ marginTop: '24px', backgroundColor: '#f4f2e6', borderRadius: '12px', overflow: 'hidden', border: '1px solid #dcd8c9', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <table style={{ width: '100%', fontSize: '12px', textAlign: 'left', borderCollapse: 'collapse' }}>
+            <thead style={{ backgroundColor: '#e3e1d1', color: '#64748b', fontWeight: 600, borderBottom: '1px solid #dcd8c9' }}>
+              <tr>
+                <th style={{ padding: '8px 12px', borderRight: '1px solid #dcd8c9' }}>Institutional Identity</th>
+                <th style={{ padding: '8px 12px', borderRight: '1px solid #dcd8c9' }}>Role Sovereignty</th>
+                <th style={{ padding: '8px 12px' }}>Access Key</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { email: "eic@pjps.pk", role: "Editor-in-Chief" },
+                { email: "finance@pjps.pk", role: "Finance Admin" },
+                { email: "editor@pjps.pk", role: "Associate Editor" },
+                { email: "reviewer@pjps.pk", role: "Peer Reviewer" },
+                { email: "author@pjps.pk", role: "Scholarly Author" },
+              ].map((demo, idx) => (
+                <tr key={idx} style={{ borderBottom: idx === 4 ? 'z' : '1px solid #dcd8c9' }}>
+                  <td style={{ padding: '6px 12px', borderRight: '1px solid #dcd8c9' }}>
+                    <span style={{ padding: '2px 6px', backgroundColor: '#dcdad0', color: '#ba2a2a', borderRadius: '4px', fontFamily: 'monospace', fontSize: '11px' }}>
+                      {demo.email}
+                    </span>
+                  </td>
+                  <td style={{ padding: '6px 12px', borderRight: '1px solid #dcd8c9', fontWeight: 700, color: '#475569' }}>
+                    {demo.role}
+                  </td>
+                  <td style={{ padding: '6px 12px' }}>
+                    <span style={{ padding: '2px 6px', backgroundColor: '#dcdad0', color: '#ba2a2a', borderRadius: '4px', fontFamily: 'monospace', fontSize: '11px' }}>
+                      Softsols@123
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
+
     </div>
   );
 }

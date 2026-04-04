@@ -1,7 +1,9 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const bcrypt = require('bcryptjs');
 
 async function main() {
+  const hashedPassword = await bcrypt.hash("Softsols@123", 10);
   // 1. Initial Pricing Seed
   await prisma.pricing.upsert({
     where: { origin: "PAKISTANI" },
@@ -158,7 +160,30 @@ async function main() {
     });
   }
 
-  console.log("Seeding completed successfully with pricing and expanded article catalog!");
+  // 4. Scholarly Trial Accounts
+  const trialAccounts = [
+    { name: "PJPS Editor-in-Chief", email: "eic@pjps.pk", role: "EDITOR_IN_CHIEF", institution: "Pakistan Journal of Pharmaceutical Sciences" },
+    { name: "PJPS Finance Admin", email: "finance@pjps.pk", role: "FINANCE_ADMIN", institution: "PJPS Fiscal Office" },
+    { name: "PJPS Associate Editor", email: "editor@pjps.pk", role: "ASSOCIATE_EDITOR", institution: "University of Karachi" },
+    { name: "Guest Reviewer", email: "reviewer@pjps.pk", role: "REVIEWER", institution: "Independent Scholar" },
+    { name: "Demo Author", email: "author@pjps.pk", role: "AUTHOR", institution: "Research Institute" }
+  ];
+
+  for (const acc of trialAccounts) {
+    await prisma.user.upsert({
+      where: { email: acc.email },
+      update: { role: acc.role },
+      create: {
+        name: acc.name,
+        email: acc.email,
+        password: hashedPassword,
+        role: acc.role,
+        affiliation: acc.institution
+      }
+    });
+  }
+
+  console.log("Seeding completed successfully with pricing, article catalog, and scholarly trial accounts!");
 }
 
 main()
