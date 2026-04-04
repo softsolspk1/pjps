@@ -56,6 +56,8 @@ model Article {
   paymentStatus     String          @default("UNPAID")
   trackingType      String          @default("REGULAR")
   userId            String?
+  downloadCount     Int             @default(0)
+  
   issue             Issue?          @relation(fields: [issueId], references: [id])
   submitter         User?           @relation("SubmittedArticles", fields: [userId], references: [id])
   authors           AuthorMapping[]
