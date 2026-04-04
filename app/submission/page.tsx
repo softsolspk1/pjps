@@ -46,6 +46,15 @@ export default function SubmissionPage() {
       // Assuming session might have country now after signup update
       const country = (session.user as any).country || "Pakistan";
       setUserOrigin(country.toLowerCase() === "pakistan" ? "PAKISTANI" : "INTERNATIONAL");
+
+      // PRE-FILL FIRST AUTHOR (If form is fresh)
+      if (authors.length === 1 && !authors[0].name && !authors[0].email) {
+        setAuthors([{
+          name: session.user.name || "",
+          email: session.user.email || "",
+          affiliation: ""
+        }]);
+      }
     }
   }, [session]);
 
@@ -263,40 +272,80 @@ export default function SubmissionPage() {
         )}
 
         {step === 3 && (
-          <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4">
-            {/* Primary Manuscript */}
-            <div className="space-y-4">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Principal Manuscript File</label>
-              <div className="relative h-48 border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center bg-slate-50 hover:bg-blue-50/30 hover:border-blue-400 transition-all cursor-pointer group">
-                <input 
-                  type="file" 
-                  accept=".pdf,.doc,.docx,.tex,.zip"
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  onChange={(e) => setManuscriptFile(e.target.files ? e.target.files[0] : null)}
-                />
-                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm text-slate-400 group-hover:text-blue-600 mb-4 transition-colors">
-                  {manuscriptFile ? <CheckCircle size={24} className="text-emerald-500" /> : <Upload size={24} />}
+          <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Primary Manuscript */}
+              <div className={`${styles.fileVaultCard} ${manuscriptFile ? styles.hasFile : ""}`}>
+                <div className={styles.fileCardHeader}>
+                  <div className={styles.fileIconBox}>
+                     {manuscriptFile ? <CheckCircle size={24} className="text-emerald-500" /> : <Upload size={24} />}
+                  </div>
+                  <div>
+                    <h4 className={styles.fileTitle}>Principal Manuscript</h4>
+                    <p className={styles.fileSubtitle}>PDF, DOCX, or LaTeX (ZIP)</p>
+                  </div>
                 </div>
-                <h3 className="font-bold text-slate-900 mb-1">
-                  {manuscriptFile ? manuscriptFile.name : "Select Manuscript Source"}
-                </h3>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                  PDF, DOCX, or LaTeX (ZIP) | Max 10MB
-                </p>
+                
+                <div className={styles.dropZone}>
+                  <input 
+                    type="file" 
+                    accept=".pdf,.doc,.docx,.tex,.zip"
+                    className={styles.fileInput}
+                    onChange={(e) => setManuscriptFile(e.target.files ? e.target.files[0] : null)}
+                  />
+                  <div className="text-center">
+                    <p className="text-sm font-bold text-slate-900 mb-1">
+                      {manuscriptFile ? manuscriptFile.name : "Select Document Source"}
+                    </p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                      {manuscriptFile ? `${(manuscriptFile.size / 1024 / 1024).toFixed(2)} MB` : "Max File Size: 15MB"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Proof of Payment */}
+              <div className={`${styles.fileVaultCard} ${paymentProofFile ? styles.hasFilePayment : ""}`}>
+                <div className={styles.fileCardHeader}>
+                  <div className={styles.paymentIconBox}>
+                     {paymentProofFile ? <CheckCircle size={24} className="text-emerald-500" /> : <DollarSign size={24} />}
+                  </div>
+                  <div>
+                    <h4 className={styles.fileTitle}>Payment Proof</h4>
+                    <p className={styles.fileSubtitle}>Mandatory for processing</p>
+                  </div>
+                </div>
+                
+                <div className={styles.paymentDropZone}>
+                  <input 
+                    type="file" 
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    className={styles.fileInput}
+                    onChange={(e) => setPaymentProofFile(e.target.files ? e.target.files[0] : null)}
+                  />
+                  <div className="text-center">
+                    <p className="text-sm font-bold text-slate-900 mb-1">
+                      {paymentProofFile ? paymentProofFile.name : "Upload Bank Receipt"}
+                    </p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                      {paymentProofFile ? "Receipt Attached" : "PDF or High-res Image"}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Supplementary Data */}
-            <div className="space-y-4">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Supplementary Data (Optional)</label>
-              <div className="flex items-center gap-4 p-6 bg-white border border-slate-200 rounded-2xl">
-                 <div className="p-3 bg-slate-100 rounded-xl text-slate-500">
-                   <FileArchive size={20} />
-                 </div>
-                 <div className="flex-1">
-                    <p className="text-sm font-bold text-slate-700">Extended Datasets & Media</p>
-                    <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">CSV, ZIP, or RAR versions</p>
-                 </div>
+            <div className={styles.supplementaryRow}>
+               <div className={styles.suppIcon}>
+                 <FileArchive size={20} />
+               </div>
+               <div className="flex-1">
+                  <p className="text-sm font-bold text-slate-800">Extended Datasets & Media (Optional)</p>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">CSV, ZIP, or RAR versions</p>
+               </div>
+               <div className="flex items-center gap-4">
+                 {supplementaryFile && <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-md uppercase tracking-tight">ATTACHED</span>}
                  <input 
                    type="file" 
                    accept=".zip,.rar,.csv,.xlsx"
@@ -304,52 +353,26 @@ export default function SubmissionPage() {
                    className="hidden"
                    onChange={(e) => setSupplementaryFile(e.target.files ? e.target.files[0] : null)}
                  />
-                 <label htmlFor="suppInput" className="px-4 py-2 border border-slate-200 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 cursor-pointer transition-colors">
-                   {supplementaryFile ? "Replace File" : "Choose File"}
+                 <label htmlFor="suppInput" className={styles.suppButton}>
+                   {supplementaryFile ? "Replace" : "Choose File"}
                  </label>
-              </div>
-              {supplementaryFile && <p className="text-xs text-blue-600 font-medium ml-2 flex items-center gap-2"><CheckCircle size={12}/> {supplementaryFile.name} attached.</p>}
-            </div>
-
-            {/* Proof of Payment */}
-            <div className="space-y-4">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Proof of Payment (Mandatory)</label>
-              <div className="flex items-center gap-4 p-6 bg-emerald-50/50 border border-emerald-100 rounded-2xl">
-                 <div className="p-3 bg-emerald-100 rounded-xl text-emerald-600">
-                   <DollarSign size={20} />
-                 </div>
-                 <div className="flex-1">
-                    <p className="text-sm font-bold text-slate-700">Bank Receipt / Transaction Proof</p>
-                    <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">PDF or Image (Max 5MB)</p>
-                 </div>
-                 <input 
-                   type="file" 
-                   accept=".pdf,.jpg,.jpeg,.png"
-                   id="paymentInput"
-                   className="hidden"
-                   onChange={(e) => setPaymentProofFile(e.target.files ? e.target.files[0] : null)}
-                 />
-                 <label htmlFor="paymentInput" className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 cursor-pointer transition-colors">
-                   {paymentProofFile ? "Replace Proof" : "Upload Proof"}
-                 </label>
-              </div>
-              {paymentProofFile && <p className="text-xs text-emerald-600 font-medium ml-2 flex items-center gap-2"><CheckCircle size={12}/> {paymentProofFile.name} attached.</p>}
+               </div>
             </div>
 
             {/* Guidelines Checkbox */}
-            <div className="p-8 bg-slate-900 rounded-3xl text-white shadow-xl">
-               <div className="flex gap-4">
-                  <div className="pt-1">
+            <div className={styles.ethicsContainer}>
+               <div className="flex gap-6 items-start">
+                  <div className="pt-2">
                     <input 
                       type="checkbox" 
                       id="guidelines" 
                       checked={guidelinesConfirmed}
                       onChange={(e) => setGuidelinesConfirmed(e.target.checked)}
-                      className="w-5 h-5 rounded accent-blue-500 cursor-pointer"
+                      className={styles.checkbox}
                     />
                   </div>
-                  <label htmlFor="guidelines" className="cursor-pointer">
-                    <h4 className="font-serif font-bold text-lg mb-2">Ethics & Formatting Adherence</h4>
+                  <label htmlFor="guidelines" className="cursor-pointer group">
+                    <h4 className="font-serif font-bold text-xl text-white mb-2 group-hover:text-blue-400 transition-colors">Ethics & Formatting Adherence</h4>
                     <p className="text-slate-400 text-sm leading-relaxed font-medium">
                       I confirm that the submitted manuscript adheres to the **PJPS Formatting Guidelines**, consists of original research not previously published, and complies with international ethical standards for scientific publication.
                     </p>

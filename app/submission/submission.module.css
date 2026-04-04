@@ -174,11 +174,219 @@
 
 .inputSmall {
   width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--border-medium);
-  border-radius: 4px;
-  font-size: 0.9rem;
+  padding: 12px 18px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   outline: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #1e293b;
+  transition: all 0.2s;
+}
+
+.inputSmall:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* FILE VAULT (SECTION 3) */
+.fileVaultCard {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 30px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.fileVaultCard:hover {
+  border-color: #2563eb;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -8px rgba(37, 99, 235, 0.15);
+}
+
+.fileCardHeader {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.fileIconBox {
+  width: 52px;
+  height: 52px;
+  background: #f1f5f9;
+  color: #64748b;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.paymentIconBox {
+  width: 52px;
+  height: 52px;
+  background: #ecfdf5;
+  color: #10b981;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.hasFile .fileIconBox {
+  background: #ecfdf5;
+  color: #10b981;
+}
+
+.hasFilePayment .paymentIconBox {
+  background: #34d399;
+  color: white;
+}
+
+.fileTitle {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.fileSubtitle {
+  font-size: 0.7rem;
+  color: #64748b;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dropZone {
+  height: 120px;
+  border: 2px dashed #e2e8f0;
+  background: #f8fafc;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.paymentDropZone {
+  height: 120px;
+  border: 2px dashed #d1fae5;
+  background: #f0fdf4;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.hasFile .dropZone {
+  border-color: #10b981;
+  background: #f0fdf4;
+}
+
+.hasFilePayment .paymentDropZone {
+  border-color: #10b981;
+  background: #f0fdf4;
+}
+
+.fileInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+/* SUPPLEMENTARY DATA */
+.supplementaryRow {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: all 0.2s;
+}
+
+.supplementaryRow:hover {
+  border-color: #cbd5e1;
+}
+
+.suppIcon {
+  width: 44px;
+  height: 44px;
+  background: #f1f5f9;
+  color: #64748b;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.suppButton {
+  padding: 10px 20px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.suppButton:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #1e293b;
+}
+
+/* ETHICS CONTAINER */
+.ethicsContainer {
+  background: #0f172a;
+  border-radius: 32px;
+  padding: 40px;
+  box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.3);
+}
+
+.checkbox {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  border: 2px solid #334155;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+  position: relative;
+  transition: all 0.2s;
+  accent-color: #3b82f6;
+}
+
+.checkbox:checked {
+  background: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.checkbox:checked::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 14px;
 }
 
 .subLabel {
