@@ -291,9 +291,11 @@ export default function FormattingTool() {
                <div key={key} className={styles.editorSection}>
                  <label className={styles.label}>
                    {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
-                   {key === 'abstract' ? ' (Full Width Block)' : ' (Standard Multi-Column)'}
+                   <span className="ml-2 text-[10px] font-normal lowercase text-slate-400">
+                     ({key === 'abstract' ? 'Single Column Header Block' : 'Two Column Body Section'})
+                   </span>
                  </label>
-                 <div className="bg-white border rounded-lg overflow-hidden shadow-sm">
+                 <div className={styles.manuscriptBox}>
                     <div className="bg-slate-50 border-b p-2 flex gap-2">
                        <button 
                          type="button"
@@ -307,7 +309,7 @@ export default function FormattingTool() {
                                const reader = new FileReader();
                                reader.onload = (re) => {
                                  const img = `<img src="${re.target?.result}" className="img-inside-column" alt="Section Image" style="max-width: 100%; display: block; margin: 15px 0; border-radius: 4px;" />`;
-                                 handleSectionChange(key as keyof Sections, sections[key as keyof Sections] + img);
+                                 handleSectionChange(key as keyof Sections, (sections[key as keyof Sections] || "") + img);
                                };
                                reader.readAsDataURL(file);
                              }
@@ -330,7 +332,7 @@ export default function FormattingTool() {
                                const reader = new FileReader();
                                reader.onload = (re) => {
                                  const img = `<div class="full-width-asset" style="text-align: center; margin: 25px 0; break-inside: avoid; column-span: all;"><img src="${re.target?.result}" alt="Table Image" style="max-width: 100%; border: 1.5pt solid black; padding: 6px; border-radius: 0;" /><p style="font-weight: bold; margin-top: 10px; font-size: 11px;">Table ${new Date().getTime().toString().slice(-2)}</p></div>`;
-                                 handleSectionChange(key as keyof Sections, sections[key as keyof Sections] + img);
+                                 handleSectionChange(key as keyof Sections, (sections[key as keyof Sections] || "") + img);
                                };
                                reader.readAsDataURL(file);
                              }
@@ -353,7 +355,7 @@ export default function FormattingTool() {
                                const reader = new FileReader();
                                reader.onload = (re) => {
                                  const img = `<div class="full-width-asset" style="text-align: center; margin: 25px 0; break-inside: avoid; column-span: all;"><img src="${re.target?.result}" alt="Graph Image" style="max-width: 100%;" /><p style="font-weight: bold; margin-top: 10px; font-size: 11px;">Fig. ${new Date().getTime().toString().slice(-2)}</p></div>`;
-                                 handleSectionChange(key as keyof Sections, sections[key as keyof Sections] + img);
+                                 handleSectionChange(key as keyof Sections, (sections[key as keyof Sections] || "") + img);
                                };
                                reader.readAsDataURL(file);
                              }
@@ -436,7 +438,7 @@ export default function FormattingTool() {
            </div>
 
            <div className={styles.articleFooter}>
-              <span>{new Date().getFullYear() === 2026 ? "1602" : "Page No."}</span>
+              <span>{doi ? doi.split('/').pop()?.toUpperCase() : "1602"}</span>
               <span>Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610</span>
            </div>
         </div>

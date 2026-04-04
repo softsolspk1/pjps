@@ -46,6 +46,20 @@
   letter-spacing: 0.15em;
 }
 
+.manuscriptBox {
+  background: white;
+  border: 1.5pt solid #cbd5e1;
+  border-radius: 12px;
+  box-shadow: 0 4px 6pt rgba(0,0,0,0.02);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.manuscriptBox:focus-within {
+  border-color: var(--primary-navy);
+  box-shadow: 0 8pt 16pt rgba(0, 45, 94, 0.08);
+}
+
 .authorsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -211,7 +225,10 @@
 }
 
 .scientificSection {
-  margin-bottom: 12pt;
+  margin-bottom: 20pt;
+  break-inside: avoid-column;
+  display: block;
+  width: 100%;
 }
 
 /* SUPPORT FOR FULL WIDTH ASSETS */
@@ -293,11 +310,22 @@
 }
 
 @media print {
-  body { background: white; }
-  .container { box-shadow: none; padding: 0; }
-  .toolHeader, .controls, .editorSection { display: none; }
-  .articleViewport { background: white; padding: 0; }
-  .articlePreview { box-shadow: none; width: 100%; padding: 0; }
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  body { background: white; margin: 0; padding: 0; }
+  .container { box-shadow: none; padding: 0; margin: 0; max-width: none; }
+  .toolHeader, .controls, .editorSection, .authorsGrid, .authorsHeader { display: none !important; }
+  .articleViewport { background: white; padding: 0; margin: 0; display: block; }
+  .articlePreview { 
+    box-shadow: none; 
+    width: 210mm; 
+    height: 297mm; 
+    border: none;
+    margin: 0;
+    padding: 2.0cm 1.8cm;
+  }
 }
 
 
@@ -307,6 +335,12 @@
 }
 
 /* Rich Content Column Scaling & Tables */
+.rich-content p {
+  text-align: justify;
+  text-justify: inter-word;
+  margin-bottom: 8pt;
+}
+
 .rich-content img {
   max-width: 100%;
   height: auto;
