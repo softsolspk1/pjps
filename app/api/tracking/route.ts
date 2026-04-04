@@ -1,45 +1,22 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { recordPageView } from "@/lib/analytics";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
-
-  if (!id) {
-    return NextResponse.json({ error: "Reference ID is required" }, { status: 400 });
-  }
-
+export async function POST(req: Request) {
   try {
-    const article = await prisma.article.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        title: true,
-        status: true,
-        updatedAt: true,
-        createdAt: true,
-        issue: {
-          select: {
-            number: true,
-            month: true,
-            volume: {
-              select: {
-                number: true,
-                year: true
-              }
-            }
-          }
-        }
-      }
-    });
+    const { path } = await req.json();
+    const session = await getServerSession(authOptions);
+    const userId = (session?.user as any)?.id;
+    
+    // Get IP and User Agent from headers
+    const ip = req.headers.get("x-forwarded-for") || "127.0.0.1";
+    const userAgent = req.headers.get("user-agent") || "unknown";
 
-    if (!article) {
-      return NextResponse.json({ error: "Manuscript not found" }, { status: 404 });
-    }
-
-    return NextResponse.json(article);
-  } catch (error) {
-    console.error("Tracking API error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    await recordPageView(path, ip, userAgent, userId);
+    
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    return NextResponse.json({ success: false }, { status: 500 });
   }
 }

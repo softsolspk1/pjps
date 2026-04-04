@@ -29,6 +29,7 @@ model Issue {
   
   volume          Volume   @relation(fields: [volumeId], references: [id], onDelete: Cascade)
   createdAt       DateTime @default(now())
+  doi             String?  @unique
 
   @@unique([volumeId, number])
 }
@@ -52,6 +53,9 @@ model Article {
   status          String   @default("DRAFT") // DRAFT, SUBMITTED, IN_REVIEW, ACCEPTED, REJECTED, PUBLISHED
   reviewType      String   @default("DOUBLE_BLIND") // SINGLE_BLIND, DOUBLE_BLIND, OPEN
   copyeditingStatus String @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
+  
+  doi             String?  @unique
+  indexingStatus  Json?    // { crossref: boolean, scopus: boolean, wos: boolean }
   
   issueId         String?
   issue           Issue?   @relation(fields: [issueId], references: [id])
@@ -127,7 +131,35 @@ model Analytics {
   id              String   @id @default("global")
   formattingCount Int      @default(0)
   totalExports    Int      @default(0)
+  totalPageViews  Int      @default(0)
   updatedAt       DateTime @updatedAt
+}
+
+model AuditLog {
+  id              String   @id @default(cuid())
+  action          String   // e.g., "ARTICLE_STATUS_CHANGE", "USER_LOGIN", "DOI_ASSIGNED"
+  entityType      String   // "ARTICLE", "USER", "ISSUE", "REVIEW"
+  entityId        String?
+  userId          String?  // The actor
+  details         Json?    // { oldStatus: "PENDING", newStatus: "REVIEW" }
+  createdAt       DateTime @default(now())
+
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  @@index([userId])
+  @@index([entityId])
+}
+
+model PageView {
+  id              String   @id @default(cuid())
+  path            String   // e.g., "/article/cm123"
+  ipHash          String?  // Anonymized/Hashed IP
+  userAgent       String?
+  userId          String?  // Track if logged in
+  referrer        String?
+  createdAt       DateTime @default(now())
+
+  @@index([path])
+  @@index([createdAt])
 }
 
 model User {
@@ -153,6 +185,8 @@ model User {
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  
+  auditLogs AuditLog[]
 }
 
 model Pricing {

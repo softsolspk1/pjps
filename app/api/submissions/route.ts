@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
+import { logAction } from "@/lib/audit";
 import { v2 as cloudinary } from "cloudinary";
 
 cloudinary.config({
@@ -83,6 +84,14 @@ export async function POST(req: Request) {
         authors: true,
       },
     });
+
+    // Audit Log the Submission
+    await logAction(
+      "ARTICLE_SUBMITTED",
+      "ARTICLE",
+      newArticle.id,
+      userId
+    );
 
     // 4. Send Thank You Email
     try {

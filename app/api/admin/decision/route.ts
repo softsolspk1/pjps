@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { logAction } from "@/lib/audit";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
@@ -27,6 +28,15 @@ export async function POST(req: Request) {
         }
       }
     });
+
+    // Audit Log the Decision
+    await logAction(
+      "ARTICLE_STATUS_CHANGE",
+      "ARTICLE",
+      articleId,
+      (session.user as any).id,
+      { newStatus: status }
+    );
 
     // Notify Author of Editorial Decision
     const targetEmail = article.submitter?.email || article.authors?.[0]?.email;

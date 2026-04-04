@@ -19,6 +19,7 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [doi, setDoi] = useState("");
 
   useEffect(() => {
     async function fetchArticle() {
@@ -26,6 +27,7 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
         const res = await fetch(`/api/articles/${id}`);
         const data = await res.json();
         setArticle(data);
+        if (data.doi) setDoi(data.doi);
       } catch (err) {
         console.error("Fetch error:", err);
       } finally {
@@ -56,6 +58,25 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
       }
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleUpdateDoi = async () => {
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/admin/articles/${id}/metadata`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ doi })
+      });
+      if (res.ok) {
+        setMessage({ type: 'success', text: "DOI successfully registered in registry." });
+        setArticle({ ...article, doi });
+      }
+    } catch (err) {
+      setMessage({ type: 'error', text: "Failed to update DOI" });
     } finally {
       setSubmitting(false);
     }
@@ -108,7 +129,36 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
                 <h4>Full Text Access</h4>
                 <p>Scholarly PDF Manuscript</p>
              </div>
-             <a href={article.media?.find((m: any) => m.type === 'DOC')?.url} target="_blank" className={styles.downloadBtn}>Download Registry File</a>
+             <a href={article.media?.find((m: any) => m.type === 'DOC' || m.section === "MANUSCRIPT")?.url} target="_blank" className={styles.downloadBtn}>Download Registry File</a>
+          </div>
+
+          <div style={{ marginTop: '30px', padding: '30px', backgroundColor: '#fcfdfe', borderRadius: '16px', border: '1px solid #edf2f7' }}>
+             <h3 style={{ fontSize: '11px', fontWeight: 900, color: '#1a202c', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Award size={18} color="#0061ff" /> Academic Integrations
+             </h3>
+             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                   <label style={{ fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: '8px' }}>CrossRef DOI Identifier</label>
+                   <div style={{ display: 'flex', gap: '10px' }}>
+                      <input 
+                        type="text" 
+                        value={doi} 
+                        onChange={(e) => setDoi(e.target.value)}
+                        placeholder="10.36721/PJPS..."
+                        style={{ flex: 1, padding: '12px', backgroundColor: 'white', border: '1px solid #edf2f7', borderRadius: '10px', fontSize: '13px', fontWeight: 600 }}
+                      />
+                      <button onClick={handleUpdateDoi} disabled={submitting} style={{ padding: '0 20px', backgroundColor: '#1a202c', color: 'white', border: 'none', borderRadius: '10px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', cursor: 'pointer' }}>Assign</button>
+                   </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                   <a href={`/api/admin/articles/${id}/export?format=xml`} download className={styles.exportBtn} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f7fafc', border: '1px solid #edf2f7', borderRadius: '10px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', color: '#4a5568', textDecoration: 'none' }}>
+                      Export JATS XML
+                   </a>
+                   <a href={`/api/admin/articles/${id}/export?format=json`} download className={styles.exportBtn} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f7fafc', border: '1px solid #edf2f7', borderRadius: '10px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', color: '#4a5568', textDecoration: 'none' }}>
+                      Export JSON
+                   </a>
+                </div>
+             </div>
           </div>
         </section>
 
