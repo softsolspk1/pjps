@@ -378,16 +378,16 @@ export default function SubmissionPage() {
                </div>
                <div className="flex items-center gap-4">
                  {supplementaryFile && <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-md uppercase tracking-tight">FILE ATTACHED</span>}
-                 <input 
-                   type="file" 
-                   accept=".zip,.rar,.csv,.xlsx"
-                   id="suppInput"
-                   className="hidden"
-                   onChange={(e) => setSupplementaryFile(e.target.files ? e.target.files[0] : null)}
-                 />
-                 <label htmlFor="suppInput" className={styles.suppButton}>
-                   {supplementaryFile ? "Replace" : "Choose File"}
-                 </label>
+                  <input 
+                    type="file" 
+                    accept=".zip,.rar,.csv,.xlsx"
+                    id="suppInput"
+                    style={{ position: 'absolute', width: '1px', height: '1px', padding: '0', margin: '-1px', overflow: 'hidden', clip: 'rect(0,0,0,0)', border: '0', opacity: '0' }}
+                    onChange={(e) => setSupplementaryFile(e.target.files ? e.target.files[0] : null)}
+                  />
+                  <label htmlFor="suppInput" className={styles.suppButton}>
+                    {supplementaryFile ? "Replace" : "Choose File"}
+                  </label>
                </div>
             </div>
 
@@ -446,10 +446,15 @@ export default function SubmissionPage() {
         </div>
       </form>
 
-      <div className="mt-12 flex justify-center items-center gap-8 text-slate-400 grayscale opacity-50">
-         <Info size={16} />
-         <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Double-Blind Peer Review Standard</span>
-         <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Cope Compliant Workflow</span>
+      <div className="mt-16 flex flex-wrap justify-center items-center gap-10 text-slate-400 grayscale opacity-60 pb-10">
+         <div className="flex items-center gap-2">
+            <Info size={16} />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Double-Blind Peer Review Standard</span>
+         </div>
+         <div className="flex items-center gap-2">
+            <ShieldCheck size={16} />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Cope Compliant Workflow</span>
+         </div>
       </div>
     </div>
   );
