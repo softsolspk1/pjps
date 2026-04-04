@@ -222,7 +222,7 @@ export default function FormattingTool() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className={styles.editorSection}>
-              <label className={styles.label}>DOI / Reference ID</label>
+              <label className={styles.label}>DOI / Reference ID (Optional)</label>
               <input type="text" value={doi} onChange={(e) => setDoi(e.target.value)} className={styles.authorInput} placeholder="e.g. doi.org/10.36721..." />
             </div>
             <div className={styles.editorSection}>
@@ -232,19 +232,16 @@ export default function FormattingTool() {
           </div>
 
           <div className={styles.editorSection}>
-            <label className={styles.label}>Publication Chronology</label>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <span className="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Submitted</span>
-                <input type="text" value={dates.submitted} onChange={(e) => setDates({...dates, submitted: e.target.value})} className={styles.authorInput} placeholder="DD-MM-YYYY" />
-              </div>
-              <div>
-                <span className="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Revised</span>
-                <input type="text" value={dates.revised} onChange={(e) => setDates({...dates, revised: e.target.value})} className={styles.authorInput} placeholder="DD-MM-YYYY" />
-              </div>
-              <div>
-                <span className="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Accepted</span>
-                <input type="text" value={dates.accepted} onChange={(e) => setDates({...dates, accepted: e.target.value})} className={styles.authorInput} placeholder="DD-MM-YYYY" />
+            <label className={styles.label}>Publication Chronology (Optional)</label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="md:col-start-1">
+                <span className="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Date Submitted</span>
+                <input 
+                  type="date" 
+                  value={dates.submitted} 
+                  onChange={(e) => setDates({...dates, submitted: e.target.value})} 
+                  className={styles.authorInput} 
+                />
               </div>
             </div>
           </div>
@@ -286,42 +283,78 @@ export default function FormattingTool() {
                <div key={key} className={styles.editorSection}>
                  <label className={styles.label}>
                    {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
-                   {key === 'abstract' ? ' (Full Width)' : ' (Scientific Column)'}
+                   {key === 'abstract' ? ' (Full Width Block)' : ' (Standard Multi-Column)'}
                  </label>
                  <div className="bg-white border rounded-lg overflow-hidden shadow-sm">
                     <div className="bg-slate-50 border-b p-2 flex gap-2">
                        <button 
                          type="button"
                          onClick={() => {
-                           const tableHtml = `
-                             <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
-                               <thead>
-                                 <tr style="border-top: 2px solid black; border-bottom: 1px solid black;">
-                                   <th style="padding: 8px; text-align: left;">Header 1</th>
-                                   <th style="padding: 8px; text-align: left;">Header 2</th>
-                                   <th style="padding: 8px; text-align: left;">Header 3</th>
-                                 </tr>
-                               </thead>
-                               <tbody>
-                                 <tr style="border-bottom: 1px solid #eee;">
-                                   <td style="padding: 8px;">Data</td>
-                                   <td style="padding: 8px;">Data</td>
-                                   <td style="padding: 8px;">Data</td>
-                                 </tr>
-                                 <tr style="border-bottom: 2px solid black;">
-                                   <td style="padding: 8px;">Data</td>
-                                   <td style="padding: 8px;">Data</td>
-                                   <td style="padding: 8px;">Data</td>
-                                 </tr>
-                               </tbody>
-                             </table>
-                           `;
-                           // @ts-ignore
-                           handleSectionChange(key, sections[key as keyof Sections] + tableHtml);
+                           const input = document.createElement('input');
+                           input.type = 'file';
+                           input.accept = 'image/*';
+                           input.onchange = (e: any) => {
+                             const file = e.target.files[0];
+                             if (file) {
+                               const reader = new FileReader();
+                               reader.onload = (re) => {
+                                 const img = `<img src="${re.target?.result}" alt="Section Image" style="max-width: 100%; display: block; margin: 15px 0; border-radius: 4px;" />`;
+                                 handleSectionChange(key as keyof Sections, sections[key as keyof Sections] + img);
+                               };
+                               reader.readAsDataURL(file);
+                             }
+                           };
+                           input.click();
                          }}
-                         className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 bg-white border rounded hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                         className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 bg-white border rounded hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-1"
                        >
-                         + Insert Table Template
+                         <PlusCircle size={10} /> Add Image
+                       </button>
+                       <button 
+                         type="button"
+                         onClick={() => {
+                           const input = document.createElement('input');
+                           input.type = 'file';
+                           input.accept = 'image/*';
+                           input.onchange = (e: any) => {
+                             const file = e.target.files[0];
+                             if (file) {
+                               const reader = new FileReader();
+                               reader.onload = (re) => {
+                                 const img = `<div style="text-align: center; margin: 20px 0;"><img src="${re.target?.result}" alt="Table Image" style="max-width: 100%; border: 1px solid #ddd; padding: 4px; border-radius: 4px;" /><p style="font-weight: bold; margin-top: 8px; font-size: 11px;">Table ${new Date().getTime().toString().slice(-2)}</p></div>`;
+                                 handleSectionChange(key as keyof Sections, sections[key as keyof Sections] + img);
+                               };
+                               reader.readAsDataURL(file);
+                             }
+                           };
+                           input.click();
+                         }}
+                         className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 bg-white border rounded hover:bg-emerald-50 hover:text-emerald-600 transition-colors flex items-center gap-1"
+                       >
+                         <Layout size={10} /> Add Table (Image)
+                       </button>
+                       <button 
+                         type="button"
+                         onClick={() => {
+                           const input = document.createElement('input');
+                           input.type = 'file';
+                           input.accept = 'image/*';
+                           input.onchange = (e: any) => {
+                             const file = e.target.files[0];
+                             if (file) {
+                               const reader = new FileReader();
+                               reader.onload = (re) => {
+                                 const img = `<div style="text-align: center; margin: 20px 0;"><img src="${re.target?.result}" alt="Graph Image" style="max-width: 100%;" /><p style="font-weight: bold; margin-top: 8px; font-size: 11px;">Fig. ${new Date().getTime().toString().slice(-2)}</p></div>`;
+                                 handleSectionChange(key as keyof Sections, sections[key as keyof Sections] + img);
+                               };
+                               reader.readAsDataURL(file);
+                             }
+                           };
+                           input.click();
+                         }}
+                         className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 bg-white border rounded hover:bg-orange-50 hover:text-orange-600 transition-colors flex items-center gap-1"
+                       >
+                         <BarChart3 size={10} /> Add Graph (Image)
                        </button>
                     </div>
                     <ReactQuill 
@@ -372,7 +405,8 @@ export default function FormattingTool() {
            </div>
 
            <div className={styles.dateLine}>
-             Submitted on {dates.submitted || "---"} — Revised on {dates.revised || "---"} — Accepted on {dates.accepted || "---"}
+             {dates.submitted && `Submitted on ${dates.submitted}`} {dates.revised && `— Revised on ${dates.revised}`} {dates.accepted && `— Accepted on ${dates.accepted}`}
+             {!dates.submitted && !dates.revised && !dates.accepted && "Chronology Pending Verification"}
            </div>
 
            <div className={styles.scientificBody}>
