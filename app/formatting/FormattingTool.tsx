@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import dynamic from "next/dynamic";
 import { useReactToPrint } from "react-to-print";
-import { Document, Packer, Paragraph, TextRun, AlignmentType, HeadingLevel, SectionType, ImageRun } from "docx";
+import { Document, Packer, Paragraph, TextRun, AlignmentType, HeadingLevel, SectionType, ImageRun, BorderStyle } from "docx";
 import { saveAs } from "file-saver";
 import { FileText, Download, Printer, Users, Layout, PlusCircle, Trash2, Eye, Edit3, BarChart3, Save, Calendar, Globe } from "lucide-react";
 import styles from "./formatting.module.css";
@@ -229,7 +229,7 @@ export default function FormattingTool() {
                 bottom: {
                   color: "auto",
                   space: 10,
-                  value: "single",
+                  style: BorderStyle.SINGLE,
                   size: 6,
                 },
               },
