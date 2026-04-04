@@ -1,66 +1,66 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import crypto from "crypto";
 import { sendEmail } from "@/lib/mail";
+import crypto from "crypto";
 
 export async function POST(req: Request) {
   try {
     const { email } = await req.json();
-
-    if (!email) {
-      return NextResponse.json({ error: "Scholarly email is required" }, { status: 400 });
-    }
 
     const user = await prisma.user.findUnique({
       where: { email },
     });
 
     if (!user) {
-      // For security, don't reveal if user exists, but here we can be helpful for small portal or just return success
-      return NextResponse.json({ message: "If this email is registered, recovery instructions have been dispatched." });
+      // For security, do not reveal if the user doesn't exist
+      return NextResponse.json({ message: "Institutional recovery link dispatched." });
     }
 
-    // Generate Token
-    const token = crypto.randomBytes(32).toString("hex");
-    const expiry = new Date(Date.now() + 3600000); // 1 hour
+    // Generate secure reset token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour expiry
 
     await prisma.user.update({
-      where: { email },
+      where: { id: user.id },
       data: {
-        resetToken: token,
-        resetTokenExpiry: expiry,
+        resetToken,
+        resetTokenExpiry,
       },
     });
 
-    // Send Recovery Email
-    // In a real app, this would be a link to /reset-password?token=XYZ
-    // For this context, we'll provide a professional recovery notification
+    const resetUrl = `${process.env.NEXTAUTH_URL || "https://pjps.pk"}/reset-password/${resetToken}`;
+
     await sendEmail({
-      to: email,
-      subject: "PJPS | Scholarly Account Recovery Instruction",
+      to: user.email,
+      subject: "PJPS Scholarly Identity Recovery",
       html: `
-        <div style="font-family: 'Times New Roman', Times, serif; color: #002d5e; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; padding: 40px; border-radius: 8px; background-color: #fff;">
-          <h1 style="border-bottom: 2px solid #002d5e; padding-bottom: 15px; margin-bottom: 25px; color: #002d5e;">Account Recovery Initiation</h1>
-          <p>Dear <strong>${user.name || "Scholarly Participant"}</strong>,</p>
-          <p>A request has been received to recover the password associated with your account in the <strong>Pakistan Journal of Pharmaceutical Sciences (PJPS)</strong> Academic Portal.</p>
-          <p>To proceed with your institutional access recovery, please use the following temporary authorization token within the next hour:</p>
-          <div style="margin: 35px 0; padding: 20px; background-color: #f8fafc; border-left: 5px solid #0061ff; font-family: monospace; font-size: 1.1em; letter-spacing: 1.5px; text-align: center; color: #1e293b;">
-            ${token}
-          </div>
-          <p style="font-size: 0.9em; color: #64748b;">(Standard Reset Link: https://pjps.app/reset-password?token=${token})</p>
-          <p>If you did not initiate this request, please ignore this communication. Your account security remains intact unless the authorization link is utilized.</p>
-          <div style="margin-top: 45px; border-top: 1px solid #e2e8f0; padding-top: 25px; font-size: 0.9em; color: #64748b;">
-            Respectfully,<br/>
-            <strong>Scholarly Support & Security Team</strong><br/>
-            Pakistan Journal of Pharmaceutical Sciences
+        <div style="font-family: 'Times New Roman', serif; padding: 40px; color: #1a202c; line-height: 1.6; background-color: #f8fafc;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 24px; padding: 40px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: #0061ff; font-style: italic; font-size: 28px; margin: 0;">Institutional Recovery Protocol</h1>
+            </div>
+            <p>Dear <strong>${user.name || "Scholar"}</strong>,</p>
+            <p>We received a formal request to recover the scholarly identity associated with this institutional email address.</p>
+            <p>To finalize the identity restoration and set a new secure credential, please utilize the institutional link below:</p>
+            <div style="text-align: center; margin: 40px 0;">
+              <a href="${resetUrl}" style="background-color: #0061ff; color: white; padding: 16px 32px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; display: inline-block; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                Finalize Identity Restoration
+              </a>
+            </div>
+            <p style="font-size: 12px; color: #718096; text-align: center;">This recovery link is valid for **60 minutes**. If you did not initiate this request, please disregard this communication.</p>
+            <hr style="border: 0; border-top: 1px solid #edf2f7; margin: 30px 0;" />
+            <p style="font-size: 11px; color: #a0aec0; text-align: center;">
+              © 2026 Pakistan Journal of Pharmaceutical Sciences<br />
+              Scholarly Automation Division
+            </p>
           </div>
         </div>
-      `
+      `,
     });
 
-    return NextResponse.json({ message: "Recovery email dispatched successfully." });
-  } catch (err: any) {
-    console.error("Forgot password error:", err);
-    return NextResponse.json({ error: "Failed to dispatch recovery instructions." }, { status: 500 });
+    return NextResponse.json({ message: "Institutional recovery link dispatched." });
+  } catch (err) {
+    console.error("Forgot Password Error:", err);
+    return NextResponse.json({ error: "Failed to process recovery request" }, { status: 500 });
   }
 }

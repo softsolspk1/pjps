@@ -89,7 +89,7 @@ export default async function AdminArticlesList() {
                 </td>
                 <td>
                   <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                     <Link href={`/admin/articles/${article.id}/edit`} className={styles.actionBtn} title="Modify Manuscript">
+                     <Link href={`/admin/articles/${article.id}`} className={styles.actionBtn} title="Editorial Decision Hub">
                         <Edit2 size={16} />
                      </Link>
                      {article.status === "SUBMITTED" && (

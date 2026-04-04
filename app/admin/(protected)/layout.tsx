@@ -104,9 +104,16 @@ export default async function AdminLayout({ children }: { children: ReactNode })
 
          {/* Sub-route Content Container */}
          <div style={{ flex: 1, overflowY: 'auto', backgroundColor: '#fcfdfe' }}>
-            <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+            <div style={{ maxWidth: '1400px', margin: '0 auto', minHeight: 'calc(100vh - 180px)' }}>
                {children}
             </div>
+
+            {/* Institutional Footer */}
+            <footer style={{ padding: '40px', borderTop: '1px solid #edf2f7', textAlign: 'center' }}>
+               <p style={{ fontSize: '11px', fontWeight: 600, color: '#a0aec0', letterSpacing: '0.05em' }}>
+                  © 2026 Pakistan Journal of Pharmaceutical Sciences. Developed by <a href="https://softsols.pk" target="_blank" style={{ color: '#0061ff', textDecoration: 'none', fontWeight: 800 }}>Softsols Pakistan</a>
+               </p>
+            </footer>
          </div>
       </main>
     </div>

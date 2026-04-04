@@ -1,11 +1,12 @@
 export const dynamic = 'force-dynamic';
 import { prisma } from "@/lib/prisma";
-import styles from "@/components/AdminTable.module.css";
 import { 
   ClipboardCheck, Search, Filter, 
-  User, Calendar, CheckCircle, Clock 
+  User, Calendar, CheckCircle, Clock,
+  ShieldCheck, AlertCircle
 } from "lucide-react";
 import { format } from "date-fns";
+import styles from "./Reviews.module.css";
 
 export default async function ReviewPoolPage() {
   const reviews = await prisma.review.findMany({
@@ -19,74 +20,55 @@ export default async function ReviewPoolPage() {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <div className={styles.titleGroup}>
-           <p>Peer Review Oversight</p>
-           <h1>Reviewer Pool</h1>
+        <div>
+           <div className={styles.badge}>Editorial Oversight</div>
+           <h1 className={styles.title}>Global Review Pool</h1>
+           <p className={styles.subtitle}>Audit the integrity and progress of the double-blind peer-review lifecycle.</p>
         </div>
       </header>
 
-      {/* Registry Search & Filter Bar */}
-      <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
-         <div style={{ flex: 1, backgroundColor: 'white', border: '1px solid #edf2f7', borderRadius: '12px', padding: '0 20px', display: 'flex', alignItems: 'center', gap: '12px', height: '54px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
-            <Search size={18} color="#a0aec0" />
-            <input type="text" placeholder="Filter review pool by manuscript title or reviewer identity..." style={{ flex: 1, background: 'none', border: 'none', outline: 'none', fontSize: '14px', fontWeight: 500, color: '#1a202c' }} />
-         </div>
-         <button style={{ backgroundColor: 'white', border: '1px solid #edf2f7', borderRadius: '12px', padding: '0 20px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '11px', textTransform: 'uppercase', color: '#718096', cursor: 'pointer' }}>
-            <Filter size={16} /> Pool Filters
-         </button>
-      </div>
-
-      <div className={styles.tableWrapper}>
+      <div className={styles.tableCard}>
         <table className={styles.table}>
           <thead>
             <tr>
-              <th style={{ width: '40%' }}>Manuscript Details</th>
-              <th>Assigned Reviewer</th>
-              <th style={{ textAlign: 'center' }}>Review Status</th>
-              <th style={{ textAlign: 'center' }}>Assignment Date</th>
-              <th style={{ textAlign: 'right' }}>Actions</th>
+               <th style={{ width: '40%' }}>Manuscript Details</th>
+               <th>Assigned Reviewer</th>
+               <th style={{ textAlign: 'center' }}>Review Status</th>
+               <th style={{ textAlign: 'center' }}>Assignment Date</th>
+               <th style={{ textAlign: 'right' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {reviews.length === 0 && (
-              <tr>
-                <td colSpan={5} style={{ padding: '60px', textAlign: 'center', color: '#a0aec0', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                  No active peer reviews currently found in the repository.
-                </td>
-              </tr>
-            )}
             {reviews.map((review) => (
               <tr key={review.id}>
                 <td>
-                  <div style={{ fontWeight: 800, color: '#1a202c', fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '350px' }}>{review.article.title}</div>
-                  <div style={{ fontSize: '10px', fontWeight: 700, color: '#0061ff', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>ID: {review.articleId.slice(0, 8)}</div>
+                  <h3 className={styles.articleTitle}>{review.article.title}</h3>
+                  <div className={styles.articleId}>Institutional ID: {review.articleId.slice(0, 8)}</div>
                 </td>
                 <td>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{ width: '32px', height: '32px', backgroundColor: '#ebf4ff', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0061ff', fontSize: '12px', fontWeight: 900 }}>
-                       {review.reviewer.name?.charAt(0)}
+                  <div className={styles.userInfo}>
+                    <div className={styles.userIcon}>
+                       {review.reviewer.name?.charAt(0) || "U"}
                     </div>
                     <div>
-                      <div style={{ fontWeight: 800, color: '#1a202c', fontSize: '13px' }}>{review.reviewer.name}</div>
-                      <div style={{ fontSize: '10px', fontWeight: 600, color: '#a0aec0' }}>{review.reviewer.email}</div>
+                      <div className={styles.userName}>{review.reviewer.name || "Anonymous Expert"}</div>
+                      <div className={styles.userEmail}>{review.reviewer.email}</div>
                     </div>
                   </div>
                 </td>
                 <td style={{ textAlign: 'center' }}>
-                  <span className={`${styles.badge} ${
-                    review.status === "COMPLETED" ? styles.badgeSuccess : styles.badgePending
-                  }`}>
+                  <span className={`${styles.statusBadge} ${review.status === 'COMPLETED' ? styles.completed : styles.pending}`}>
                     {review.status}
                   </span>
                 </td>
                 <td style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 700, color: '#4a5568' }}>
+                  <div className={styles.dateText}>
                     {format(new Date(review.createdAt), "MMM dd, yyyy")}
                   </div>
                 </td>
                 <td>
-                  <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                     <button className={styles.actionBtn} title="View Review Detail">
+                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                     <button className={styles.actionBtn} title="View Scholarly Review Detail">
                         <ClipboardCheck size={16} />
                      </button>
                   </div>
@@ -95,6 +77,31 @@ export default async function ReviewPoolPage() {
             ))}
           </tbody>
         </table>
+
+        {reviews.length === 0 && (
+          <div className={styles.emptyState}>
+             <div className={styles.emptyIcon}>
+               <ShieldCheck size={32} />
+             </div>
+             <h2 className={styles.emptyTitle}>Review Registry Empty</h2>
+             <p className={styles.emptyText}>
+               This registry tracks all manuscripts currently undergoing peer evaluation. 
+               Once an editor assigns a reviewer to a manuscript, the record will appear here for longitudinal oversight.
+             </p>
+          </div>
+        )}
+      </div>
+
+      <div style={{ marginTop: '40px', padding: '24px', backgroundColor: '#f8fafc', borderRadius: '24px', display: 'flex', alignItems: 'center', gap: '16px', border: '1px solid #edf2f7' }}>
+         <div style={{ padding: '12px', backgroundColor: '#ebf4ff', borderRadius: '12px', color: '#0061ff' }}>
+            <AlertCircle size={20} />
+         </div>
+         <div>
+            <h4 style={{ fontWeight: 800, fontSize: '13px', color: '#1a202c', marginBottom: '2px' }}>Scholarly Integrity Protocol</h4>
+            <p style={{ fontSize: '11px', color: '#718096', fontWeight: 500 }}>
+              The Review Pool ensures transparency in the evaluation process. Editors-in-Chief can utilize this module to detect bottlenecks in the scholarly workflow and ensure timely publication.
+            </p>
+         </div>
       </div>
     </div>
   );

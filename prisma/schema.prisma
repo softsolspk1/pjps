@@ -83,6 +83,7 @@ model Review {
   paymentStatus   String?  @default("UNPAID") // UNPAID, PAID
   paymentAmount   Float?   @default(0)
   paymentRef      String?
+  paymentDocUrl   String?  @db.Text
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

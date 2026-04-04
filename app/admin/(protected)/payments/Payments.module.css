@@ -1,0 +1,255 @@
+.container {
+  padding: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+}
+
+.header {
+  margin-bottom: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.badge {
+  display: inline-block;
+  background-color: #ebf4ff;
+  color: #0061ff;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  padding: 6px 12px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 900;
+  color: #1a202c;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #718096;
+  margin-top: 4px;
+}
+
+.searchBar {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 16px 12px 48px;
+  background-color: white;
+  border: 1px solid #edf2f7;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.searchInput:focus {
+  border-color: #0061ff;
+  box-shadow: 0 0 0 4px rgba(0, 97, 255, 0.1);
+}
+
+.searchIcon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a0aec0;
+}
+
+.tableCard {
+  background-color: white;
+  border: 1px solid #edf2f7;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th {
+  background-color: #f8fafc;
+  padding: 20px;
+  font-size: 10px;
+  font-weight: 900;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.table td {
+  padding: 20px;
+  border-bottom: 1px solid #f7fafc;
+  vertical-align: middle;
+}
+
+.table tr:hover {
+  background-color: #fcfdfe;
+}
+
+.articleTitle {
+  font-size: 13px;
+  font-weight: 800;
+  color: #1a202c;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.authorInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #718096;
+}
+
+.trackBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.trackRegular { background-color: #f1f5f9; color: #475569; }
+.trackFast { background-color: #fff7ed; color: #c2410c; }
+.trackUltrafast { background-color: #eef2ff; color: #4338ca; }
+
+.originLabel {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.originPakistani { color: #059669; }
+.originInternational { color: #2563eb; }
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.statusPaid { color: #10b981; }
+.statusPending { color: #f59e0b; }
+.statusUnpaid { color: #a0aec0; }
+
+.proofLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #0061ff;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.proofLink:hover {
+  text-decoration: underline;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.actionBtn {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #edf2f7;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.approveBtn { background-color: #f0fdf4; color: #10b981; border-color: #dcfce7; }
+.approveBtn:hover { background-color: #10b981; color: white; border-color: #10b981; }
+
+.rejectBtn { background-color: #fef2f2; color: #ef4444; border-color: #fee2e2; }
+.rejectBtn:hover { background-color: #ef4444; color: white; border-color: #ef4444; }
+
+.emptyState {
+  padding: 80px;
+  text-align: center;
+  background-color: #fcfdfe;
+}
+
+.emptyIcon {
+  width: 64px;
+  height: 64px;
+  background-color: #f1f5f9;
+  color: #94a3b8;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+}
+
+.emptyText {
+  font-weight: 700;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.policyCard {
+  margin-top: 40px;
+  padding: 24px;
+  background-color: #1a202c;
+  color: white;
+  border-radius: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.policyContent {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.policyIcon {
+  padding: 12px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #60a5fa;
+}
+
+.policyTitle { font-weight: 800; font-size: 14px; margin-bottom: 2px; }
+.policyDesc { font-size: 11px; color: #94a3b8; font-weight: 500; }
+
+.policyProtocol {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #4a5568;
+}

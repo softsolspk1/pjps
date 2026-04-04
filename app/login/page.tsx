@@ -8,6 +8,7 @@ import {
   ArrowRight, CheckCircle, AlertCircle,
   ShieldCheck, Loader2
 } from "lucide-react";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -155,7 +156,14 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-2">Password</label>
+              <div className="flex justify-between items-center ml-2">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Password</label>
+                {mode === "LOGIN" && (
+                  <Link href="/forgot-password" className="text-[10px] font-bold text-blue-500 uppercase tracking-widest hover:text-blue-700 transition-colors">
+                    Forgot?
+                  </Link>
+                )}
+              </div>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input 

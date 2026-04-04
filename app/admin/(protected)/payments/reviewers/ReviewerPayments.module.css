@@ -1,21 +1,20 @@
 .container {
   padding: 40px;
-  background-color: #fcfdfe;
-  min-height: 100vh;
-  font-family: 'Inter', 'Outfit', sans-serif;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
 }
 
 .header {
   margin-bottom: 40px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
 }
 
 .headerTitleGroup {
   display: flex;
   flex-direction: column;
-  gap: 8px;
 }
 
 .badge {
@@ -25,9 +24,10 @@
   font-size: 10px;
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  padding: 6px 14px;
+  letter-spacing: 0.2em;
+  padding: 6px 12px;
   border-radius: 6px;
+  margin-bottom: 8px;
   width: fit-content;
 }
 
@@ -35,7 +35,6 @@
   font-size: 32px;
   font-weight: 900;
   color: #1a202c;
-  margin: 0;
   letter-spacing: -0.02em;
 }
 
@@ -48,43 +47,42 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
-  color: #f59e0b;
-  background-color: #fff7ed;
-  padding: 10px 20px;
+  color: #718096;
+  background-color: white;
+  padding: 10px 16px;
   border-radius: 12px;
-  border: 1px solid #ffedd5;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  border: 1px solid #edf2f7;
 }
 
 .tableCard {
   background-color: white;
   border: 1px solid #edf2f7;
   border-radius: 24px;
-  padding: 32px;
+  overflow: hidden;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
+  text-align: left;
 }
 
 .table th {
-  padding: 16px 20px;
-  text-align: left;
+  background-color: #f8fafc;
+  padding: 20px 24px;
   font-size: 10px;
   font-weight: 900;
   color: #a0aec0;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   border-bottom: 1px solid #edf2f7;
 }
 
 .table td {
-  padding: 24px 20px;
+  padding: 20px 24px;
   border-bottom: 1px solid #f7fafc;
   vertical-align: middle;
 }
@@ -92,71 +90,60 @@
 .userInfo {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .userIcon {
-  width: 40px;
-  height: 40px;
-  background-color: #f8fafc;
-  border-radius: 12px;
+  width: 36px;
+  height: 36px;
+  background-color: #ebf4ff;
+  color: #0061ff;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #0061ff;
-  border: 1px solid #edf2f7;
 }
 
 .userName {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
   color: #1a202c;
 }
 
 .userEmail {
   font-size: 11px;
-  font-weight: 600;
   color: #a0aec0;
-  margin-top: 2px;
+  font-weight: 600;
 }
 
 .articleInfo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .articleTitle {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: #4a5568;
-  max-width: 300px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 300px;
 }
 
 .statusBadge {
-  font-size: 10px;
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 9px;
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 6px 12px;
-  border-radius: 100px;
+  letter-spacing: 0.05em;
 }
 
+.completed { background-color: #f0fdf4; color: #10b981; }
 .pending { background-color: #fff7ed; color: #f59e0b; }
-.completed { background-color: #ecfdf5; color: #10b981; }
-
-.unpaidBadge {
-  font-size: 10px;
-  font-weight: 900;
-  color: #ef4444;
-  background-color: #fef2f2;
-  padding: 6px 12px;
-  border-radius: 8px;
-  border: 1px solid #fee2e2;
-}
 
 .paidInfo {
   display: flex;
@@ -167,62 +154,137 @@
 .paidAmount {
   font-size: 12px;
   font-weight: 800;
+  color: #1a202c;
+}
+
+.unpaidBadge {
+  font-size: 10px;
+  font-weight: 900;
+  color: #a0aec0;
+  letter-spacing: 0.1em;
+}
+
+.completedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
   color: #10b981;
 }
 
 .payBtn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   background-color: #1a202c;
   color: white;
-  border: none;
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  padding: 10px 18px;
+  padding: 10px 16px;
   border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.payBtn:hover {
-  background-color: #4a5568;
-  transform: translateY(-2px);
-}
-
-.payBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.completedBadge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #a0aec0;
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.05em;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.payBtn:hover {
+  background-color: #000;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .loader {
-  height: 60vh;
   display: flex;
-  align-items: center;
   justify-content: center;
+  padding: 100px;
 }
 
 .spinner {
-  width: 40px;
-  height: 40px;
-  color: #0061ff;
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(26, 32, 44, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  background-color: white;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: modalIn 0.3s ease-out;
+}
+
+@keyframes modalIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modalHeader {
+  background-color: #f8fafc;
+  padding: 24px 32px;
+  border-bottom: 1px solid #edf2f7;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modalTitle { font-size: 18px; font-weight: 900; color: #1a202c; }
+.closeBtn { color: #a0aec0; cursor: pointer; border: none; background: none; }
+
+.modalBody { padding: 32px; }
+
+.formGroup { margin-bottom: 24px; }
+.label { display: block; font-size: 10px; font-weight: 900; color: #a0aec0; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+
+.input { 
+  width: 100%; padding: 12px 16px; border: 1px solid #edf2f7; border-radius: 12px; background-color: #f8fafc; font-size: 14px; font-weight: 700; outline: none; transition: all 0.2s;
+}
+.input:focus { border-color: #0061ff; background-color: white; box-shadow: 0 0 0 4px rgba(0, 97, 255, 0.1); }
+
+.uploadArea {
+  border: 2px dashed #edf2f7;
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.uploadArea:hover { border-color: #0061ff; background-color: #f0f7ff; }
+
+.submitBtn {
+  width: 100%;
+  padding: 16px;
+  background-color: #0061ff;
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 10px 15px -3px rgba(0, 97, 255, 0.2);
+}
+
+.submitBtn:hover { transform: translateY(-2px); box-shadow: 0 15px 20px -5px rgba(0, 97, 255, 0.3); }
+.submitBtn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
