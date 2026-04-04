@@ -36,22 +36,31 @@ export default async function AdminLayout({ children }: { children: ReactNode })
            </div>
 
            <nav style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-              <div style={{ padding: '20px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Journal Management</div>
-              <SidebarLink href="/admin/dashboard" icon={<LayoutDashboard size={18} />} label="System Overview" />
-              <SidebarLink href="/admin/articles" icon={<Inbox size={18} />} label="Manuscripts" />
-              <SidebarLink href="/admin/reviews" icon={<ClipboardCheck size={18} />} label="Review Pool" />
-              <SidebarLink href="/admin/users" icon={<Users size={18} />} label="User Directory" />
-              <SidebarLink href="/admin/issues" icon={<Layers size={18} />} label="Issue Catalog" />
+              {session.user.role !== "FINANCE_ADMIN" && (
+                <>
+                  <div style={{ padding: '20px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Journal Management</div>
+                  <SidebarLink href="/admin/dashboard" icon={<LayoutDashboard size={18} />} label="System Overview" />
+                  <SidebarLink href="/admin/articles" icon={<Inbox size={18} />} label="Manuscripts" />
+                  <SidebarLink href="/admin/reviews" icon={<ClipboardCheck size={18} />} label="Review Pool" />
+                  <SidebarLink href="/admin/users" icon={<Users size={18} />} label="User Directory" />
+                  <SidebarLink href="/admin/issues" icon={<Layers size={18} />} label="Issue Catalog" />
+                </>
+              )}
               
               <div style={{ padding: '20px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Scholarly Finance</div>
               <SidebarLink href="/admin/payments" icon={<DollarSign size={18} />} label="Fee Verification" />
+              <SidebarLink href="/admin/payments/reviewers" icon={<CreditCard size={18} />} label="Reviewer Rewards" />
               <SidebarLink href="/admin/pricing" icon={<CreditCard size={18} />} label="Global Pricing" />
               
-              <div style={{ padding: '20px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Communication</div>
-              <SidebarLink href="/admin/messages" icon={<Mail size={18} />} label="Editorial Dispatch" />
-              
-              <div style={{ padding: '20px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>System</div>
-              <SidebarLink href="/admin/analytics" icon={<BarChart3 size={18} />} label="Lifetime Reports" />
+              {session.user.role !== "FINANCE_ADMIN" && (
+                <>
+                  <div style={{ padding: '20px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Communication</div>
+                  <SidebarLink href="/admin/messages" icon={<Mail size={18} />} label="Editorial Dispatch" />
+                  
+                  <div style={{ padding: '20px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>System</div>
+                  <SidebarLink href="/admin/analytics" icon={<BarChart3 size={18} />} label="Lifetime Reports" />
+                </>
+              )}
               <SidebarLink href="/" icon={<Globe size={18} />} label="Visit Portal" external />
            </nav>
         </div>
@@ -84,7 +93,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer' }}>
                   <div style={{ textAlign: 'right' }}>
                      <p style={{ fontSize: '13px', fontWeight: 800, color: '#1a202c', marginBottom: '2px' }}>{session.user.name}</p>
-                     <p style={{ fontSize: '10px', fontWeight: 700, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Super Admin</p>
+                     <p style={{ fontSize: '10px', fontWeight: 700, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{session.user.role?.replace('_', ' ') || 'Expert Admin'}</p>
                   </div>
                   <div style={{ width: '40px', height: '40px', backgroundColor: '#ebf4ff', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0061ff', fontWeight: 900 }}>
                      {session.user.name?.charAt(0)}

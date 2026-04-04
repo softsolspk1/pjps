@@ -65,12 +65,12 @@ export default async function UserRegistryPage() {
                       <div style={{ fontWeight: 800, color: '#1a202c', fontSize: '14px' }}>{user.name}</div>
                       <div style={{ marginTop: '4px' }}>
                         <span className={`${styles.badge} ${
-                          user.role === 'ADMIN' ? styles.badgeError :
-                          user.role === 'EDITOR' ? styles.badgePending :
-                          user.role === 'REVIEWER' ? styles.badgeInfo :
+                          (user.role === 'ADMIN' || user.role === 'EDITOR_IN_CHIEF') ? styles.badgeError :
+                          (user.role === 'ASSOCIATE_EDITOR' || user.role === 'EDITOR') ? styles.badgePending :
+                          (user.role === 'FINANCE_ADMIN' || user.role === 'REVIEWER') ? styles.badgeInfo :
                           styles.badgeSuccess
                         }`}>
-                          {user.role}
+                          {user.role?.replace('_', ' ')}
                         </span>
                       </div>
                     </div>

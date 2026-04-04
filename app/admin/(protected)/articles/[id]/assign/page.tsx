@@ -124,7 +124,7 @@ export default function AssignReviewerPage({ params }: { params: Promise<{ id: s
                         <User size={20} />
                       </div>
                       <div>
-                        <h3 className="font-bold text-slate-900 group-hover:text-blue-700 transition-colors uppercase tracking-widest text-sm">{reviewer.name} {reviewer.role === 'EDITOR' ? '(Section Editor)' : ''}</h3>
+                        <h3 className="font-bold text-slate-900 group-hover:text-blue-700 transition-colors uppercase tracking-widest text-sm">{reviewer.name} {(reviewer.role === 'ASSOCIATE_EDITOR' || reviewer.role === 'EDITOR') ? '(Associate Editor)' : ''}</h3>
                         <p className="text-sm text-slate-400">{reviewer.email}</p>
                       </div>
                     </div>

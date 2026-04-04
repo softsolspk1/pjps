@@ -19,13 +19,23 @@ export default withAuth(
 
     // 2. Role-based protection
     if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-      if (token?.role !== "ADMIN" && token?.role !== "EDITOR") {
+      const allowedRoles = ["ADMIN", "EDITOR_IN_CHIEF", "ASSOCIATE_EDITOR", "EDITOR", "FINANCE_ADMIN"];
+      if (!token || !allowedRoles.includes(token.role as string)) {
         return NextResponse.redirect(new URL("/", req.url));
+      }
+
+      // 3. Finance Admin Isolation
+      if (token.role === "FINANCE_ADMIN") {
+        const financePaths = ["/admin/dashboard", "/admin/payments", "/admin/pricing"];
+        const isFinancePath = financePaths.some(p => pathname.startsWith(p));
+        if (!isFinancePath) {
+          return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+        }
       }
     }
 
     if (pathname.startsWith("/reviewer")) {
-      if (token?.role !== "REVIEWER" && token?.role !== "ADMIN") {
+      if (token?.role !== "REVIEWER" && token?.role !== "ADMIN" && token?.role !== "EDITOR_IN_CHIEF") {
         return NextResponse.redirect(new URL("/", req.url));
       }
     }

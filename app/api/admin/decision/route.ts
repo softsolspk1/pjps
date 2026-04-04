@@ -4,34 +4,26 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions) as any;
-
-  if (session?.user?.role !== "ADMIN" && session?.user?.role !== "EDITOR") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
-    const { articleId, decision, comments, issueId } = await req.json();
+    const session = await getServerSession(authOptions);
+    if (!session || !["ADMIN", "EDITOR_IN_CHIEF", "ASSOCIATE_EDITOR", "EDITOR"].includes((session.user as any).role)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    // Decisions: ACCEPTED, REJECTED, REVISION_REQUIRED
-    // We map these to article status
-    let status = "SUBMITTED";
-    if (decision === "ACCEPT") status = "ACCEPTED";
-    if (decision === "REJECT") status = "REJECTED";
-    if (decision === "REVISE") status = "SUBMITTED"; // Back to submitted but with comments
+    const { articleId, status } = await req.json();
 
-    const updatedArticle = await prisma.article.update({
+    if (!["ACCEPTED", "REJECTED", "REVISION", "IN_REVIEW"].includes(status)) {
+      return NextResponse.json({ error: "Invalid status transition" }, { status: 400 });
+    }
+
+    const article = await prisma.article.update({
       where: { id: articleId },
-      data: { 
-        status,
-        issueId: decision === "ACCEPT" ? issueId : undefined,
-      }
+      data: { status }
     });
 
-    // In a real system, we would also trigger an email here.
-    
-    return NextResponse.json({ success: true, article: updatedArticle });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Failed to record decision" }, { status: 500 });
+    return NextResponse.json(article);
+  } catch (err) {
+    console.error("Decision API Error:", err);
+    return NextResponse.json({ error: "Failed to record scholarly decision" }, { status: 500 });
   }
 }

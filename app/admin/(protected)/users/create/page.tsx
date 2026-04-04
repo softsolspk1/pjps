@@ -131,7 +131,9 @@ export default function CreateUserPage() {
                  value={formData.role} onChange={(e) => setFormData({...formData, role: e.target.value})}
                  style={{ width: '100%', padding: '16px 16px 16px 50px', backgroundColor: '#fcfdfe', border: '1px solid #edf2f7', borderRadius: '14px', outline: 'none', fontWeight: 800, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.1em', appearance: 'none' }}
                >
-                 <option value="SECTION_EDITOR">SECTION EDITOR</option>
+                 <option value="ASSOCIATE_EDITOR">Associate Editor</option>
+                 <option value="EDITOR_IN_CHIEF">Editor-in-Chief</option>
+                 <option value="FINANCE_ADMIN">Finance Sub-Admin</option>
                  <option value="REVIEWER">PEER REVIEWER</option>
                  <option value="ADMIN">ADMINISTRATOR</option>
                  <option value="AUTHOR">AUTHOR</option>

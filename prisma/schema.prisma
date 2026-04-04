@@ -77,7 +77,10 @@ model Review {
   comments        String?  @db.Text
   recommendation  String   @default("PENDING") // PENDING, ACCEPT, REVISION, REJECT
   status          String   @default("PENDING") // PENDING, COMPLETED
-  
+  paymentStatus   String?  @default("UNPAID") // UNPAID, PAID
+  paymentAmount   Float?   @default(0)
+  paymentRef      String?
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -126,7 +129,7 @@ model User {
   email     String   @unique
   password  String   // hashed
   name      String?
-  role      String   @default("AUTHOR") // ADMIN, EDITOR, REVIEWER, AUTHOR, READER_SUBSCRIBER
+  role      String   @default("AUTHOR") // ADMIN, EDITOR_IN_CHIEF, ASSOCIATE_EDITOR, FINANCE_ADMIN, REVIEWER, AUTHOR, READER_SUBSCRIBER
   
   // Security Reset
   resetToken       String?
