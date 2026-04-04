@@ -15,6 +15,8 @@ export default async function ReviewPoolPage() {
   let reviews: any[] = [];
   let fetchError = false;
 
+  let debugError = "";
+
   try {
     reviews = await prisma.review.findMany({
       orderBy: { createdAt: "desc" },
@@ -23,9 +25,10 @@ export default async function ReviewPoolPage() {
         reviewer: true
       }
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Critical Registry Fetch Error:", error);
     fetchError = true;
+    debugError = error.message || "Unknown Database Error";
   }
 
   if (fetchError) {
@@ -34,7 +37,10 @@ export default async function ReviewPoolPage() {
         <div style={{ padding: '40px', textAlign: 'center', backgroundColor: '#fff5f5', borderRadius: '24px', border: '1px solid #feb2b2' }}>
            <AlertTriangle size={48} color="#e53e3e" style={{ margin: '0 auto 16px' }} />
            <h2 style={{ color: '#c53030', fontWeight: 900 }}>Registry Connection Failure</h2>
-           <p style={{ color: '#9b2c2c', fontSize: '14px', marginTop: '8px' }}>The scholarly database is currently unavailable. Please verify your connection or contact the system administrator.</p>
+           <p style={{ color: '#9b2c2c', fontSize: '14px', marginTop: '8px' }}>The scholarly database is currently unavailable.</p>
+           <div style={{ marginTop: '20px', padding: '12px', backgroundColor: '#fff', borderRadius: '8px', fontSize: '10px', color: '#718096', fontFamily: 'monospace', textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              System Log: {debugError.substring(0, 200)}...
+           </div>
         </div>
       </div>
     );
