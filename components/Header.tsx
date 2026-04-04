@@ -110,9 +110,9 @@ export default function Header() {
         </nav>
 
         <div className={styles.actions}>
-          <button className={styles.searchBtn} aria-label="Search">
+          <Link href="/search" className={styles.searchBtn} aria-label="Search Registry">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
-          </button>
+          </Link>
           
           {session ? (
             <div className="flex items-center gap-4">
