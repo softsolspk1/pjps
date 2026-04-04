@@ -1,21 +1,44 @@
 export const dynamic = 'force-dynamic';
 import { prisma } from "@/lib/prisma";
 import { 
-  ClipboardCheck, Search, Filter, 
-  User, Calendar, CheckCircle, Clock,
-  ShieldCheck, AlertCircle
+  ClipboardCheck, 
+  User, 
+  CheckCircle, 
+  ShieldCheck, 
+  Activity,
+  AlertTriangle
 } from "lucide-react";
 import { format } from "date-fns";
 import styles from "./Reviews.module.css";
 
 export default async function ReviewPoolPage() {
-  const reviews = await prisma.review.findMany({
-    orderBy: { createdAt: "desc" },
-    include: {
-      article: true,
-      reviewer: true
-    }
-  });
+  let reviews = [];
+  let fetchError = false;
+
+  try {
+    reviews = await prisma.review.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        article: true,
+        reviewer: true
+      }
+    });
+  } catch (error) {
+    console.error("Critical Registry Fetch Error:", error);
+    fetchError = true;
+  }
+
+  if (fetchError) {
+    return (
+      <div className={styles.container}>
+        <div style={{ padding: '40px', textAlign: 'center', backgroundColor: '#fff5f5', borderRadius: '24px', border: '1px solid #feb2b2' }}>
+           <AlertTriangle size={48} color="#e53e3e" style={{ margin: '0 auto 16px' }} />
+           <h2 style={{ color: '#c53030', fontWeight: 900 }}>Registry Connection Failure</h2>
+           <p style={{ color: '#9b2c2c', fontSize: '14px', marginTop: '8px' }}>The scholarly database is currently unavailable. Please verify your connection or contact the system administrator.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -39,11 +62,11 @@ export default async function ReviewPoolPage() {
             </tr>
           </thead>
           <tbody>
-            {reviews.map((review) => (
+            {(reviews || []).map((review) => (
               <tr key={review.id}>
                 <td>
-                  <h3 className={styles.articleTitle}>{review.article?.title || "Unknown Manuscript"}</h3>
-                  <div className={styles.articleId}>Institutional ID: {review.articleId?.slice(0, 8) || "N/A"}</div>
+                  <h3 className={styles.articleTitle}>{review.article?.title || "Manuscript Title Unavailable"}</h3>
+                  <div className={styles.articleId}>Institutional ID: {review.articleId?.slice(0, 8) || "REF-ID-NA"}</div>
                 </td>
                 <td>
                   <div className={styles.userInfo}>
@@ -58,12 +81,12 @@ export default async function ReviewPoolPage() {
                 </td>
                 <td style={{ textAlign: 'center' }}>
                   <span className={`${styles.statusBadge} ${review.status === 'COMPLETED' ? styles.completed : styles.pending}`}>
-                    {review.status}
+                    {review.status || "PENDING"}
                   </span>
                 </td>
                 <td style={{ textAlign: 'center' }}>
                   <div className={styles.dateText}>
-                    {review.createdAt ? format(new Date(review.createdAt), "MMM dd, yyyy") : "N/A"}
+                    {review.createdAt ? format(new Date(review.createdAt), "MMM dd, yyyy") : "Date Unavailable"}
                   </div>
                 </td>
                 <td>
@@ -78,7 +101,7 @@ export default async function ReviewPoolPage() {
           </tbody>
         </table>
 
-        {reviews.length === 0 && (
+        {(!reviews || reviews.length === 0) && (
           <div className={styles.emptyState}>
              <div className={styles.emptyIcon}>
                <ShieldCheck size={32} />
@@ -94,7 +117,7 @@ export default async function ReviewPoolPage() {
 
       <div style={{ marginTop: '40px', padding: '24px', backgroundColor: '#f8fafc', borderRadius: '24px', display: 'flex', alignItems: 'center', gap: '16px', border: '1px solid #edf2f7' }}>
          <div style={{ padding: '12px', backgroundColor: '#ebf4ff', borderRadius: '12px', color: '#0061ff' }}>
-            <AlertCircle size={20} />
+            <Activity size={20} />
          </div>
          <div>
             <h4 style={{ fontWeight: 800, fontSize: '13px', color: '#1a202c', marginBottom: '2px' }}>Scholarly Integrity Protocol</h4>
