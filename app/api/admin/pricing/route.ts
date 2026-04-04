@@ -19,16 +19,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { origin, regular, fast, ultraFast } = await req.json();
+    const data = await req.json();
+    const { origin } = data;
+
+    // Remove ID and Update timestamp to prevent Prisma errors
+    delete data.id;
+    delete data.updatedAt;
 
     const pricing = await prisma.pricing.upsert({
       where: { origin },
-      update: { regular, fast, ultraFast },
-      create: { origin, regular, fast, ultraFast },
+      update: data,
+      create: data,
     });
 
     return NextResponse.json(pricing);
   } catch (err) {
-    return NextResponse.json({ error: "Failed to update pricing" }, { status: 500 });
+    console.error("Update pricing error:", err);
+    return NextResponse.json({ error: "Failed to update scholarly pricing" }, { status: 500 });
   }
 }

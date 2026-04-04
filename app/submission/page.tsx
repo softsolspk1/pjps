@@ -52,9 +52,11 @@ export default function SubmissionPage() {
   const getCurrentFee = () => {
     const p = pricing.find(item => item.origin === userOrigin);
     if (!p) return 0;
-    if (submissionType === "REGULAR") return p.regular;
-    if (submissionType === "FAST") return p.fast;
-    if (submissionType === "ULTRAFAST") return p.ultraFast;
+    
+    if (submissionType === "REGULAR") return p.processingRegular;
+    if (submissionType === "FAST") return p.processingFast;
+    if (submissionType === "ULTRAFAST") return p.processingUltraFast;
+    
     return 0;
   };
 

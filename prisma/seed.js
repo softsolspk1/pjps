@@ -5,23 +5,55 @@ async function main() {
   // 1. Initial Pricing Seed
   await prisma.pricing.upsert({
     where: { origin: "PAKISTANI" },
-    update: {},
+    update: {
+      processingRegular: 2000,
+      processingFast: 5000,
+      processingUltraFast: 10000,
+      publicationRegular: 15000,
+      publicationFast: 25000,
+      publicationUltraFast: 40000,
+      extraPageFee: 1000,
+      extraCopyFee: 2000,
+      annualSubscriptionFee: 8000,
+    },
     create: {
       origin: "PAKISTANI",
-      regular: 25000,
-      fast: 45000,
-      ultraFast: 75000,
+      processingRegular: 2000,
+      processingFast: 5000,
+      processingUltraFast: 10000,
+      publicationRegular: 15000,
+      publicationFast: 25000,
+      publicationUltraFast: 40000,
+      extraPageFee: 1000,
+      extraCopyFee: 2000,
+      annualSubscriptionFee: 8000,
     }
   });
 
   await prisma.pricing.upsert({
     where: { origin: "INTERNATIONAL" },
-    update: {},
+    update: {
+      processingRegular: 20,
+      processingFast: 50,
+      processingUltraFast: 100,
+      publicationRegular: 150,
+      publicationFast: 250,
+      publicationUltraFast: 400,
+      extraPageFee: 10,
+      extraCopyFee: 30,
+      annualSubscriptionFee: 120,
+    },
     create: {
       origin: "INTERNATIONAL",
-      regular: 250,
-      fast: 450,
-      ultraFast: 750,
+      processingRegular: 20,
+      processingFast: 50,
+      processingUltraFast: 100,
+      publicationRegular: 150,
+      publicationFast: 250,
+      publicationUltraFast: 400,
+      extraPageFee: 10,
+      extraCopyFee: 30,
+      annualSubscriptionFee: 120,
     }
   });
 

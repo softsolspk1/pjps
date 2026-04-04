@@ -8,7 +8,8 @@ import {
   LayoutDashboard, FileText, Layers, 
   Users, LogOut, ShieldCheck, Inbox, 
   BarChart3, ClipboardCheck, UserPlus, 
-  Bell, Search, Globe, UserCircle 
+  Bell, Search, Globe, UserCircle,
+  DollarSign, CreditCard, Mail
 } from "lucide-react";
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
@@ -35,14 +36,23 @@ export default async function AdminLayout({ children }: { children: ReactNode })
            </div>
 
            <nav style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-              <SidebarLink href="/admin/dashboard" icon={<LayoutDashboard size={18} />} label="Dashboard" />
+              <div style={{ padding: '20px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Journal Management</div>
+              <SidebarLink href="/admin/dashboard" icon={<LayoutDashboard size={18} />} label="System Overview" />
               <SidebarLink href="/admin/articles" icon={<Inbox size={18} />} label="Manuscripts" />
               <SidebarLink href="/admin/reviews" icon={<ClipboardCheck size={18} />} label="Review Pool" />
               <SidebarLink href="/admin/users" icon={<Users size={18} />} label="User Directory" />
-              <SidebarLink href="/admin/users/create" icon={<UserPlus size={18} />} label="Enroll Expert" />
-              <SidebarLink href="/admin/issues" icon={<Layers size={18} />} label="Journal Catalog" />
+              <SidebarLink href="/admin/issues" icon={<Layers size={18} />} label="Issue Catalog" />
+              
+              <div style={{ padding: '20px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Scholarly Finance</div>
+              <SidebarLink href="/admin/payments" icon={<DollarSign size={18} />} label="Fee Verification" />
+              <SidebarLink href="/admin/pricing" icon={<CreditCard size={18} />} label="Global Pricing" />
+              
+              <div style={{ padding: '20px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Communication</div>
+              <SidebarLink href="/admin/messages" icon={<Mail size={18} />} label="Editorial Dispatch" />
+              
+              <div style={{ padding: '20px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>System</div>
               <SidebarLink href="/admin/analytics" icon={<BarChart3 size={18} />} label="Lifetime Reports" />
-              <SidebarLink href="/" icon={<Globe size={18} />} label="Live Journal" external />
+              <SidebarLink href="/" icon={<Globe size={18} />} label="Visit Portal" external />
            </nav>
         </div>
 
