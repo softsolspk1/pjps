@@ -72,14 +72,39 @@ export default function SubmissionPage() {
   const addAuthor = () => setAuthors([...authors, { name: "", email: "", affiliation: "" }]);
   const removeAuthor = (index: number) => setAuthors(authors.filter((_, i) => i !== index));
   const updateAuthor = (index: number, field: keyof Author, value: string) => {
-    const newAuthors = [...authors];
-    // @ts-ignore
-    newAuthors[index][field] = value;
+    const newAuthors = authors.map((author, i) => 
+      i === index ? { ...author, [field]: value } : author
+    );
     setAuthors(newAuthors);
+  };
+
+  const handleNextStep = () => {
+    setError(null);
+    if (step === 1) {
+      if (!title.trim() || !abstract.trim() || !keywords.trim()) {
+        setError("Metadata fields (Title, Abstract, Keywords) are required.");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+    }
+    
+    if (step === 2) {
+      const hasEmpty = authors.some(a => !a.name.trim() || !a.email.trim() || !a.affiliation.trim());
+      if (hasEmpty) {
+        setError("All author details (Name, Email, Affiliation) are mandatory for journal indexing.");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+    }
+
+    setStep(step + 1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (step < 3) return handleNextStep();
+
     if (!paymentProofFile) return setError("Proof of payment is mandatory for scholarly review.");
     if (!manuscriptFile) return setError("Principal manuscript file is required.");
     if (!guidelinesConfirmed) return setError("You must confirm adherence to PJPS formatting guidelines.");
@@ -250,7 +275,7 @@ export default function SubmissionPage() {
                     />
                   </div>
                   <div className="col-span-2">
-                    <label className={styles.subLabel}>Primary Institutional Affiliation</label>
+                    <label className={styles.subLabel}>Primary Institutional Affiliation <span className="text-red-500 font-black">*</span></label>
                     <input 
                       type="text" required value={author.affiliation} onChange={(e) => updateAuthor(idx, "affiliation", e.target.value)}
                       className={styles.inputSmall}
@@ -408,12 +433,7 @@ export default function SubmissionPage() {
           {step < 3 ? (
             <button 
               type="button" 
-              onClick={() => {
-                if (step === 1 && (!title || !abstract || !keywords)) return setError("Please fill in all manuscript metadata.");
-                if (step === 2 && authors.some(a => !a.name || !a.email || !a.affiliation)) return setError("Please provide complete details for all authors.");
-                setError(null);
-                setStep(step + 1);
-              }}
+              onClick={handleNextStep}
               className="btn btn-primary px-10 flex items-center gap-2"
             >
               Continue to {step === 1 ? "Authors" : "Scholarly File"} <ChevronRight size={16} />
