@@ -2,7 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { 
   Users, UserPlus, Mail, Shield, 
   Trash2, Edit, Search, Filter,
-  Building2, MoreVertical, ShieldCheck
+  Building2, MoreVertical, ShieldCheck,
+  FileText
 } from "lucide-react";
 import Link from "next/link";
 import styles from "@/components/AdminTable.module.css";
@@ -12,7 +13,10 @@ export default async function UserRegistryPage() {
     orderBy: { createdAt: "desc" },
     include: {
       _count: {
-        select: { reviews: true }
+        select: { 
+          reviewsGiven: true,
+          articles: true
+        }
       }
     }
   });
@@ -89,8 +93,16 @@ export default async function UserRegistryPage() {
                    </div>
                 </td>
                 <td style={{ textAlign: 'center' }}>
-                   <div style={{ display: 'inline-block', backgroundColor: '#f1f5f9', color: '#1a202c', padding: '4px 12px', borderRadius: '100px', fontSize: '12px', fontWeight: 900 }}>
-                     {user._count.reviews}
+                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#f1f5f9', color: '#1a202c', padding: '4px 12px', borderRadius: '100px', fontSize: '11px', fontWeight: 900 }}>
+                     {(user as any).role === 'REVIEWER' || (user as any).role === 'ASSOCIATE_EDITOR' ? (
+                       <>
+                         <ShieldCheck size={12} color="#0061ff" /> {(user as any)._count.reviewsGiven} Reviews
+                       </>
+                     ) : (
+                       <>
+                         <FileText size={12} color="#0061ff" /> {(user as any)._count.articles} Submissions
+                       </>
+                     )}
                    </div>
                 </td>
                 <td style={{ textAlign: 'center' }}>
