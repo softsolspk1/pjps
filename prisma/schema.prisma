@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,116 +11,103 @@ model Volume {
   id        String   @id @default(cuid())
   number    Int      @unique
   year      Int
-  issues    Issue[]
   createdAt DateTime @default(now())
+  issues    Issue[]
 }
 
 model Issue {
-  id              String   @id @default(cuid())
-  volumeId        String
-  number          Int
-  month           String   // e.g., "June"
-  isContinuous    Boolean  @default(false)
-  isPublished     Boolean  @default(false)
-  articles        Article[]
-  
-  volume          Volume   @relation(fields: [volumeId], references: [id], onDelete: Cascade)
-  createdAt       DateTime @default(now())
-  doi             String?  @unique
+  id           String    @id @default(cuid())
+  volumeId     String
+  number       Int
+  month        String
+  isContinuous Boolean   @default(false)
+  isPublished  Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  doi          String?   @unique
+  articles     Article[]
+  volume       Volume    @relation(fields: [volumeId], references: [id], onDelete: Cascade)
 
   @@unique([volumeId, number])
 }
 
 model Article {
-  id              String   @id @default(cuid())
-  title           String
-  abstract        String?  @db.Text
-  introduction    String?  @db.Text
-  materialsMethods String? @db.Text
-  results         String?  @db.Text
-  discussion      String?  @db.Text
-  conclusion      String?  @db.Text
-  references      String?  @db.Text
+  id                String          @id @default(cuid())
+  title             String
+  abstract          String?
+  introduction      String?
+  materialsMethods  String?
+  results           String?
+  discussion        String?
+  conclusion        String?
+  references        String?
+  status            String          @default("DRAFT")
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  submissionType    String?         @default("REGULAR")
+  reviewType        String          @default("DOUBLE_BLIND")
+  copyeditingStatus String          @default("PENDING")
   
-  submissionType  String?  @default("REGULAR") // REGULAR, FAST, ULTRAFAST
-  trackingType    String   @default("REGULAR") // REGULAR, FAST, ULTRA_FAST
-  origin          String?  @default("PAKISTANI") // PAKISTANI, INTERNATIONAL
-  paymentProofUrl String?
-  paymentStatus   String   @default("UNPAID") // UNPAID, PENDING, PAID
-  status          String   @default("DRAFT") // DRAFT, SUBMITTED, IN_REVIEW, ACCEPTED, REJECTED, PUBLISHED
-  reviewType      String   @default("DOUBLE_BLIND") // SINGLE_BLIND, DOUBLE_BLIND, OPEN
-  copyeditingStatus String @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
+  doi               String?         @unique
+  indexingStatus    Json?           // { crossref: boolean, scopus: boolean, wos: boolean }
   
-  doi             String?  @unique
-  indexingStatus  Json?    // { crossref: boolean, scopus: boolean, wos: boolean }
-  
-  issueId         String?
-  issue           Issue?   @relation(fields: [issueId], references: [id])
-  
-  userId          String?
-  submitter       User?    @relation("SubmittedArticles", fields: [userId], references: [id])
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
-  authors         AuthorMapping[]
-  media           Media[]
-  reviews         Review[]
+  issueId           String?
+  origin            String?         @default("PAKISTANI")
+  paymentProofUrl   String?
+  paymentStatus     String          @default("UNPAID")
+  trackingType      String          @default("REGULAR")
+  userId            String?
+  issue             Issue?          @relation(fields: [issueId], references: [id])
+  submitter         User?           @relation("SubmittedArticles", fields: [userId], references: [id])
+  authors           AuthorMapping[]
+  media             Media[]
+  reviews           Review[]
 }
 
 model Review {
-  id              String   @id @default(cuid())
-  articleId       String
-  reviewerId      String
-  
-  // Scoring Criteria (1-10)
-  originality     Int      @default(0)
-  quality         Int      @default(0)
-  importance      Int      @default(0)
-  
-  comments        String?  @db.Text
-  recommendation  String   @default("PENDING") // PENDING, ACCEPT, REVISION, REJECT
-  status          String   @default("PENDING") // PENDING, COMPLETED
-  paymentStatus   String?  @default("UNPAID") // UNPAID, PAID
-  paymentAmount   Float?   @default(0)
-  paymentRef      String?
-  paymentDocUrl   String?  @db.Text
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  article         Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  reviewer        User     @relation("ReviewAssignments", fields: [reviewerId], references: [id], onDelete: Cascade)
+  id             String   @id @default(cuid())
+  articleId      String
+  reviewerId     String
+  originality    Int      @default(0)
+  quality        Int      @default(0)
+  importance     Int      @default(0)
+  comments       String?
+  recommendation String   @default("PENDING")
+  status         String   @default("PENDING")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  paymentAmount  Float?   @default(0)
+  paymentRef     String?
+  paymentStatus  String?  @default("UNPAID")
+  paymentDocUrl  String?
+  article        Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  reviewer       User     @relation("ReviewAssignments", fields: [reviewerId], references: [id], onDelete: Cascade)
 
   @@index([articleId])
   @@index([reviewerId])
 }
 
 model AuthorMapping {
-  id              String   @id @default(cuid())
-  articleId       String
-  name            String
-  address         String?
-  sequence        Int      @default(0) // To order authors 1 to 8
-
-  email           String? // Contact for this specific author
-  
-  article         Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  id        String  @id @default(cuid())
+  articleId String
+  name      String
+  address   String?
+  sequence  Int     @default(0)
+  email     String?
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
 
   @@index([articleId])
 }
 
 model Media {
-  id              String   @id @default(cuid())
-  articleId       String
-  publicId        String   // Cloudinary public_id
-  secureUrl       String   @db.Text
-  resourceType    String   @default("image") // image, raw (for pdf/docs)
-  section         String?  // The section of the article this media belongs to if applicable
-  createdAt       DateTime @default(now())
+  id           String   @id @default(cuid())
+  articleId    String
+  publicId     String
+  secureUrl    String
+  resourceType String   @default("image")
+  section      String?
+  createdAt    DateTime @default(now())
+  article      Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
 
-  article         Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  
   @@index([articleId])
 }
 
@@ -163,49 +147,37 @@ model PageView {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String   // hashed
-  name      String?
-  role      String   @default("AUTHOR") // ADMIN, EDITOR_IN_CHIEF, ASSOCIATE_EDITOR, FINANCE_ADMIN, REVIEWER, AUTHOR, READER_SUBSCRIBER
-  
-  // Security Reset
+  id               String    @id @default(cuid())
+  email            String    @unique
+  password         String
+  name             String?
+  role             String    @default("AUTHOR")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  affiliation      String?
+  biography        String?
+  interests        String?
+  orcid            String?
+  country          String?   @default("Pakistan")
   resetToken       String?
   resetTokenExpiry DateTime?
+  articles         Article[] @relation("SubmittedArticles")
+  reviewsGiven     Review[]  @relation("ReviewAssignments")
   
-  // Professional Profile
-  orcid           String?
-  affiliation     String?
-  country         String?  @default("Pakistan")
-  
-  articles        Article[] @relation("SubmittedArticles")
-  reviewsGiven    Review[]  @relation("ReviewAssignments")
-  biography       String?  @db.Text
-  interests       String?  // Research interests / Reviewer expertise
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  auditLogs AuditLog[]
+  auditLogs        AuditLog[]
 }
 
 model Pricing {
   id                    String   @id @default(cuid())
-  origin                String   @unique // PAKISTANI, INTERNATIONAL
-  
-  // Processing Fees (at submission phase)
-  processingRegular     Float    @default(0) // Rs 2,000 / $20
-  processingFast        Float    @default(0) // Rs 5,000 / $50
-  processingUltraFast   Float    @default(0) // Rs 10,000 / $100
-  
-  // Publication Fees (after acceptance phase)
-  publicationRegular    Float    @default(0) // Rs 15,000 / $150
-  publicationFast       Float    @default(0) // Rs 25,000 / $250
-  publicationUltraFast  Float    @default(0) // Rs 40,000 / $400
-  
-  extraPageFee          Float    @default(0) // Rs 1,000 / $10
-  extraCopyFee          Float    @default(0) // Rs 2,000 / $30
-  annualSubscriptionFee Float    @default(0) // Rs 8,000 / $120
-  
+  origin                String   @unique
   updatedAt             DateTime @updatedAt
+  annualSubscriptionFee Float    @default(0)
+  extraCopyFee          Float    @default(0)
+  extraPageFee          Float    @default(0)
+  processingFast        Float    @default(0)
+  processingRegular     Float    @default(0)
+  processingUltraFast   Float    @default(0)
+  publicationFast       Float    @default(0)
+  publicationRegular    Float    @default(0)
+  publicationUltraFast  Float    @default(0)
 }

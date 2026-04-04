@@ -29,7 +29,7 @@ export default async function DashboardPage() {
   ]);
 
   // @ts-ignore
-  const analytics = await prisma.analytics.findUnique({ where: { id: "global" } }) || { formattingCount: 0, totalExports: 0 };
+  const analytics = await prisma.analytics.findUnique({ where: { id: "global" } }) || { formattingCount: 0, totalExports: 0, totalPageViews: 0 };
 
   return (
     <div className={styles.dashboard}>
