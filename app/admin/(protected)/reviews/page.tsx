@@ -12,7 +12,7 @@ import { format } from "date-fns";
 import styles from "./Reviews.module.css";
 
 export default async function ReviewPoolPage() {
-  let reviews = [];
+  let reviews: any[] = [];
   let fetchError = false;
 
   try {
