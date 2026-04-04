@@ -42,17 +42,17 @@ export default async function ReviewPoolPage() {
             {reviews.map((review) => (
               <tr key={review.id}>
                 <td>
-                  <h3 className={styles.articleTitle}>{review.article.title}</h3>
-                  <div className={styles.articleId}>Institutional ID: {review.articleId.slice(0, 8)}</div>
+                  <h3 className={styles.articleTitle}>{review.article?.title || "Unknown Manuscript"}</h3>
+                  <div className={styles.articleId}>Institutional ID: {review.articleId?.slice(0, 8) || "N/A"}</div>
                 </td>
                 <td>
                   <div className={styles.userInfo}>
                     <div className={styles.userIcon}>
-                       {review.reviewer.name?.charAt(0) || "U"}
+                       {review.reviewer?.name?.charAt(0) || "U"}
                     </div>
                     <div>
-                      <div className={styles.userName}>{review.reviewer.name || "Anonymous Expert"}</div>
-                      <div className={styles.userEmail}>{review.reviewer.email}</div>
+                      <div className={styles.userName}>{review.reviewer?.name || "Anonymous Expert"}</div>
+                      <div className={styles.userEmail}>{review.reviewer?.email || "No contact info"}</div>
                     </div>
                   </div>
                 </td>
@@ -63,7 +63,7 @@ export default async function ReviewPoolPage() {
                 </td>
                 <td style={{ textAlign: 'center' }}>
                   <div className={styles.dateText}>
-                    {format(new Date(review.createdAt), "MMM dd, yyyy")}
+                    {review.createdAt ? format(new Date(review.createdAt), "MMM dd, yyyy") : "N/A"}
                   </div>
                 </td>
                 <td>
