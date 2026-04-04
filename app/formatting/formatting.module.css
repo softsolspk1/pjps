@@ -133,13 +133,14 @@
 .articlePreview {
   width: 210mm; 
   background: white;
-  padding: 2.5cm 2cm; /* Professional Margins: 2.5cm Top/Bottom, 2cm Sides */
+  padding: 2.5cm 2cm; /* Institutional Margins: 2.5cm Top/Bottom, 2cm Sides */
   box-shadow: 0 0 30px rgba(0,0,0,0.2);
   font-family: "Times New Roman", Times, serif;
   color: black;
   line-height: 1.15;
   position: relative;
   min-height: 297mm;
+  margin: 0 auto;
 }
 
 /* Journal Header Styles */
@@ -213,11 +214,25 @@
   break-inside: avoid-column;
 }
 
+/* SUPPORT FOR FULL WIDTH ASSETS */
+:global(.full-width-asset) {
+  column-span: all !important;
+  width: 100% !important;
+  margin: 25pt 0 !important;
+  background: white;
+  z-index: 10;
+}
+
+:global(.img-inside-column) {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
 .sectionHeading {
   font-weight: bold;
   text-transform: uppercase;
-  margin-bottom: 6pt;
-  font-size: 10.5pt;
+  margin-bottom: 8pt;
+  font-size: 11pt;
   display: block;
   break-after: avoid;
   border-bottom: 0.25pt solid #ddd;
