@@ -68,10 +68,14 @@ export default async function AdminLayout({ children }: { children: ReactNode })
                 </>
               )}
               
-              <div style={{ padding: '10px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Scholarly Finance</div>
-              <SidebarLink href="/admin/payments" icon={<DollarSign size={18} />} label="Fee Verification" />
-              <SidebarLink href="/admin/payments/reviewers" icon={<CreditCard size={18} />} label="Reviewer Rewards" />
-              <SidebarLink href="/admin/pricing" icon={<CreditCard size={18} />} label="Global Pricing" />
+              {(session.user.role === "ADMIN" || session.user.role === "FINANCE_ADMIN") && (
+                <>
+                  <div style={{ padding: '10px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Scholarly Finance</div>
+                  <SidebarLink href="/admin/payments" icon={<DollarSign size={18} />} label="Fee Verification" />
+                  <SidebarLink href="/admin/payments/reviewers" icon={<CreditCard size={18} />} label="Reviewer Rewards" />
+                  <SidebarLink href="/admin/pricing" icon={<CreditCard size={18} />} label="Global Pricing" />
+                </>
+              )}
               
               {session.user.role !== "FINANCE_ADMIN" && (
                 <>
