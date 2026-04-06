@@ -504,6 +504,7 @@ export default function FormattingTool() {
           </div>
         </div>
         <div className={styles.controls}>
+          {/* Hide Print Preview and PDF for now
           {view === "EDIT" ? (
              <button onClick={() => setView("PREVIEW")} className="btn btn-outline flex items-center gap-2">
                <Eye size={16} /> Print Preview
@@ -512,13 +513,15 @@ export default function FormattingTool() {
             <button onClick={() => setView("EDIT")} className="btn btn-outline flex items-center gap-2">
                <Edit3 size={16} /> Editor Mode
              </button>
-          )}
+          )} */}
           <button onClick={exportToWord} className="btn btn-outline flex items-center gap-2 border-slate-300">
             <Download size={16} /> DOCX
           </button>
+          {/* 
           <button onClick={generateProfessionalPDF} className="btn btn-primary flex items-center gap-2">
             <Sparkles size={16} /> Download PDF (HD)
-          </button>
+          </button> 
+          */}
         </div>
       </div>
 
