@@ -61,16 +61,20 @@
   font-family: var(--font-serif);
   font-size: 3.5rem;
   font-weight: 900;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   letter-spacing: -0.03em;
+  color: #ffffff !important;
+  background: none !important;
   line-height: 1.1;
 }
 
 .heroDesc {
   max-width: 650px;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.85) !important;
+  background: none !important;
+  font-size: 1.15rem;
   line-height: 1.7;
+  margin-bottom: 3rem;
 }
 
 .searchBox {
