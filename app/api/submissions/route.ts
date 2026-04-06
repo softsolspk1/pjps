@@ -52,7 +52,59 @@ export async function POST(req: Request) {
       ).end(paymentBuffer);
     }) as any;
 
-    // 3. Create Article with Versioning & Status
+    // 3. Process Extra Files (Figures and Supplementary)
+    const extraMedia: any[] = [];
+    
+    // Add primary manuscript
+    extraMedia.push({
+      publicId: manuscriptUpload.public_id,
+      secureUrl: manuscriptUpload.secure_url,
+      resourceType: "raw",
+      section: "MANUSCRIPT",
+      version: parentId ? parseInt(formData.get("version") as string || "2") : 1,
+    });
+
+    // Handle Figures
+    const figureKeys = Array.from(formData.keys()).filter(key => key.startsWith('figure_'));
+    for (const key of figureKeys) {
+       const f = formData.get(key) as File;
+       const buf = Buffer.from(await f.arrayBuffer());
+       const upload = await new Promise((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
+            { resource_type: "auto", folder: "pjps_figures" },
+            (error, result) => error ? reject(error) : resolve(result)
+          ).end(buf);
+       }) as any;
+       extraMedia.push({
+          publicId: upload.public_id,
+          secureUrl: upload.secure_url,
+          resourceType: "image",
+          section: "FIGURE",
+          version: 1
+       });
+    }
+
+    // Handle Supplementary
+    const suppKeys = Array.from(formData.keys()).filter(key => key.startsWith('supplementary_'));
+    for (const key of suppKeys) {
+       const f = formData.get(key) as File;
+       const buf = Buffer.from(await f.arrayBuffer());
+       const upload = await new Promise((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
+            { resource_type: "raw", folder: "pjps_supplementary" },
+            (error, result) => error ? reject(error) : resolve(result)
+          ).end(buf);
+       }) as any;
+       extraMedia.push({
+          publicId: upload.public_id,
+          secureUrl: upload.secure_url,
+          resourceType: "raw",
+          section: "SUPPLEMENTARY",
+          version: 1
+       });
+    }
+
+    // 4. Create Article with Versioning & Status
     const newArticle = await prisma.article.create({
       data: {
         title,
@@ -75,13 +127,7 @@ export async function POST(req: Request) {
           })),
         },
         media: {
-          create: {
-            publicId: manuscriptUpload.public_id,
-            secureUrl: manuscriptUpload.secure_url,
-            resourceType: "raw",
-            section: "MANUSCRIPT",
-            version: parentId ? parseInt(formData.get("version") as string || "2") : 1,
-          },
+          create: extraMedia,
         },
       } as any,
       include: {
@@ -89,7 +135,7 @@ export async function POST(req: Request) {
       },
     });
 
-    // 4. Audit Log the Submission
+    // 5. Audit Log the Submission
     await logAction(
       "ARTICLE_SUBMITTED",
       "ARTICLE",
@@ -97,25 +143,48 @@ export async function POST(req: Request) {
       userId
     );
 
-    // 5. Send Professional Notification
+    // 5. Send Professional Notifications
     try {
       const { sendEmail } = await import("@/lib/mail");
+      
+      // Notify Author
       await sendEmail({
         to: authors[0].email,
         subject: "PJPS Manuscript Submission Confirmation",
+        title: "Manuscript Registry Confirmation",
         html: `
-          <div style="font-family: 'Times New Roman', Times, serif; color: #002d5e; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; padding: 40px; border-radius: 8px;">
-            <h1 style="border-bottom: 2px solid #002d5e; padding-bottom: 15px; margin-bottom: 25px;">Submission Received</h1>
-            <p>Dear <strong>${authors[0].name}</strong>,</p>
-            <p>Thank you for submitting your research titled "<strong>${title}</strong>" to the <strong>Pakistan Journal of Pharmaceutical Sciences (PJPS)</strong>.</p>
-            <p>Your manuscript has been successfully cataloged and is now entering the editorial screening phase.</p>
-            <div style="margin: 30px 0; padding: 20px; background-color: #f8fafc; border-radius: 6px;">
-              <p style="margin: 0; font-weight: bold;">Submission Details:</p>
-               <p style="margin: 5px 0;">Reference ID: ${newArticle.id}</p>
-               <p style="margin: 5px 0;">Track: ${trackingType}</p>
-               <p style="margin: 5px 0;">Status: SCREENING (Evaluating Criteria)</p>
-            </div>
-            <p>You can track the live progress of your manuscript through the Online Submission Portal.</p>
+          <p>Dear <strong>${authors[0].name}</strong>,</p>
+          <p>Thank you for submitting your research titled "<strong>${title}</strong>" to the <strong>Pakistan Journal of Pharmaceutical Sciences (PJPS)</strong>.</p>
+          <p>Your manuscript has been successfully cataloged and is now entering the editorial screening phase.</p>
+          <div style="margin: 30px 0; padding: 25px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+            <p style="margin: 0; font-weight: bold; color: #002d5e; border-bottom: 1px solid #edf2f7; padding-bottom: 10px; margin-bottom: 15px;">Submission Details:</p>
+             <p style="margin: 5px 0; font-size: 13px;"><strong>Reference ID:</strong> ${newArticle.id}</p>
+             <p style="margin: 5px 0; font-size: 13px;"><strong>Tracking Type:</strong> ${trackingType}</p>
+             <p style="margin: 5px 0; font-size: 13px;"><strong>Current Status:</strong> SCREENING</p>
+             <p style="margin: 5px 0; font-size: 13px;"><strong>Date Logged:</strong> ${new Date().toLocaleDateString()}</p>
+          </div>
+          <p>You can track the live progress of your manuscript through the Online Submission Portal using your account credentials.</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${process.env.NEXTAUTH_URL}/author/dashboard" style="background-color: #002d5e; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; text-transform: uppercase;">Track Submission Progress</a>
+          </div>
+        `
+      });
+
+      // Notify Editor (SMTP_USER)
+      await sendEmail({
+        to: process.env.SMTP_USER!,
+        subject: "New Manuscript Submission Alert - PJPS",
+        title: "New Submission in Registry",
+        html: `
+          <p>A new manuscript has been submitted to the PJPS portal and requires editorial attention.</p>
+          <div style="margin: 20px 0; padding: 20px; background-color: #fcfdfe; border-left: 4px solid #002d5e;">
+            <p style="margin: 0; font-weight: bold; color: #1e293b;">${title}</p>
+            <p style="margin: 5px 0; font-size: 12px; color: #64748b;">Submitted by: ${authors[0].name} (${authors[0].email})</p>
+            <p style="margin: 5px 0; font-size: 12px; color: #64748b;">ID: ${newArticle.id}</p>
+          </div>
+          <p>Please log in to the Administrative Dashboard to begin the screening process.</p>
+          <div style="text-align: center; margin: 25px 0;">
+            <a href="${process.env.NEXTAUTH_URL}/admin/articles/${newArticle.id}" style="background-color: #0f172a; color: #ffffff; padding: 10px 25px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 12px; text-transform: uppercase;">Review Submission</a>
           </div>
         `
       });

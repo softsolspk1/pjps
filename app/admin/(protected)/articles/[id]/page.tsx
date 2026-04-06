@@ -2,6 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { 
   FileText, CheckCircle, XCircle, 
   RotateCcw, AlertCircle, Loader2, 
@@ -9,7 +10,7 @@ import {
   Calendar, MessageSquare, Info,
   TrendingUp, Award, Quote,
   ShieldCheck, Eye, Search,
-  ChevronRight, ExternalLink
+  ChevronRight, ExternalLink, PlusCircle
 } from "lucide-react";
 import styles from "./Decision.module.css";
 
@@ -20,8 +21,32 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
   const [article, setArticle] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [messaging, setMessaging] = useState(false);
+  const [messageContent, setMessageContent] = useState("");
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [doi, setDoi] = useState("");
+
+  const handleSendMessage = async () => {
+    if (!messageContent.trim()) return;
+    setMessaging(true);
+    try {
+      const res = await fetch(`/api/admin/articles/${id}/message`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: messageContent })
+      });
+      if (res.ok) {
+        setMessage({ type: 'success', text: "Manuscript correspondence dispatched to the lead author." });
+        setMessageContent("");
+      } else {
+        throw new Error("Failed to dispatch correspondence.");
+      }
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setMessaging(false);
+    }
+  };
 
   useEffect(() => {
     async function fetchArticle() {
@@ -199,7 +224,15 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
           </div>
 
           <div className={styles.reviewList}>
-             <h3 className={styles.subTitle}><MessageSquare size={18} /> Reviewer Scorecards</h3>
+             <div className="flex items-center justify-between mb-6">
+                <h3 className={styles.subTitle} style={{ marginBottom: 0 }}><MessageSquare size={18} /> Reviewer Scorecards</h3>
+                <Link 
+                  href={`/admin/articles/${id}/assign`}
+                  className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 transition-all shadow-lg active:scale-95"
+                >
+                   <PlusCircle size={14} /> Assign Expert
+                </Link>
+             </div>
              {article.reviews?.length === 0 ? (
                <div className={styles.emptyReviews}>No expert reviews have been submitted for this stage.</div>
              ) : (
@@ -248,6 +281,32 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
                  </div>
                ))
              )}
+          </div>
+
+          {/* Editorial Correspondence */}
+          <div className="mt-10 p-8 bg-white border border-slate-100 rounded-3xl shadow-sm">
+             <h3 className={styles.subTitle}><MessageSquare size={18} /> Editorial Correspondence</h3>
+             <div className="mt-6 space-y-6">
+                <textarea 
+                  className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500 min-h-[120px] transition-all"
+                  placeholder="Draft a scholarly communication to the lead author about this manuscript..."
+                  value={messageContent}
+                  onChange={(e) => setMessageContent(e.target.value)}
+                  disabled={messaging}
+                />
+                <div className="flex justify-between items-center">
+                   <div className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                      <ShieldCheck size={14} className="text-emerald-500" /> Secure Encryption Active
+                   </div>
+                   <button 
+                     onClick={handleSendMessage}
+                     disabled={messaging || !messageContent.trim()}
+                     className="bg-slate-900 hover:bg-black text-white px-6 py-2.5 rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 disabled:opacity-50 transition-all flex items-center gap-2"
+                   >
+                      {messaging ? <Loader2 className="animate-spin" size={14} /> : "Dispatch to Author"}
+                   </button>
+                </div>
+             </div>
           </div>
 
           <div className={styles.decisionActions}>

@@ -6,10 +6,11 @@ import { useSession, signOut } from "next-auth/react";
 import {
   FileText, Clock, CheckCircle2, ChevronRight,
   BookOpen, LogOut, Loader2, ShieldCheck,
-  AlertCircle, Award, User
+  AlertCircle, Award, User, Bell
 } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import styles from "./dashboard.module.css";
+import RoleLayout from "@/components/RoleLayout";
 
 export default function ReviewerDashboard() {
   const { data: session } = useSession();
@@ -36,15 +37,34 @@ export default function ReviewerDashboard() {
 
   if (loading) {
     return (
-      <div className={styles.loaderWrap}>
-        <Loader2 className={styles.spinner} size={40} />
-        <div className={styles.loaderText}>Loading Manuscript Registry...</div>
-      </div>
+      <RoleLayout role="REVIEWER">
+        <div className={styles.loaderWrap}>
+          <Loader2 className={styles.spinner} size={40} />
+          <div className={styles.loaderText}>Loading Manuscript Registry...</div>
+        </div>
+      </RoleLayout>
     );
   }
 
-  const pendingReviews = reviews.filter((r) => r.status === "PENDING" || r.status !== "COMPLETED");
+  const invitations = reviews.filter((r) => r.status === "INVITED");
+  const pendingReviews = reviews.filter((r) => r.status === "ACCEPTED" || r.status === "PENDING" || (r.status !== "COMPLETED" && r.status !== "INVITED"));
   const completedReviews = reviews.filter((r) => r.status === "COMPLETED");
+
+  async function handleResponse(reviewId: string, response: 'ACCEPTED' | 'DECLINED') {
+    if (!confirm(`Are you sure you want to ${response.toLowerCase()} this scholarly invitation?`)) return;
+    try {
+      const res = await fetch("/api/reviewer/respond", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviewId, response })
+      });
+      if (res.ok) {
+        window.location.reload();
+      }
+    } catch (err) {
+      console.error("Response error:", err);
+    }
+  }
 
   function getRecClass(rec: string) {
     if (rec === "ACCEPT") return styles.recAccept;
@@ -63,40 +83,8 @@ export default function ReviewerDashboard() {
   }
 
   return (
-    <div className={styles.portalRoot}>
-
-      {/* ── Top Navigation Bar ─── */}
-      <header className={styles.topBar}>
-        <div className={styles.brand}>
-          <div className={styles.brandLogo}>P</div>
-          <div>
-            <div className={styles.brandName}>PJPS</div>
-            <div className={styles.brandSub}>Reviewer Portal</div>
-          </div>
-        </div>
-
-        <div className={styles.topBarRight}>
-          {session?.user && (
-            <div className={styles.userInfo}>
-              <div className={styles.userAvatar}>
-                {session.user.name?.charAt(0) || <User size={16} />}
-              </div>
-              <div>
-                <div className={styles.userName}>{session.user.name}</div>
-                <div className={styles.userRole}>Peer Reviewer</div>
-              </div>
-            </div>
-          )}
-          <button
-            onClick={() => signOut({ callbackUrl: "/" })}
-            className={styles.logoutBtn}
-          >
-            <LogOut size={14} />
-            Sign Out
-          </button>
-        </div>
-      </header>
-
+    <RoleLayout role="REVIEWER">
+      <div className={styles.dashboardContainer}>
       {/* ── Main Content ─── */}
       <div className={styles.content}>
 
@@ -105,11 +93,11 @@ export default function ReviewerDashboard() {
           <div className={styles.welcomeGlow} />
           <div className={styles.welcomeText}>
             <h1>Welcome back, {session?.user?.name?.split(" ")[0] || "Reviewer"}</h1>
-            <p>Manage your peer review assignments and track submission progress.</p>
+            <p>Manage your expert peer review assignments and track scholarly progress.</p>
           </div>
           <div className={styles.welcomeBadge}>
             <ShieldCheck size={12} />
-            Double-Blind Review
+            Double-Blind Protocol
           </div>
         </div>
 
@@ -130,11 +118,11 @@ export default function ReviewerDashboard() {
         <div className={styles.statsRow}>
           <div className={styles.statCard}>
             <div className={`${styles.statIcon} ${styles.statIconBlue}`}>
-              <FileText size={24} />
+              <Bell size={24} />
             </div>
             <div>
-              <div className={styles.statNumber}>{reviews.length}</div>
-              <div className={styles.statLabel}>Total Assigned</div>
+              <div className={styles.statNumber}>{invitations.length}</div>
+              <div className={styles.statLabel}>Expert Invitations</div>
             </div>
           </div>
 
@@ -144,7 +132,7 @@ export default function ReviewerDashboard() {
             </div>
             <div>
               <div className={styles.statNumber}>{pendingReviews.length}</div>
-              <div className={styles.statLabel}>Awaiting Review</div>
+              <div className={styles.statLabel}>Active Review</div>
             </div>
           </div>
 
@@ -165,13 +153,54 @@ export default function ReviewerDashboard() {
           {/* Left: Pending + Completed */}
           <div>
 
+            {/* ── Invitations ─── */}
+            <div className={styles.sectionCard} style={{ marginBottom: "24px", border: '1px solid #c3dafe' }}>
+              <div className={styles.sectionHeader} style={{ backgroundColor: '#ebf4ff' }}>
+                <div className={`${styles.sectionHeaderIcon} ${styles.iconBlue}`}>
+                  <Bell size={18} />
+                </div>
+                <span className={styles.sectionTitle}>Expert Selection Invitations</span>
+                <span className={styles.sectionCount} style={{ backgroundColor: '#0061ff', color: 'white' }}>{invitations.length}</span>
+              </div>
+
+              {invitations.length === 0 ? (
+                <div className={styles.emptyState}>
+                  <p className={styles.emptyText}>No new scholarly invitations at this time.</p>
+                </div>
+              ) : (
+                <div className={styles.invitationList}>
+                  {invitations.map((inv, i) => (
+                    <div key={inv.id} className={styles.assignmentRow} style={{ cursor: 'default' }}>
+                      <div className={styles.assignmentIndex}>{i + 1}</div>
+                      <div className={styles.assignmentContent}>
+                        <div className={styles.assignmentTitle}>{inv.article?.title}</div>
+                        <div className={styles.assignmentMeta}>
+                          <span className={styles.assignmentDate}>Invitation Dated: {format(new Date(inv.createdAt), "MMM dd, yyyy")}</span>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '10px' }}>
+                        <button 
+                          onClick={() => handleResponse(inv.id, 'ACCEPTED')}
+                          style={{ padding: '8px 16px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '8px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', cursor: 'pointer' }}
+                        >Accept</button>
+                        <button 
+                          onClick={() => handleResponse(inv.id, 'DECLINED')}
+                          style={{ padding: '8px 16px', backgroundColor: 'white', color: '#ef4444', border: '1px solid #fee2e2', borderRadius: '8px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', cursor: 'pointer' }}
+                        >Decline</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* ── Pending Reviews ─── */}
             <div className={styles.sectionCard} style={{ marginBottom: "24px" }}>
               <div className={styles.sectionHeader}>
                 <div className={`${styles.sectionHeaderIcon} ${styles.iconAmber}`}>
                   <Clock size={18} />
                 </div>
-                <span className={styles.sectionTitle}>Action Required</span>
+                <span className={styles.sectionTitle}>Finalize Action Required</span>
                 <span className={styles.sectionCount}>{pendingReviews.length}</span>
               </div>
 
@@ -182,7 +211,7 @@ export default function ReviewerDashboard() {
                   </div>
                   <h3 className={styles.emptyTitle}>All Clear</h3>
                   <p className={styles.emptyText}>
-                    No manuscripts currently awaiting your review. You are up to date.
+                    No manuscripts currently awaiting your expert review.
                   </p>
                 </div>
               ) : (
@@ -231,7 +260,7 @@ export default function ReviewerDashboard() {
                   <div className={`${styles.sectionHeaderIcon} ${styles.iconGreen}`}>
                     <CheckCircle2 size={18} />
                   </div>
-                  <span className={styles.sectionTitle}>Completed Reviews</span>
+                  <span className={styles.sectionTitle}>Completed Reviews Registry</span>
                   <span className={styles.sectionCount}>{completedReviews.length}</span>
                 </div>
 
@@ -271,14 +300,14 @@ export default function ReviewerDashboard() {
                 <div className={`${styles.sectionHeaderIcon} ${styles.iconBlue}`}>
                   <BookOpen size={18} />
                 </div>
-                <span className={styles.sectionTitle}>Review Guidelines</span>
+                <span className={styles.sectionTitle}>Institutional Guidelines</span>
               </div>
               <div className={styles.guidelineList}>
                 {[
-                  { icon: ShieldCheck, text: "Maintain strict confidentiality throughout the peer-review process." },
-                  { icon: FileText, text: "Evaluate originality, methodology, relevance, and scientific impact." },
-                  { icon: Clock, text: "Submit finalized reviews within 14 days of manuscript assignment." },
-                  { icon: Award, text: "Declare any conflicts of interest before accepting an assignment." },
+                  { icon: ShieldCheck, text: "Maintain strict confidentiality throughout the double-blind process." },
+                  { icon: FileText, text: "Evaluate originality, methodology, and scientific impact." },
+                  { icon: Clock, text: "Finalize reviews within 14 days of manuscript assignment." },
+                  { icon: Award, text: "Declare conflicts of interest before accepting an assignment." },
                 ].map((item, i) => (
                   <div key={i} className={styles.guidelineItem}>
                     <div className={styles.guidelineIcon}>
@@ -317,14 +346,8 @@ export default function ReviewerDashboard() {
 
           </div>
         </div>
-
+        </div>
       </div>
-
-      {/* Footer */}
-      <footer className={styles.footer}>
-        © 2026 Pakistan Journal of Pharmaceutical Sciences. Developed by{" "}
-        <a href="https://softsols.pk" target="_blank" rel="noopener noreferrer">Softsols Pakistan</a>
-      </footer>
-    </div>
+    </RoleLayout>
   );
 }

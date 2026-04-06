@@ -9,7 +9,7 @@ import {
   AlertCircle, FileText, Info, ShieldCheck,
   FileArchive, FileCode, ChevronRight, Loader2,
   Clock, Zap, Gauge, CreditCard, DollarSign,
-  History, RotateCcw
+  History, RotateCcw, Layers
 } from "lucide-react";
 
 type Author = {
@@ -36,7 +36,8 @@ function SubmissionForm() {
   const [submissionType, setSubmissionType] = useState("REGULAR");
   const [authors, setAuthors] = useState<Author[]>([{ name: "", email: "", affiliation: "" }]);
   const [manuscriptFile, setManuscriptFile] = useState<File | null>(null);
-  const [supplementaryFile, setSupplementaryFile] = useState<File | null>(null);
+  const [figureFiles, setFigureFiles] = useState<File[]>([]);
+  const [supplementaryFiles, setSupplementaryFiles] = useState<File[]>([]);
   const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null);
   const [guidelinesConfirmed, setGuidelinesConfirmed] = useState(false);
 
@@ -162,7 +163,15 @@ function SubmissionForm() {
          formData.append("version", (currentVersion + 1).toString());
       }
 
-      if (supplementaryFile) formData.append("supplementary", supplementaryFile);
+      // Handle Figures
+      figureFiles.forEach((file, index) => {
+         formData.append(`figure_${index}`, file);
+      });
+
+      // Handle Supplementary
+      supplementaryFiles.forEach((file, index) => {
+         formData.append(`supplementary_${index}`, file);
+      });
 
       const res = await fetch("/api/submissions", {
         method: "POST",
@@ -431,6 +440,33 @@ function SubmissionForm() {
               </div>
             </div>
 
+            {/* Figures Upload */}
+            <div className={styles.supplementaryRow}>
+               <div className="flex-1 flex items-center gap-4">
+                  <div className={styles.suppIcon} style={{ border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', color: '#64748b' }}>
+                    <Layers size={20} />
+                  </div>
+                  <div>
+                     <div className="flex items-center gap-2">
+                        <p className="text-sm font-bold text-slate-800 tracking-tight">Analytical Figures & Charts</p>
+                        <span className="text-[8px] font-black bg-slate-100 text-slate-500 px-2 py-0.5 rounded uppercase tracking-widest">Optional</span>
+                     </div>
+                     <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">JPG, PNG, or TIFF versions</p>
+                  </div>
+               </div>
+               <div className="flex items-center gap-4">
+                 {figureFiles.length > 0 && <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md uppercase tracking-tight">{figureFiles.length} ATTACHED</span>}
+                  <input 
+                    type="file" multiple accept="image/*" id="figInput"
+                    style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0 }}
+                    onChange={(e) => setFigureFiles(Array.from(e.target.files || []))}
+                  />
+                  <label htmlFor="figInput" className={styles.suppButton}>
+                    {figureFiles.length > 0 ? "Change" : "Add Figures"}
+                  </label>
+               </div>
+            </div>
+
             {/* Supplementary Data */}
             <div className={styles.supplementaryRow}>
                <div className="flex-1 flex items-center gap-4">
@@ -446,16 +482,14 @@ function SubmissionForm() {
                   </div>
                </div>
                <div className="flex items-center gap-4">
-                 {supplementaryFile && <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-md uppercase tracking-tight">FILE ATTACHED</span>}
+                 {supplementaryFiles.length > 0 && <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-md uppercase tracking-tight">{supplementaryFiles.length} ATTACHED</span>}
                   <input 
-                    type="file" 
-                    accept=".zip,.rar,.csv,.xlsx"
-                    id="suppInput"
-                    style={{ position: 'absolute', width: '1px', height: '1px', padding: '0', margin: '-1px', overflow: 'hidden', clip: 'rect(0,0,0,0)', border: '0', opacity: '0' }}
-                    onChange={(e) => setSupplementaryFile(e.target.files ? e.target.files[0] : null)}
+                    type="file" multiple accept=".zip,.rar,.csv,.xlsx,.xls" id="suppInput"
+                    style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0 }}
+                    onChange={(e) => setSupplementaryFiles(Array.from(e.target.files || []))}
                   />
                   <label htmlFor="suppInput" className={styles.suppButton}>
-                    {supplementaryFile ? "Replace" : "Choose File"}
+                    {supplementaryFiles.length > 0 ? "Change" : "Add Datasets"}
                   </label>
                </div>
             </div>

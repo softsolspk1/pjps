@@ -4,121 +4,9 @@
 ─────────────────────────────────────────────── */
 
 /* ── Layout ─── */
-.portalRoot {
-  min-height: 100vh;
-  background: #f8fafc;
-  font-family: 'Inter', sans-serif;
+.dashboardContainer {
+  min-height: calc(100vh - 180px);
 }
-
-/* Top Header Bar */
-.topBar {
-  background: white;
-  border-bottom: 1px solid #edf2f7;
-  padding: 0 40px;
-  height: 72px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.brandLogo {
-  width: 36px;
-  height: 36px;
-  background: #0061ff;
-  border-radius: 9px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: 900;
-  font-size: 18px;
-  font-family: 'Georgia', serif;
-}
-
-.brandName {
-  font-size: 14px;
-  font-weight: 900;
-  color: #1a202c;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
-.brandSub {
-  font-size: 9px;
-  font-weight: 700;
-  color: #a0aec0;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.topBarRight {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.userInfo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.userAvatar {
-  width: 38px;
-  height: 38px;
-  background: #ebf4ff;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #0061ff;
-  font-size: 16px;
-  font-weight: 900;
-  font-family: 'Georgia', serif;
-}
-
-.userName {
-  font-size: 13px;
-  font-weight: 800;
-  color: #1a202c;
-}
-
-.userRole {
-  font-size: 9px;
-  font-weight: 700;
-  color: #a0aec0;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.logoutBtn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #a0aec0;
-  background: none;
-  border: none;
-  cursor: pointer;
-  text-decoration: none;
-  transition: color 0.2s;
-  padding: 8px 12px;
-  border-radius: 8px;
-}
-.logoutBtn:hover { color: #e53e3e; background: #fff5f5; }
 
 /* ── Content Area ─── */
 .content {
@@ -327,6 +215,9 @@
 }
 
 /* ── Review Assignment Row ─── */
+.invitationList {
+  padding: 8px 0;
+}
 .assignmentList {
   padding: 8px 0;
 }

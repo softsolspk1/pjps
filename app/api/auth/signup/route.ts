@@ -40,24 +40,22 @@ export async function POST(req: Request) {
       await sendEmail({
         to: email,
         subject: "Welcome to PJPS Academic Portal",
+        title: "Welcome to the Scholarly Registry",
         html: `
-          <div style="font-family: 'Times New Roman', Times, serif; color: #002d5e; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; padding: 40px; border-radius: 8px;">
-            <h1 style="border-bottom: 2px solid #002d5e; padding-bottom: 15px; margin-bottom: 25px;">Welcome to PJPS</h1>
-            <p>Dear <strong>${name}</strong>,</p>
-            <p>Congratulations! Your scholarly account has been successfully registered with the <strong>Pakistan Journal of Pharmaceutical Sciences (PJPS)</strong> Academic Portal.</p>
-            <p>You can now log in to your dashboard to submit your research manuscripts, track their progress, and participate in our academic community.</p>
-            <div style="margin: 30px 0; padding: 20px; background-color: #f8fafc; border-radius: 6px;">
-              <p style="margin: 0; font-weight: bold;">User Details:</p>
-              <p style="margin: 5px 0;">Email: ${email}</p>
-              <p style="margin: 5px 0;">Affiliation: ${affiliation}</p>
-            </div>
-            <p>If you have any questions or require technical assistance, please do not hesitate to contact our editorial support team.</p>
-            <p style="margin-top: 40px; border-top: 1px solid #e2e8f0; pt: 20px; font-size: 0.9em; color: #64748b;">
-              Best regards,<br/>
-              <strong>Editorial IT Support Team</strong><br/>
-              Pakistan Journal of Pharmaceutical Sciences
-            </p>
+          <p>Dear <strong>${name}</strong>,</p>
+          <p>Congratulations! Your scholarly account has been successfully registered with the <strong>Pakistan Journal of Pharmaceutical Sciences (PJPS)</strong> Academic Portal.</p>
+          <p>You can now log in to your dashboard to submit your research manuscripts, track their progress, and participate in our academic community.</p>
+          <div style="margin: 30px 0; padding: 20px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <p style="margin: 0; font-weight: bold; color: #002d5e;">Registration Credentials:</p>
+            <p style="margin: 5px 0; font-size: 13px;">Registered Email: ${email}</p>
+            <p style="margin: 5px 0; font-size: 13px;">Affiliation: ${affiliation}</p>
+            <p style="margin: 5px 0; font-size: 13px;">Authored Region: ${country || "Pakistan"}</p>
           </div>
+          <p>To begin your submission journey, please access the professional portal via the link below:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${process.env.NEXTAUTH_URL}/login" style="background-color: #002d5e; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Access Author Portal</a>
+          </div>
+          <p>If you require technical assistance, please do not hesitate to contact our editorial support team.</p>
         `
       });
     } catch (emailErr) {

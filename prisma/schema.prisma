@@ -44,26 +44,22 @@ model Article {
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
   submissionType    String?         @default("REGULAR")
-  reviewType        String          @default("DOUBLE_BLIND")
   copyeditingStatus String          @default("PENDING")
-  
-  doi               String?         @unique
-  indexingStatus    Json?           // { crossref: boolean, scopus: boolean, wos: boolean }
-  
   issueId           String?
+  reviewType        String          @default("DOUBLE_BLIND")
   origin            String?         @default("PAKISTANI")
   paymentProofUrl   String?
   paymentStatus     String          @default("UNPAID")
   trackingType      String          @default("REGULAR")
   userId            String?
+  doi               String?         @unique
+  indexingStatus    Json?
   downloadCount     Int             @default(0)
-  
-  version           Int             @default(1)
   parentId          String?
+  version           Int             @default(1)
+  issue             Issue?          @relation(fields: [issueId], references: [id])
   parentArticle     Article?        @relation("ArticleVersions", fields: [parentId], references: [id])
   revisions         Article[]       @relation("ArticleVersions")
-  
-  issue             Issue?          @relation(fields: [issueId], references: [id])
   submitter         User?           @relation("SubmittedArticles", fields: [userId], references: [id])
   authors           AuthorMapping[]
   media             Media[]
@@ -71,27 +67,27 @@ model Article {
 }
 
 model Review {
-  id             String   @id @default(cuid())
-  articleId      String
-  reviewerId     String
-  originality    Int      @default(0)
-  quality        Int      @default(0)
-  importance     Int      @default(0)
-  comments       String?
-  recommendation String   @default("PENDING")
-  status         String   @default("PENDING")
-  rating         Int      @default(0) // 1-5 scale
-  dueDate        DateTime?
-  commentsToEditor String?
+  id               String    @id @default(cuid())
+  articleId        String
+  reviewerId       String
+  originality      Int       @default(0)
+  quality          Int       @default(0)
+  importance       Int       @default(0)
+  comments         String?
+  recommendation   String    @default("PENDING")
+  status           String    @default("PENDING")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  paymentAmount    Float?    @default(0)
+  paymentRef       String?
+  paymentStatus    String?   @default("UNPAID")
+  paymentDocUrl    String?
   commentsToAuthor String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  paymentAmount  Float?   @default(0)
-  paymentRef     String?
-  paymentStatus  String?  @default("UNPAID")
-  paymentDocUrl  String?
-  article        Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  reviewer       User     @relation("ReviewAssignments", fields: [reviewerId], references: [id], onDelete: Cascade)
+  commentsToEditor String?
+  dueDate          DateTime?
+  rating           Int       @default(0)
+  article          Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  reviewer         User      @relation("ReviewAssignments", fields: [reviewerId], references: [id], onDelete: Cascade)
 
   @@index([articleId])
   @@index([reviewerId])
@@ -116,8 +112,8 @@ model Media {
   secureUrl    String
   resourceType String   @default("image")
   section      String?
-  version      Int      @default(1)
   createdAt    DateTime @default(now())
+  version      Int      @default(1)
   article      Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
 
   @@index([articleId])
@@ -127,56 +123,55 @@ model Analytics {
   id              String   @id @default("global")
   formattingCount Int      @default(0)
   totalExports    Int      @default(0)
-  totalPageViews  Int      @default(0)
   updatedAt       DateTime @updatedAt
+  totalPageViews  Int      @default(0)
 }
 
 model AuditLog {
-  id              String   @id @default(cuid())
-  action          String   // e.g., "ARTICLE_STATUS_CHANGE", "USER_LOGIN", "DOI_ASSIGNED"
-  entityType      String   // "ARTICLE", "USER", "ISSUE", "REVIEW"
-  entityId        String?
-  userId          String?  // The actor
-  details         Json?    // { oldStatus: "PENDING", newStatus: "REVIEW" }
-  createdAt       DateTime @default(now())
+  id         String   @id @default(cuid())
+  action     String
+  entityType String
+  entityId   String?
+  userId     String?
+  details    Json?
+  createdAt  DateTime @default(now())
+  user       User?    @relation(fields: [userId], references: [id])
 
-  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   @@index([userId])
   @@index([entityId])
 }
 
 model PageView {
-  id              String   @id @default(cuid())
-  path            String   // e.g., "/article/cm123"
-  ipHash          String?  // Anonymized/Hashed IP
-  userAgent       String?
-  userId          String?  // Track if logged in
-  referrer        String?
-  createdAt       DateTime @default(now())
+  id        String   @id @default(cuid())
+  path      String
+  ipHash    String?
+  userAgent String?
+  userId    String?
+  referrer  String?
+  createdAt DateTime @default(now())
 
   @@index([path])
   @@index([createdAt])
 }
 
 model User {
-  id               String    @id @default(cuid())
-  email            String    @unique
+  id               String     @id @default(cuid())
+  email            String     @unique
   password         String
   name             String?
-  role             String    @default("AUTHOR")
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  role             String     @default("AUTHOR")
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
   affiliation      String?
   biography        String?
   interests        String?
   orcid            String?
-  country          String?   @default("Pakistan")
+  country          String?    @default("Pakistan")
   resetToken       String?
   resetTokenExpiry DateTime?
-  articles         Article[] @relation("SubmittedArticles")
-  reviewsGiven     Review[]  @relation("ReviewAssignments")
-  
+  articles         Article[]  @relation("SubmittedArticles")
   auditLogs        AuditLog[]
+  reviewsGiven     Review[]   @relation("ReviewAssignments")
 }
 
 model Pricing {

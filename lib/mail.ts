@@ -10,13 +10,35 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendEmail = async ({ to, subject, html }: { to: string; subject: string; html: string }) => {
+export const renderEmail = (title: string, content: string) => `
+  <div style="font-family: 'Times New Roman', Times, serif; color: #002d5e; max-width: 650px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+    <div style="background-color: #002d5e; padding: 30px; text-align: center;">
+      <h1 style="color: #ffffff; margin: 0; font-size: 24px; letter-spacing: 2px; text-transform: uppercase;">PJPS</h1>
+      <p style="color: #94a3b8; margin: 5px 0 0 0; font-size: 12px; font-weight: bold; letter-spacing: 1px;">PAKISTAN JOURNAL OF PHARMACEUTICAL SCIENCES</p>
+    </div>
+    <div style="padding: 40px; line-height: 1.6;">
+      <h2 style="color: #0f172a; margin-top: 0; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 25px;">${title}</h2>
+      <div style="color: #334155; font-size: 15px;">
+        ${content}
+      </div>
+    </div>
+    <div style="background-color: #f8fafc; padding: 30px; text-align: center; border-top: 1px solid #e2e8f0;">
+      <p style="margin: 0; font-size: 12px; color: #64748b; font-weight: bold;">OFFICIAL SCHOLARLY COMMUNICATION</p>
+      <p style="margin: 5px 0 0 0; font-size: 11px; color: #94a3b8;">
+        &copy; ${new Date().getFullYear()} Pakistan Journal of Pharmaceutical Sciences. All rights reserved.
+      </p>
+    </div>
+  </div>
+`;
+
+export const sendEmail = async ({ to, subject, html, title }: { to: string; subject: string; html: string; title?: string }) => {
   try {
+    const finalHtml = title ? renderEmail(title, html) : html;
     const info = await transporter.sendMail({
-      from: `"PJPS Editorial Office" <${process.env.SMTP_FROM}>`,
+      from: `"PJPS" <${process.env.SMTP_FROM}>`,
       to,
       subject,
-      html,
+      html: finalHtml,
     });
     console.log('Message sent: %s', info.messageId);
     return { success: true, messageId: info.messageId };

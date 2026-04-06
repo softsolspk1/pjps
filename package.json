@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
-    "seed": "node prisma/seed.js"
+    "seed": "node prisma/seed.js",
+    "migrate": "tsx scripts/migrate-articles.ts"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
@@ -16,10 +17,14 @@
   "dependencies": {
     "@prisma/client": "^5.22.0",
     "@types/file-saver": "^2.0.7",
+    "axios": "^1.14.0",
     "bcryptjs": "^3.0.3",
+    "cheerio": "^1.2.0",
     "docx": "^8.5.0",
+    "dotenv": "^17.4.0",
     "file-saver": "^2.0.5",
     "html-to-text": "^9.0.5",
+    "https": "^1.0.0",
     "next": "16.2.2",
     "nodemailer": "^8.0.4",
     "pg": "^8.20.0",
@@ -30,7 +35,8 @@
     "react-to-print": "^3.3.0"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/cheerio": "^0.22.35",
+    "@types/node": "^20.19.39",
     "@types/nodemailer": "^7.0.11",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -41,6 +47,8 @@
     "jose": "^6.2.2",
     "lucide-react": "^1.7.0",
     "next-auth": "^4.24.13",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }
