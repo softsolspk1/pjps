@@ -1,8 +1,10 @@
 :root {
   --primary-navy: #002d5e;
+  --text-main: #334155;
   --bg-soft: #f8fafc;
   --border-light: #e2e8f0;
   --border-medium: #cbd5e1;
+  --shadow-premium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 .container {
@@ -11,7 +13,7 @@
   background: white;
   padding: 40px;
   border-radius: 12px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-premium);
 }
 
 .toolHeader {
@@ -28,230 +30,684 @@
   gap: 12px;
 }
 
-/* ── Editor Section ── */
-.editorSection { margin-bottom: 35px; }
+/* Editor Section Styles */
+.editorSection {
+  margin-bottom: 35px;
+  animation: fadeIn 0.4s ease-out;
+}
+
 .label {
-  display: block; font-weight: 800; color: var(--primary-navy);
-  margin-bottom: 12px; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.15em;
+  display: block;
+  font-weight: 800;
+  color: var(--primary-navy);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
 }
-.titleField {
-  width: 100%; padding: 18px 24px; border: 1px solid var(--border-medium);
-  border-radius: 8px; font-size: 1.2rem; font-family: "Times New Roman", Times, serif; font-weight: 700;
-  color: #1a1a1a; outline: none; transition: 0.3s baseline;
-}
-.titleField:focus { border-color: var(--primary-navy); }
 
-/* Authors & Meta */
+.manuscriptBox {
+  background: white;
+  border: 1.5pt solid #cbd5e1;
+  border-radius: 12px;
+  box-shadow: 0 4px 6pt rgba(0,0,0,0.02);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.manuscriptBox:focus-within {
+  border-color: var(--primary-navy);
+  box-shadow: 0 8pt 16pt rgba(0, 45, 94, 0.08);
+}
+
 .authorsGrid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
 }
-.authorCard {
-  background: var(--bg-soft); padding: 24px; border-radius: 8px; border: 1px solid var(--border-light);
-}
-.authorInput {
-  width: 100%; padding: 10px 14px; margin-bottom: 10px; border: 1px solid var(--border-medium); border-radius: 6px;
-}
-.metadataGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
 
-/* ── PREVIEW WRAPPER ── */
-.previewBackground {
-  background: #525659;
-  padding: 40px 0;
+.authorCard {
+  background: var(--bg-soft);
+  padding: 24px;
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.authorCard:hover {
+  border-color: var(--primary-navy);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 45, 94, 0.05);
+}
+
+.authorInput {
+  width: 100%;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border-medium);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.authorInput:focus {
+  border-color: var(--primary-navy);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 45, 94, 0.1);
+}
+
+.titleField {
+  width: 100%;
+  padding: 18px 24px;
+  border: 1px solid var(--border-medium);
+  border-radius: 8px;
+  font-size: 1.6rem;
+  font-family: "Times New Roman", Times, serif;
+  font-weight: 700;
+  color: #1a1a1a;
+  outline: none;
+  transition: all 0.3s ease;
+  line-height: 1.3;
+}
+
+.titleField:focus {
+  border-color: var(--primary-navy);
+  box-shadow: 0 0 0 4px rgba(0, 45, 94, 0.08);
+}
+
+/* Metadata Fields Row */
+.metadataGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+/* ARTICLE PREVIEW (A4 Simulation) */
+.articleViewport {
+  background: #cbd5e1;
+  padding: 60px 20px;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  min-height: 80vh;
+  min-height: 800px;
   overflow-y: auto;
 }
 
-/* ── EXACT A4 PAGE COMPONENT ── */
-.a4Page {
-  width: 210mm;
-  min-height: 297mm;
-  background: #ffffff;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-  margin: 0 auto 40px;
-  position: relative;
-  /* Exact PJPS formatting from reference */
-  padding: 25mm 20mm 20mm 20mm;
-  box-sizing: border-box;
-
-  /* Typography Base */
-  font-family: "Times New Roman", Times, serif;
-  color: #000;
+.hiddenForPrint {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+  visibility: hidden;
+  height: 0;
+  overflow: hidden;
 }
 
-/* Header & Top */
-.pjpsHeader {
+.articlePreview {
+  width: 210mm; 
+  background: white;
+  /* PJPS standard: 2.5cm top/bottom, 2cm left/right */
+  padding: 2.5cm 2cm;
+  box-shadow: 0 0 30px rgba(0,0,0,0.15);
+  font-family: "Times New Roman", Times, serif;
+  font-size: 10pt;
+  color: black;
+  /* FIX 1: Was 1.1 — PJPS spec is 1.35 */
+  line-height: 1.35;
+  position: relative;
+  min-height: 297mm;
+  margin: 0 auto;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* Journal Header Styles */
+.journalHeader {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
+  font-size: 9pt;
+  margin-bottom: 18pt;
+  color: #000;
   border-bottom: 0.5pt solid #000;
-  padding-bottom: 4pt;
-  margin-bottom: 24pt;
+  padding-bottom: 5pt;
 }
-.pjpsHeaderLeft { font-size: 9pt; font-style: italic; }
-.pjpsHeaderRight { font-size: 9pt; font-weight: bold; }
 
-/* Article Meta */
+.journalHeaderLeft {
+  font-style: italic;
+  max-width: 70%;
+}
+
+.journalHeaderRight {
+  font-weight: bold;
+}
+
 .articleTitle {
   font-size: 16pt;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 16pt;
+  margin-bottom: 14pt;
+  line-height: 1.3;
   text-transform: uppercase;
-  line-height: 1.25;
+  color: #000;
+  letter-spacing: 0.01em;
 }
+
 .articleAuthors {
+  text-align: center;
   font-size: 12pt;
   font-weight: bold;
-  text-align: center;
   margin-bottom: 6pt;
-}
-.articleAffiliations {
-  font-size: 10pt;
-  text-align: center;
-  font-style: italic;
-  margin-bottom: 24pt;
-}
-.articleAffiliations div {
-  margin-bottom: 2pt;
+  line-height: 1.4;
 }
 
-/* Abstract & Meta */
+.articleAffiliations {
+  text-align: center;
+  font-size: 10pt;
+  margin-bottom: 18pt;
+  color: #000;
+  line-height: 1.45;
+  font-style: italic;
+}
+
+/* Abstract & Keywords */
 .abstractBlock {
   font-size: 10pt;
+  margin-bottom: 10pt;
   text-align: justify;
   line-height: 1.35;
-  margin-bottom: 8pt;
-}
-.keywordsBlock {
-  font-size: 10pt;
-  margin-bottom: 12pt;
-}
-.datesBlock {
-  font-size: 9pt;
-  font-style: italic;
-  border-bottom: 0.5pt solid #000;
-  padding-bottom: 4pt;
-  margin-bottom: 18pt;
 }
 
-/* ── TWO-COLUMN SECTION ── */
-.twoColumnArea {
+.keywordsBlock {
+  font-size: 9.5pt;
+  margin-bottom: 12pt;
+  line-height: 1.4;
+}
+
+.dateLine {
+  font-size: 9pt;
+  font-style: italic;
+  margin-bottom: 20pt;
+  border-bottom: 0.75pt solid black;
+  padding-bottom: 6pt;
+  text-align: left;
+}
+
+/* TWO COLUMN BODY - OPTIMIZED FOR SCHOLARLY JOURNALS */
+.scientificBody {
   column-count: 2;
-  column-gap: 20pt;
+  column-gap: 18pt;
   column-fill: balance;
   text-align: justify;
   font-size: 10pt;
   line-height: 1.35;
-  orphans: 2;
-  widows: 2;
+  orphans: 3;
+  widows: 3;
+  width: 100%;
 }
 
-.sectionBlock {
+.scientificSection {
   margin-bottom: 10pt;
-  break-inside: auto; /* Allow column breaks naturally */
+  position: relative;
+  width: 100%;
+  /* Prevent section heading splitting from body */
+  break-inside: auto;
 }
 
-/* Section Heading (e.g., INTRODUCTION) */
-.sectionTitle {
+/* Keep heading & its first paragraph together */
+.scientificSection .sectionHeading + * {
+  break-before: avoid;
+}
+
+/* SUPPORT FOR FULL WIDTH ASSETS (Tables, Full Graphs) */
+:global(.full-width-asset) {
+  column-span: all !important;
+  width: 100% !important;
+  margin: 18pt 0 !important;
+  background: white;
+  break-inside: avoid;
+}
+
+:global(.img-inside-column) {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block;
+  margin: 10pt auto;
+}
+
+.sectionHeading {
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 6pt;
   font-size: 11pt;
+  display: block;
+  /* Keep heading with its following content */
+  break-after: avoid;
+  page-break-after: avoid;
+  margin-top: 10pt;
+}
+
+/* FOOTNOTE & FOOTER */
+.footnoteArea {
+  column-span: all;
+  margin-top: 20pt;
+  font-size: 8pt;
+  color: #000;
+  break-inside: avoid;
+}
+
+.articleFooter {
+  column-span: all;
+  margin-top: 15pt;
+  border-top: 0.75pt solid black;
+  padding-top: 4pt;
+  display: flex;
+  justify-content: space-between;
+  font-size: 8.5pt;
+  color: #000;
+}
+
+/* ============================================
+   RICH CONTENT — FIX 2: Full Quill HTML support
+   ============================================ */
+
+/* Paragraphs */
+:global(.rich-content) p {
+  text-align: justify;
+  text-justify: inter-word;
+  margin-bottom: 8pt;
+  line-height: 1.35;
+  display: block;
+  font-size: 10pt;
+}
+
+/* Headings from Quill h1-h4 */
+:global(.rich-content) h1,
+:global(.rich-content) h2,
+:global(.rich-content) h3,
+:global(.rich-content) h4 {
+  font-family: "Times New Roman", Times, serif;
   font-weight: bold;
   text-transform: uppercase;
   margin-top: 10pt;
   margin-bottom: 6pt;
-  break-after: avoid; /* Keep with following paragraph */
+  break-after: avoid;
   page-break-after: avoid;
+  line-height: 1.2;
 }
+:global(.rich-content) h1 { font-size: 12pt; }
+:global(.rich-content) h2 { font-size: 11pt; }
+:global(.rich-content) h3 { font-size: 10.5pt; font-style: italic; text-transform: none; }
+:global(.rich-content) h4 { font-size: 10pt; font-style: italic; text-transform: none; }
 
-/* ── QUILL HTML RENDERING IN PREVIEW ── */
-.richText p {
-  text-align: justify;
-  text-justify: inter-word;
+/* Ordered & Unordered Lists */
+:global(.rich-content) ul,
+:global(.rich-content) ol {
+  margin: 6pt 0 6pt 18pt;
+  padding: 0;
   font-size: 10pt;
   line-height: 1.35;
-  margin-bottom: 8pt;
 }
-.richText h1 { font-size: 11pt; font-weight: bold; text-transform: uppercase; margin: 10pt 0 6pt; break-after: avoid; }
-.richText h2 { font-size: 10pt; font-weight: bold; text-transform: uppercase; margin: 8pt 0 4pt; break-after: avoid; }
-.richText h3 { font-size: 10pt; font-style: italic; font-weight: bold; margin: 6pt 0 4pt; break-after: avoid; }
-.richText h4 { font-size: 10pt; font-style: italic; margin: 6pt 0 4pt; break-after: avoid; }
+:global(.rich-content) li {
+  margin-bottom: 3pt;
+}
 
-.richText ul, .richText ol { margin: 4pt 0 4pt 16pt; font-size: 10pt; line-height: 1.35; }
-.richText li { margin-bottom: 2pt; }
-.richText sup { font-size: 7pt; vertical-align: super; }
-.richText sub { font-size: 7pt; vertical-align: sub; }
+/* Superscript & Subscript (critical for chemical formulas) */
+:global(.rich-content) sup {
+  font-size: 7pt;
+  vertical-align: super;
+  line-height: 0;
+}
+:global(.rich-content) sub {
+  font-size: 7pt;
+  vertical-align: sub;
+  line-height: 0;
+}
 
-.richText img {
+/* Bold, Italic, Underline */
+:global(.rich-content) strong, :global(.rich-content) b { font-weight: bold; }
+:global(.rich-content) em, :global(.rich-content) i { font-style: italic; }
+:global(.rich-content) u { text-decoration: underline; }
+
+/* Images inside rich content */
+:global(.rich-content) img {
   max-width: 100%;
   height: auto;
+  margin: 12pt 0;
   display: block;
-  margin: 12pt auto;
 }
 
-.richText table {
+/* Scientific Table Formatting — FIX 3: Full PJPS table spec */
+:global(.rich-content) table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 8.5pt;
   margin: 12pt 0;
-  border-top: 1pt solid black;
-  border-bottom: 1pt solid black;
+  font-size: 8.5pt;
+  border-top: 1.5pt solid black;
+  border-bottom: 1.5pt solid black;
+  break-inside: avoid;
+  column-span: all;
 }
-.richText th { border-bottom: 0.5pt solid black; padding: 4pt 2pt; text-align: left; }
-.richText td { border-bottom: 0.5pt dotted #ccc; padding: 4pt 2pt; text-align: left; }
 
-/* References special formatting */
-.referencesBlock .richText p {
+:global(.rich-content) th {
+  border-bottom: 1pt solid black;
+  padding: 4pt 5pt;
+  text-align: left;
+  font-weight: bold;
+  font-size: 8.5pt;
+  background: white;
+}
+
+:global(.rich-content) td {
+  padding: 3.5pt 5pt;
+  border-bottom: 0.5pt solid #999;
+  text-align: left;
+  font-size: 8.5pt;
+}
+
+/* References section — hanging indent */
+.scientificSection:last-child :global(.rich-content) p {
   padding-left: 18pt;
   text-indent: -18pt;
   font-size: 9pt;
-  margin-bottom: 4pt;
+  line-height: 1.3;
+  margin-bottom: 5pt;
 }
 
-/* Footer elements */
-.footnoteBlock {
-  column-span: all; /* Important: Spans below columns if at bottom */
-  font-size: 8pt;
-  border-top: 0.5pt solid #000;
-  padding-top: 4pt;
-  margin-top: 24pt;
-  break-inside: avoid;
-}
-
-/* ── PRINT MEDIA DIRECTIVES ── */
+/* ============================================
+   @MEDIA PRINT — FIX 1 CONTINUED
+   Complete suppression of all editor chrome
+   ============================================ */
 @media print {
   @page {
     size: A4;
-    margin: 0; /* Let .a4Page handle margins */
-  }
-
-  body {
-    background: white;
     margin: 0;
-    padding: 0;
   }
 
-  body * {
-    visibility: hidden; /* Hide all Next.js UI */
-  }
+  /* Hide EVERYTHING that is not the article preview */
+  body * { visibility: hidden; }
+  
+  /* Only make the print target and its children visible */
+  .articlePreview,
+  .articlePreview * { visibility: visible; }
 
-  .a4Page, .a4Page * {
-    visibility: visible;
-  }
-
-  /* Reset positioning for the A4 sheet so it starts exactly at Top-Left */
-  .a4Page {
-    position: absolute;
-    left: 0;
+  /* Position the preview to fill the page */
+  .articlePreview {
+    position: fixed;
     top: 0;
-    margin: 0;
+    left: 0;
+    width: 210mm;
+    height: auto;
+    min-height: 297mm;
     box-shadow: none;
     border: none;
+    margin: 0;
+    padding: 2.0cm 1.8cm;
+    font-size: 10pt;
+    line-height: 1.35;
   }
 
-  .twoColumnArea {
-    /* Enforce CSS columns on print engines that support it */
+  /* Ensure column layout holds in print */
+  .scientificBody {
     column-count: 2;
-    column-gap: 20pt;
+    column-gap: 18pt;
   }
+
+  /* Prevent orphan headings */
+  .sectionHeading {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  /* Tables and full-width figures span both columns */
+  :global(.full-width-asset),
+  :global(.rich-content) table {
+    column-span: all;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* Journal Header Styles */
+.journalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-size: 9pt;
+  margin-bottom: 25pt;
+  color: #000;
+  border-bottom: 0.5pt solid #000;
+  padding-bottom: 5pt;
+}
+
+.journalHeaderLeft {
+  font-style: italic;
+  max-width: 70%;
+}
+
+.journalHeaderRight {
+  font-weight: bold;
+}
+
+.articleTitle {
+  font-size: 16pt;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20pt;
+  line-height: 1.3;
+  text-transform: capitalize;
+  color: #000;
+}
+
+.articleAuthors {
+  text-align: center;
+  font-size: 12pt;
+  font-weight: bold;
+  margin-bottom: 8pt;
+}
+
+.articleAffiliations {
+  text-align: center;
+  font-size: 10pt;
+  margin-bottom: 25pt;
+  color: #000;
+  line-height: 1.4;
+}
+
+/* Abstract & Keywords */
+.abstractBlock {
+  font-size: 10pt;
+  margin-bottom: 12pt;
+  text-align: justify;
+  line-height: 1.3;
+}
+
+.keywordsBlock {
+  font-size: 9.5pt;
+  margin-bottom: 15pt;
+}
+
+.dateLine {
+  font-size: 9pt;
+  font-style: italic;
+  margin-bottom: 25pt;
+  border-bottom: 0.75pt solid black;
+  padding-bottom: 8pt;
+  text-align: left;
+}
+
+/* TWO COLUMN BODY - OPTIMIZED FOR SCHOLARLY JOURNALS */
+.scientificBody {
+  column-count: 2;
+  column-gap: 20pt; /* Tightened from 28pt to match journal standard */
+  column-fill: balance;
+  text-align: justify;
+  font-size: 10pt;
+  line-height: 1.35;
+  orphans: 3;
+  widows: 3;
+  width: 100%;
+}
+
+.scientificSection {
+  margin-bottom: 12pt;
+  position: relative;
+  width: 100%;
+  break-inside: avoid-column; /* Prevent headings from splitting */
+}
+
+/* SUPPORT FOR FULL WIDTH ASSETS */
+:global(.full-width-asset) {
+  column-span: all !important;
+  width: 100% !important;
+  margin: 25pt 0 !important;
+  background: white;
+  z-index: 10;
+}
+
+:global(.img-inside-column) {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+.sectionHeading {
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 8pt;
+  font-size: 12pt;
+  display: block;
+  break-after: avoid;
+  margin-top: 5pt;
+}
+
+/* FOOTNOTE & FOOTER */
+.footnoteArea {
+  position: relative;
+  margin-top: 25pt;
+  font-size: 8pt;
+  color: #000;
+  break-inside: avoid;
+}
+
+.articleFooter {
+  position: absolute;
+  bottom: 10mm;
+  left: 20mm;
+  right: 20mm;
+  border-top: 0.75pt solid black;
+  padding-top: 5pt;
+  display: flex;
+  justify-content: space-between;
+  font-size: 8.5pt;
+  color: #000;
+}
+
+/* Table & Figure Styling */
+.tableContainer {
+  margin: 15pt 0;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.tableContainer table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 8.5pt;
+  border-top: 1.5pt solid black;
+  border-bottom: 1.5pt solid black;
+}
+
+.tableContainer th {
+  border-bottom: 1pt solid black;
+  padding: 5pt;
+  text-align: left;
+}
+
+.figureContainer {
+  margin: 20pt 0;
+  text-align: center;
+}
+
+.figureCaption {
+  font-weight: bold;
+  font-size: 8.5pt;
+  margin-top: 8pt;
+  display: block;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  body { background: white; margin: 0; padding: 0; }
+  .container { box-shadow: none; padding: 0; margin: 0; max-width: none; }
+  .toolHeader, .controls, .editorSection, .authorsGrid, .authorsHeader { display: none !important; }
+  .articleViewport { background: white; padding: 0; margin: 0; display: block; }
+  .articlePreview { 
+    box-shadow: none; 
+    width: 210mm; 
+    height: 297mm; 
+    border: none;
+    margin: 0;
+    padding: 2.0cm 1.8cm;
+  }
+}
+
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Rich Content Column Scaling & Tables */
+.rich-content p {
+  text-align: justify;
+  text-justify: inter-word;
+  margin-bottom: 10pt;
+  line-height: 1.4;
+  display: block;
+}
+
+/* References Hanging Indent Style (Targeting the last section which is References) */
+.scientificSection:last-child .rich-content p {
+  padding-left: 20pt;
+  text-indent: -20pt;
+  font-size: 9pt;
+}
+
+.rich-content img {
+  max-width: 100%;
+  height: auto;
+  margin: 15pt 0;
+  display: block;
+  border-radius: 2px;
+}
+
+/* Scientific Table Formatting */
+.rich-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15pt 0;
+  font-size: 8.5pt;
+  border-top: 1.5pt solid black;
+  border-bottom: 1.5pt solid black;
+}
+
+.rich-content th, .rich-content td {
+  padding: 6pt;
+  border-bottom: 0.5pt solid #ccc;
+  text-align: left;
+}
+
+.rich-content th {
+  border-bottom: 1.2pt solid black;
+  font-weight: bold;
 }
