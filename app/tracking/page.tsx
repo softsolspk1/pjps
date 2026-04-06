@@ -1,8 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import styles from './TrackingPage.module.css';
-import { Search, FileText, CheckCircle, Clock, AlertCircle, Loader2, ArrowRight, ShieldCheck, Info } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import RoleLayout from '@/components/RoleLayout';
+import { 
+  Search, FileText, CheckCircle, Clock, 
+  AlertCircle, Loader2, ShieldCheck, 
+  Info, ChevronRight, Globe,
+  Layers, Radio
+} from 'lucide-react';
 
 const STEPS = [
   { id: 'SUBMITTED', label: 'Scholarly Submission', desc: 'Initial registration in the editorial registry.' },
@@ -14,27 +20,31 @@ const STEPS = [
 ];
 
 export default function TrackingPage() {
+  const { data: session } = useSession();
   const [refId, setRefId] = useState('');
   const [article, setArticle] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!refId.trim()) return;
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    if (id) {
+      setRefId(id);
+      performSearch(id);
+    }
+  }, []);
 
+  const performSearch = async (id: string) => {
+    if (!id) return;
     setLoading(true);
     setError('');
     setArticle(null);
 
     try {
-      const res = await fetch(`/api/tracking?id=${refId}`);
+      const res = await fetch(`/api/tracking?id=${id}`);
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Reference ID not found in scholarly registry.');
-      }
-
+      if (!res.ok) throw new Error(data.error || 'Reference ID not found.');
       setArticle(data);
     } catch (err: any) {
       setError(err.message);
@@ -43,155 +53,166 @@ export default function TrackingPage() {
     }
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!refId.trim()) return;
+    performSearch(refId);
+  };
+
   const getStatusIndex = (status: string) => {
     if (status === 'REJECTED') return -1;
-    if (status === 'IN_REVIEW') return 2; // Mapping legacy status
+    if (status === 'IN_REVIEW') return 2;
     return STEPS.findIndex(s => s.id === status);
   };
 
-  return (
-    <div className={styles.pageContainer}>
-      <header className={styles.header}>
-         <div className={styles.badge}>Live Editorial Registry</div>
-         <h1 className={styles.title}>Manuscript Monitoring</h1>
-         <p className={styles.subtitle}>Tracking scholarly research through the PJPS editorial lifecycle.</p>
-      </header>
-
-      <section className={styles.searchSection}>
-         <form onSubmit={handleSearch} className={styles.searchForm}>
-            <div className={styles.inputGroup}>
-               <label className={styles.inputLabel}>Manuscript Reference Identifier</label>
-               <div className="relative flex items-center">
-                  <Search size={20} className="absolute left-4 text-slate-400" />
+  const TrackingContent = (
+    <div className="max-w-6xl mx-auto py-10 px-6 space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      
+      {/* Platinum Hero Banner */}
+      <div className="relative p-12 bg-slate-900 rounded-[3.5rem] text-white shadow-2xl overflow-hidden group border border-white/5">
+         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 blur-[100px] rounded-full group-hover:scale-110 transition-all duration-1000" />
+         <div className="relative z-10">
+            <div className="flex items-center gap-4 mb-8">
+                <div className="px-5 py-1.5 bg-white/10 border border-white/10 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">Live Monitoring Service</div>
+                <div className="flex items-center gap-2 text-emerald-400 text-[10px] font-black uppercase tracking-[0.2em]">
+                   <ShieldCheck size={14} /> Peer-Review Integrity Verified
+                </div>
+            </div>
+            <h1 className="text-5xl font-serif font-black mb-4 tracking-tight leading-tight">Manuscript Lifecycle Analysis</h1>
+            <p className="text-slate-400 font-medium text-lg leading-relaxed max-w-2xl mb-10">
+               Monitor the real-time editorial progress of your scholarly contribution. Access institutional metadata and current phase evaluation analysis.
+            </p>
+            
+            <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4 max-w-xl">
+               <div className="flex-1 flex items-center gap-4 px-6 py-4 bg-white/5 border border-white/10 rounded-2xl focus-within:border-blue-500 transition-all">
+                  <Search size={20} className="text-slate-500" />
                   <input 
                     type="text" 
-                    required
-                    className={styles.input}
-                    style={{ paddingLeft: '50px' }}
-                    placeholder="Enter your tracking hash (e.g. clm7c...)"
+                    placeholder="Enter Reference ID (e.g. clm7c...)" 
+                    className="bg-transparent border-none outline-none text-xs font-black uppercase tracking-widest text-white w-full placeholder:text-slate-600"
                     value={refId}
                     onChange={(e) => setRefId(e.target.value)}
                   />
                </div>
-            </div>
-            <button type="submit" className={styles.submitBtn} disabled={loading}>
-              {loading ? (
-                <div className="flex items-center gap-2"><Loader2 className="animate-spin" size={16} /> Verifying...</div>
-              ) : (
-                "Query Registry"
-              )}
-            </button>
-         </form>
+               <button type="submit" disabled={loading} className="px-10 py-4 bg-white text-slate-900 text-[11px] font-black uppercase tracking-widest rounded-2xl hover:bg-slate-100 transition-all shadow-xl active:scale-95 disabled:opacity-50">
+                  {loading ? 'Consulting Registry...' : 'Query Registry'}
+               </button>
+            </form>
+         </div>
+      </div>
 
-         {error && (
-           <div className="mt-6 flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600">
-              <AlertCircle size={20} />
-              <div className="text-[11px] font-black uppercase tracking-widest">Search Failure: {error}</div>
-           </div>
-         )}
-      </section>
+      {error && (
+         <div className="p-6 bg-red-50 border border-red-100 rounded-3xl flex items-center gap-4 animate-shake">
+            <AlertCircle size={24} className="text-red-600" />
+            <div className="text-red-900 font-black text-[11px] uppercase tracking-widest">Inquiry Failure: {error}</div>
+         </div>
+      )}
 
-      {!article && !loading && !error && (
-        <div className={styles.emptyState}>
-           <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
-              <FileText size={32} />
+      {article ? (
+        <div className="space-y-12">
+           {/* Article Insight Card */}
+           <div className="bg-white border border-slate-100 rounded-[3rem] shadow-premium p-10 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-10 flex flex-col items-end gap-2">
+                 <div className="bg-slate-900 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg">ID: {article.id.slice(0, 12).toUpperCase()}</div>
+                 <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic">{new Date(article.createdAt).toLocaleDateString(undefined, { dateStyle: 'full' })}</div>
+              </div>
+              
+              <div className="max-w-3xl mb-12">
+                 <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-4 py-1.5 rounded-full uppercase tracking-widest mb-6 inline-block">Institutional Registry Profile</span>
+                 <h2 className="text-3xl font-serif font-black text-slate-900 leading-tight tracking-tight uppercase">{article.title}</h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                 {[
+                   { label: 'Evaluation Protocol', value: `${article.reviewType || 'Blind'} Peer Review`, icon: ShieldCheck, color: 'text-blue-600' },
+                   { label: 'Submitter Role', value: 'Primary Corresponding Author', icon: Info, color: 'text-slate-400' },
+                   { label: 'Editorial Status', value: article.status.replace(/_/g, ' '), icon: FileText, color: 'text-emerald-600' }
+                 ].map((stat, i) => (
+                   <div key={i} className="p-6 bg-slate-50 border border-slate-100 rounded-3xl hover:border-blue-200 transition-all group">
+                      <div className="flex items-center gap-3 mb-3">
+                         <stat.icon size={16} className={stat.color} />
+                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</span>
+                      </div>
+                      <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{stat.value}</p>
+                   </div>
+                 ))}
+              </div>
            </div>
-           <p className={styles.emptyText}>
-             Provide your scholarly reference identifier <br/> to monitor the editorial progress of your গবেষণা.
+
+           {/* Dynamic Timeline */}
+           <div className="bg-white border border-slate-100 rounded-[3rem] shadow-premium p-12">
+              <div className="flex items-center justify-between mb-16 px-4">
+                 <h3 className="text-2xl font-serif font-black text-slate-900 tracking-tight">Lifecycle Progression Analysis</h3>
+                 <div className="flex items-center gap-3 text-[10px] font-black text-emerald-600 bg-emerald-50 px-5 py-2 rounded-full uppercase tracking-widest">
+                    <Clock size={16} /> Real-time Synchronized
+                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                 {STEPS.map((step, idx) => {
+                    const currentIdx = getStatusIndex(article.status);
+                    const isCompleted = idx < currentIdx;
+                    const isActive = idx === currentIdx;
+                    const isUpcoming = idx > currentIdx;
+
+                    return (
+                      <div key={step.id} className={`relative p-8 rounded-[2rem] border transition-all duration-500 ${isActive ? 'bg-blue-600 border-blue-600 text-white shadow-2xl scale-105 z-10' : 'bg-slate-50 border-slate-100'}`}>
+                         <div className="flex items-start justify-between mb-6">
+                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center border transition-colors ${isActive ? 'bg-white/20 border-white/20 text-white' : isCompleted ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-white border-slate-100 text-slate-300'}`}>
+                               {isCompleted ? <CheckCircle size={24} /> : <span className="text-lg font-black">{idx + 1}</span>}
+                            </div>
+                            {isActive && <div className="px-3 py-1 bg-white text-blue-600 text-[8px] font-black uppercase tracking-widest rounded-full animate-pulse shadow-lg">Current Phase</div>}
+                         </div>
+                         <h4 className={`text-base font-black uppercase tracking-tight mb-2 ${isActive ? 'text-white' : 'text-slate-900'}`}>{step.label}</h4>
+                         <p className={`text-xs font-medium leading-relaxed ${isActive ? 'text-blue-100' : 'text-slate-500'}`}>{step.desc}</p>
+                      </div>
+                    );
+                 })}
+              </div>
+           </div>
+        </div>
+      ) : !loading && (
+        <div className="py-20 text-center">
+           <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-8 border border-slate-100 text-slate-200">
+              <FileText size={48} />
+           </div>
+           <p className="text-slate-400 font-medium text-lg leading-relaxed max-w-md mx-auto italic">
+              Input your unique scholarly reference hash to initiate a real-time monitor of the editorial registry.
            </p>
         </div>
       )}
 
-      {article && (
-        <div className={styles.resultContainer}>
-           <div className={styles.articleCard}>
-              <div className="flex justify-between items-start mb-8">
-                 <div>
-                    <span className={styles.articleBadge}>Institutional Registry Profile</span>
-                    <h2 className={styles.articleTitle}>{article.title}</h2>
-                 </div>
-                 <div className="bg-slate-900 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest">
-                    ID: {article.id.slice(0, 10)}
-                 </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                 <div className="p-4 bg-white border border-slate-100 rounded-2xl">
-                    <span className={styles.metaLabel}><Clock size={12} /> Date Logged</span>
-                    <p className={styles.metaValue}>{new Date(article.createdAt).toLocaleDateString(undefined, { dateStyle: 'long' })}</p>
-                 </div>
-                 <div className="p-4 bg-white border border-slate-100 rounded-2xl">
-                    <span className={styles.metaLabel}><Info size={12} /> Evaluation Type</span>
-                    <p className={styles.metaValue}>{article.reviewType || 'Blind'} Peer Review</p>
-                 </div>
-                 <div className="p-4 bg-white border border-slate-100 rounded-2xl">
-                    <span className={styles.metaLabel}><ShieldCheck size={12} /> Editorial Status</span>
-                    <p className={styles.metaValue} style={{ color: '#0061ff' }}>{article.status.replace('_', ' ')}</p>
-                 </div>
-              </div>
-           </div>
+      {/* Footer Branding */}
+      <div className="pt-10 flex flex-wrap justify-center items-center gap-12 text-slate-300 grayscale opacity-40">
+         <div className="flex items-center gap-3">
+            <ShieldCheck size={20} />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Institutional Integrity</span>
+         </div>
+         <div className="flex items-center gap-3">
+            <Globe size={20} />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Cope Compliant</span>
+         </div>
+         <div className="flex items-center gap-3">
+            <Layers size={20} />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Real-time Tracking</span>
+         </div>
+      </div>
+    </div>
+  );
 
-           <div className={styles.timelineSection}>
-              <div className="flex items-center justify-between mb-12">
-                 <h3 className={styles.timelineHeading}>Editorial Lifecycle Analysis</h3>
-                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic flex items-center gap-2">
-                    <Clock size={14} /> Real-time Monitoring Active
-                 </div>
-              </div>
-              
-              <div className={styles.timeline}>
-                 {STEPS.map((step, idx) => {
-                   const currentIdx = getStatusIndex(article.status);
-                   const isCompleted = idx < currentIdx;
-                   const isActive = idx === currentIdx;
-                   const isUpcoming = idx > currentIdx;
+  const isAuthor = (session?.user as any)?.role === 'AUTHOR';
 
-                   return (
-                     <div key={step.id} className={styles.step}>
-                        {idx !== STEPS.length - 1 && (
-                          <div className={`${styles.stepLine} ${isCompleted ? styles.stepLineActive : ''}`} />
-                        )}
-                        <div className={`
-                          ${styles.bullet} 
-                          ${isCompleted ? styles.bulletActive : ''} 
-                          ${isActive ? 'bg-blue-600 border-blue-600 scale-125 !shadow-[0_0_0_6px_rgba(0,97,255,0.15)]' : ''}
-                          ${isUpcoming ? 'opacity-20' : ''}
-                        `}>
-                           {isCompleted && <CheckCircle size={14} className="text-white" />}
-                        </div>
-                        <div className={`${styles.stepContent} ${isUpcoming ? 'opacity-30' : ''}`}>
-                           <h4 className={styles.stepLabel} style={isActive ? { color: '#0061ff', fontWeight: 900 } : {}}>
-                              {step.label}
-                              {isActive && <span className="ml-3 bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-tighter">Current Phase</span>}
-                           </h4>
-                           <p className={styles.stepDesc}>{step.desc}</p>
-                        </div>
-                     </div>
-                   );
-                 })}
-              </div>
-           </div>
+  if (isAuthor) {
+    return (
+      <RoleLayout role="AUTHOR">
+        {TrackingContent}
+      </RoleLayout>
+    );
+  }
 
-           {article.status === 'REJECTED' && (
-              <div className="mt-12 p-10 bg-red-50 border border-red-100 rounded-[32px] text-center">
-                 <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <AlertCircle size={32} />
-                 </div>
-                 <h3 className="text-sm font-black text-red-900 uppercase tracking-widest mb-3">Registry Final Decision: Declined</h3>
-                 <p className="text-xs text-red-700 leading-relaxed max-w-md mx-auto">This manuscript has been determined to be outside the scoping technical criteria for the <strong>Pakistan Journal of Pharmaceutical Sciences</strong> following formal editorial review.</p>
-              </div>
-           )}
-           
-           <div className="mt-16 text-center">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Official PJPS Scholarly Portal</p>
-              <div className="flex items-center justify-center gap-6">
-                 <ShieldCheck size={20} className="text-slate-200" />
-                 <Info size={20} className="text-slate-200" />
-                 <FileText size={20} className="text-slate-200" />
-              </div>
-           </div>
-        </div>
-      )}
+  return (
+    <div className="min-h-screen bg-slate-50">
+       {TrackingContent}
     </div>
   );
 }

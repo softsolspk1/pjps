@@ -18,19 +18,24 @@ export default function LayoutClientWrapper({ children }: { children: React.Reac
     }
   }, [pathname]);
 
-  // Identify administrative pathways
-  const isAdminPage = pathname?.startsWith("/admin") || pathname?.startsWith("/reviewer");
+  // Identify dashboard and scholarly workflow pathways to suppress public navigation
+  const isDashboardRoute = 
+    pathname?.startsWith("/admin") || 
+    pathname?.startsWith("/reviewer") || 
+    pathname?.startsWith("/author") || 
+    pathname?.startsWith("/submission") || 
+    pathname?.startsWith("/tracking");
   
   return (
     <div className="flex-1 flex flex-col">
       <a href="#main-content" className="sr-only focus:not-sr-only skip-link">
         Skip to main content
       </a>
-      <HeaderWrapper />
-      <main id="main-content" className={!isAdminPage ? "public-content-buffer" : "flex-1 flex flex-col"} tabIndex={-1}>
+      {!isDashboardRoute && <HeaderWrapper />}
+      <main id="main-content" className={!isDashboardRoute ? "public-content-buffer" : "flex-1 flex flex-col"} tabIndex={-1}>
         {children}
       </main>
-      <FooterWrapper />
+      {!isDashboardRoute && <FooterWrapper />}
     </div>
   );
 }

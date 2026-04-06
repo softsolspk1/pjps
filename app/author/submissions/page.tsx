@@ -49,77 +49,95 @@ export default function AuthorSubmissionsPage() {
   }
 
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
       
-      {/* Header Area */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <h1 className="text-3xl font-serif font-black text-slate-900 tracking-tight mb-2">My Submissions</h1>
-          <p className="text-slate-500 font-medium text-sm">Manage and track your research portfolio registered within the PJPS portal.</p>
-        </div>
-        <div className="flex items-center gap-4">
-           <div className="flex items-center gap-3 px-6 py-2.5 bg-white rounded-xl border border-slate-100 shadow-sm">
-             <Search size={16} className="text-slate-400" />
-             <input type="text" placeholder="Search my research..." className="bg-transparent border-none outline-none text-xs font-bold text-slate-900 w-48" />
-           </div>
-           <Link 
-              href="/submission"
-              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-blue-600/10 flex items-center gap-2 active:scale-95"
-           >
-              <PlusCircle size={14} /> New Submission
-           </Link>
-        </div>
+      {/* Institutional Hero Banner */}
+      <div className="relative p-12 bg-slate-900 rounded-[3.5rem] text-white shadow-2xl overflow-hidden group">
+         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 blur-[100px] rounded-full group-hover:scale-110 transition-all duration-1000" />
+         <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-10">
+            <div className="max-w-2xl">
+                <div className="flex items-center gap-4 mb-8">
+                    <div className="px-5 py-1.5 bg-white/10 border border-white/10 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">Institutional Registry</div>
+                    <div className="flex items-center gap-2 text-emerald-400 text-[10px] font-black uppercase tracking-[0.2em]">
+                       <ShieldCheck size={14} /> Global Scholarly Archive
+                    </div>
+                </div>
+                <h1 className="text-5xl font-serif font-black mb-4 tracking-tight leading-tight">Historical Research Portfolio</h1>
+                <p className="text-slate-400 font-medium text-lg leading-relaxed">
+                   Manage your authenticated manuscript submissions within the PJPS scholarly registry. Access tracking metadata, reviewer feedback, and final publication repositories.
+                </p>
+            </div>
+            <div className="flex flex-col gap-4 min-w-[280px]">
+               <div className="flex items-center gap-4 px-6 py-4 bg-white/5 border border-white/10 rounded-3xl">
+                  <Search size={20} className="text-slate-500" />
+                  <input type="text" placeholder="Search my registry..." className="bg-transparent border-none outline-none text-xs font-black uppercase tracking-widest text-white w-full placeholder:text-slate-600 focus:placeholder:text-slate-400 transition-all" />
+               </div>
+               <Link 
+                  href="/submission"
+                  className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-black uppercase tracking-widest rounded-[1.5rem] transition-all shadow-xl shadow-blue-600/20 flex items-center justify-center gap-3 active:scale-95"
+               >
+                  <PlusCircle size={18} /> Initiate New Submission
+               </Link>
+            </div>
+         </div>
       </div>
 
-      {/* Registry Table */}
-      <div className="bg-white border border-slate-100 rounded-[2.5rem] shadow-premium overflow-hidden">
-        <div className="p-8 border-b border-slate-50 overflow-x-auto">
+      {/* Manuscript Registry Registry Table */}
+      <div className="bg-white border border-slate-100 rounded-[3rem] shadow-premium overflow-hidden">
+        <div className="p-10 border-b border-slate-50 flex items-center justify-between">
+            <h2 className="text-2xl font-serif font-black text-slate-900 flex items-center gap-4">
+               <FileText className="text-blue-600" /> Scholarship History
+            </h2>
+            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-4 py-2 rounded-full border border-slate-100 italic">Institutional Record</div>
+        </div>
+
+        <div className="overflow-x-auto">
           {articles.length === 0 ? (
-            <div className="p-20 text-center flex flex-col items-center">
-              <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-6">
-                <FileText size={40} />
+            <div className="p-32 text-center flex flex-col items-center">
+              <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center text-slate-200 mb-8 border border-slate-100">
+                <Layers size={48} />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">Registry Empty</h3>
-              <p className="text-slate-400 text-sm max-w-xs mx-auto leading-relaxed">
-                You haven't submitted any manuscripts to the PJPS portal yet.
+              <h3 className="text-xl font-black text-slate-900 mb-3 uppercase tracking-tight">Registry Unpopulated</h3>
+              <p className="text-slate-500 text-sm max-w-sm mx-auto leading-relaxed font-medium">
+                Your scholarly research history is currently empty. PJPS welcomes original pharmaceutical inquiries, clinical reviews, and biomedical findings.
               </p>
             </div>
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/50">
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Manuscript ID</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Research Title</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Lifecycle Status</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Date Logged</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                  <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Manuscript ID</th>
+                  <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Research Title</th>
+                  <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] text-center">Lifecycle Status</th>
+                  <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Log Date</th>
+                  <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] text-right">Monitoring</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {articles.map((art) => (
-                  <tr key={art.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <td className="px-8 py-6">
-                      <div className="text-xs font-black text-slate-900 font-mono">#{art.id.slice(-6).toUpperCase()}</div>
+                  <tr key={art.id} className="hover:bg-slate-50/50 transition-colors group cursor-pointer" onClick={() => window.location.href = `/tracking?id=${art.id}`}>
+                    <td className="px-10 py-8">
+                      <div className="text-[11px] font-black text-slate-900 font-mono bg-slate-50 border border-slate-100 px-3 py-1 rounded-lg inline-block shadow-sm">#{art.id.slice(-6).toUpperCase()}</div>
                     </td>
-                    <td className="px-8 py-6">
-                      <div className="font-bold text-slate-800 text-xs mb-1 line-clamp-1 group-hover:text-blue-600 transition-colors">{art.title}</div>
-                      <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{art.issue ? `${art.issue.volume.title}, Issue ${art.issue.number}` : 'Awaiting Publication'}</div>
+                    <td className="px-10 py-8">
+                      <div className="font-black text-slate-900 text-[13px] mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors uppercase tracking-tight leading-tight">{art.title}</div>
+                      <div className="flex items-center gap-2">
+                         <BookOpen size={12} className="text-blue-400" />
+                         <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest">{art.issue ? `${art.issue.volume.title}, Issue ${art.issue.number}` : 'Formal Screening Phase'}</span>
+                      </div>
                     </td>
-                    <td className="px-8 py-6 text-center">
-                      <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.12em] border ${getStatusColor(art.status)}`}>
+                    <td className="px-10 py-8 text-center">
+                      <span className={`px-5 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border shadow-sm ${getStatusColor(art.status)}`}>
                         {art.status.replace(/_/g, ' ')}
                       </span>
                     </td>
-                    <td className="px-8 py-6">
-                      <div className="text-xs font-bold text-slate-600">{format(new Date(art.createdAt), 'MMM dd, yyyy')}</div>
+                    <td className="px-10 py-8">
+                      <div className="text-xs font-black text-slate-700 uppercase tracking-tighter">{format(new Date(art.createdAt), 'MMM dd, yyyy')}</div>
                     </td>
-                    <td className="px-8 py-6 text-right">
-                      <Link 
-                        href={`/tracking?id=${art.id}`}
-                        className="inline-flex items-center gap-2 p-2 border border-slate-100 rounded-lg text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-all active:scale-95"
-                      >
-                         <Search size={18} />
-                      </Link>
+                    <td className="px-10 py-8 text-right">
+                      <div className="inline-flex items-center justify-center w-12 h-12 border border-slate-100 rounded-2xl text-slate-400 group-hover:border-blue-600 group-hover:text-blue-600 transition-all bg-white shadow-sm">
+                         <ChevronRight size={24} />
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -129,47 +147,44 @@ export default function AuthorSubmissionsPage() {
         </div>
       </div>
 
-      {/* Stats Area */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="p-10 bg-slate-900 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden group">
-           <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/10 blur-[100px] rounded-full group-hover:scale-110 transition-all duration-1000" />
-           <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-6">
-                 <div className="p-3 bg-white/5 rounded-2xl text-blue-400">
-                    <ShieldCheck size={24} />
+      {/* Institutional Support Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {[
+           { 
+             title: 'Verified Publication', 
+             desc: 'Global indexing and official DOI assignment for accepted scholarly works.',
+             icon: CheckCircle2,
+             color: 'text-emerald-600',
+             bg: 'bg-emerald-50'
+           },
+           { 
+             title: 'Live Peer Tracking', 
+             desc: 'Monitor real-time lifecycle analysis from screening to final acceptance.',
+             icon: Layers,
+             color: 'text-blue-600',
+             bg: 'bg-blue-50'
+           },
+           { 
+             title: 'Scholarly Protection', 
+             desc: 'Institutional-grade manuscript security and plagiarism verification standards.',
+             icon: ShieldCheck,
+             color: 'text-slate-900',
+             bg: 'bg-slate-100'
+           }
+        ].map((item, i) => (
+           <div key={i} className="p-10 bg-white border border-slate-100 rounded-[3rem] shadow-premium hover:shadow-lg transition-all group overflow-hidden relative">
+              <div className="flex items-center gap-6 mb-8">
+                 <div className={`p-4 ${item.bg} ${item.color} rounded-2xl group-hover:scale-110 transition-transform`}>
+                    <item.icon size={28} />
                  </div>
-                 <h3 className="text-2xl font-serif font-black tracking-tight">Scholarly Protection</h3>
+                 <h4 className="text-xl font-serif font-black text-slate-900 tracking-tight">{item.title}</h4>
               </div>
-              <p className="text-slate-400 font-medium leading-relaxed mb-10">
-                 The PJPS portal ensures the highest standards of manuscript security and plagiarism verification. All submissions undergo initial screening before entering the formal peer review sequence.
-              </p>
-              <div className="flex gap-4">
-                 <div className="px-4 py-2 bg-white/5 rounded-xl border border-white/10 text-[10px] font-black uppercase tracking-widest text-emerald-400">Platinum Access</div>
-                 <div className="px-4 py-2 bg-white/5 rounded-xl border border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-400 italic">Institutional Workspace</div>
+              <p className="text-slate-500 font-medium text-sm leading-relaxed mb-6">{item.desc}</p>
+              <div className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest">
+                 Learn More <ChevronRight size={14} />
               </div>
            </div>
-        </div>
-        
-        <div className="grid grid-cols-1 gap-6">
-           <div className="p-8 bg-white border border-slate-100 rounded-[2.5rem] shadow-premium flex items-center gap-6">
-             <div className="p-5 bg-emerald-50 text-emerald-600 rounded-[1.5rem] flex-shrink-0">
-               <CheckCircle2 size={32} />
-             </div>
-             <div>
-               <h4 className="text-lg font-serif font-black text-slate-900 tracking-tight">Verified Publication</h4>
-               <p className="text-slate-500 text-sm font-medium">Once accepted, your research will be indexed and assigned an official DOI for global accessibility.</p>
-             </div>
-           </div>
-           <div className="p-8 bg-white border border-slate-100 rounded-[2.5rem] shadow-premium flex items-center gap-6">
-             <div className="p-5 bg-blue-50 text-blue-600 rounded-[1.5rem] flex-shrink-0">
-               <Layers size={32} />
-             </div>
-             <div>
-               <h4 className="text-lg font-serif font-black text-slate-900 tracking-tight">Live Peer Tracking</h4>
-               <p className="text-slate-500 text-sm font-medium">Monitor every lifecycle stage of your manuscript in real-time within the editorial workspace.</p>
-             </div>
-           </div>
-        </div>
+        ))}
       </div>
 
     </div>
