@@ -1,15 +1,16 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, Fragment } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import styles from "./submission.module.css";
+import RoleLayout from "@/components/RoleLayout";
 import { 
   PlusCircle, Trash2, Upload, CheckCircle, 
   AlertCircle, FileText, Info, ShieldCheck,
   FileArchive, FileCode, ChevronRight, Loader2,
   Clock, Zap, Gauge, CreditCard, DollarSign,
-  History, RotateCcw, Layers
+  History, RotateCcw, Layers, Globe, ArrowLeft
 } from "lucide-react";
 
 type Author = {
@@ -194,63 +195,68 @@ function SubmissionForm() {
     <div className={styles.stepper}>
       {[1, 2, 3].map((s) => (
         <div key={s} className={`${styles.step} ${step === s ? styles.activeStep : ""} ${step > s ? styles.completedStep : ""}`}>
-          <div className={styles.stepCircle}>{step > s ? <CheckCircle size={16} /> : s}</div>
-          <span className={styles.stepLabel}>{s === 1 ? "Metadata" : s === 2 ? "Authors" : "Scholarly File"}</span>
+          <div className={styles.stepCircle}>
+             {step > s ? <CheckCircle size={18} /> : (
+               <span className="text-xs font-black">{s}</span>
+             )}
+          </div>
+          <p className="text-[10px] font-black uppercase tracking-widest mt-2">{s === 1 ? "Metadata" : s === 2 ? "Authors" : "Scholarly File"}</p>
           {s < 3 && <div className={styles.stepLine} />}
         </div>
       ))}
     </div>
   );
 
-  if (success) {
-    return (
-      <div className="container section-padding flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-6">
-          <CheckCircle size={40} />
-        </div>
-        <h2 className="text-3xl font-serif font-bold text-slate-900 mb-4 tracking-tight">
-           {parentId ? "Revision Cataloged Successfully" : "Manuscript Cataloged Successfully"}
-        </h2>
-        <p className="text-slate-500 max-w-lg mb-10 leading-relaxed font-medium">
-          Your research contribution is now entering the editorial screening phase. You can track its progress using the unique Reference ID provided in your confirmation email.
-        </p>
-        <button onClick={() => window.location.href = "/"} className="btn btn-primary px-10">Return to Portal</button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="container section-padding max-w-4xl">
-      <div className="mb-16 text-center">
-        <h1 className="text-5xl font-serif font-bold text-slate-900 mb-4 tracking-tight">
-           {parentId ? `Manuscript Revision (v${currentVersion + 1})` : "Manuscript Submission"}
-        </h1>
-        <p className="text-slate-500 font-medium">
-           {parentId 
-             ? "Scientific revision submission for previously reviewed research" 
-             : "Official peer-review entry portal for Pakistan Journal of Pharmaceutical Sciences"}
-        </p>
+  const FormContent = (
+    <div className="max-w-5xl mx-auto py-10 px-6 space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      
+      {/* Institutional Banner */}
+      <div className="relative p-12 bg-slate-900 rounded-[3rem] text-white shadow-premium overflow-hidden group">
+         <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/10 blur-[100px] rounded-full group-hover:scale-110 transition-all duration-1000" />
+         <div className="relative z-10">
+            <div className="flex items-center gap-4 mb-6">
+                <div className="px-4 py-1 bg-white/10 border border-white/10 rounded-full text-[10px] font-black uppercase tracking-widest">Formal Scholarly Entry</div>
+                <div className="flex items-center gap-2 text-blue-400 text-[10px] font-black uppercase tracking-widest">
+                   <ShieldCheck size={14} /> Platinum Peer Review Protocol
+                </div>
+            </div>
+            <h1 className="text-5xl font-serif font-black mb-4 tracking-tight">
+               {parentId ? `Manuscript Revision (v${currentVersion + 1})` : "Manuscript Submission"}
+            </h1>
+            <p className="text-slate-400 font-medium text-lg leading-relaxed max-w-2xl mb-8">
+               {parentId 
+                 ? "Scientific revision submission for previously reviewed research. Prior metadata has been verified and pre-filled." 
+                 : "Official peer-review entry portal. Your research will enter the editorial screening phase upon submission."}
+            </p>
+            
+            {/* Back CTA if we're in dashboard mode */}
+            {session?.user && (
+              <button onClick={() => window.location.href = "/author/dashboard"} className="flex items-center gap-2 text-slate-500 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest group">
+                <ArrowLeft size={16} className="group-hover:-translateX-1 transition-transform" /> Back to Dashboard
+              </button>
+            )}
+         </div>
       </div>
 
       {parentId && (
-         <div className="mb-10 p-6 bg-blue-50 border border-blue-100 rounded-3xl flex items-center gap-6">
-            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-sm">
-               <RotateCcw size={24} />
+         <div className="p-8 bg-blue-50 border border-blue-100 rounded-[2rem] flex items-center gap-6 shadow-sm">
+            <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-premium">
+               <RotateCcw size={28} />
             </div>
             <div>
-               <p className="text-sm font-black text-blue-900 uppercase tracking-widest mb-1">Revision Cycle</p>
-               <p className="text-xs text-blue-700 font-bold">You are submitting a revised version of Manuscript <strong>#{parentId.slice(-6)}</strong>. Prior metadata has been pre-filled.</p>
+               <p className="text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1">Revision Outreach Link Active</p>
+               <p className="text-sm text-blue-700 font-bold italic">You are submitting a mandatory revision for Manuscript <strong>#{parentId.slice(-6).toUpperCase()}</strong>.</p>
             </div>
          </div>
       )}
 
       {renderStepIndicator()}
 
-      <form onSubmit={handleSubmit} className="bg-white border border-slate-200 rounded-3xl shadow-premium p-10 mt-10">
+      <form onSubmit={handleSubmit} className="bg-white border border-slate-100 rounded-[3rem] shadow-premium p-12 relative">
         {error && (
-          <div className="mb-8 p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl flex items-center gap-3">
-            <AlertCircle size={20} />
-            <span className="text-sm font-bold tracking-wide">{error}</span>
+          <div className="mb-10 p-5 bg-red-50 border border-red-100 text-red-600 rounded-2xl flex items-center gap-4 animate-shake">
+            <AlertCircle size={24} />
+            <span className="text-xs font-black uppercase tracking-tight">{error}</span>
           </div>
         )}
 
@@ -561,11 +567,54 @@ function SubmissionForm() {
       </div>
     </div>
   );
+
+  if (success) {
+     return (
+       <div className="max-w-4xl mx-auto py-20 px-6 text-center animate-in fade-in zoom-in-95 duration-500">
+         <div className="w-24 h-24 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-8 mx-auto shadow-premium border border-emerald-100">
+           <CheckCircle size={48} />
+         </div>
+         <h2 className="text-4xl font-serif font-black text-slate-900 mb-6 tracking-tight">
+            {parentId ? "Revision Cataloged" : "Manuscript Cataloged"}
+         </h2>
+         <p className="text-slate-500 max-w-lg mb-12 mx-auto leading-relaxed font-medium">
+           Your research contribution has been successfully indexed in the PJPS scholarly registry and is now entering the editorial screening phase.
+         </p>
+         <div className="flex justify-center gap-4">
+            <button onClick={() => window.location.href = "/author/dashboard"} className="bg-slate-900 text-white px-10 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs shadow-2xl active:scale-95 transition-all">
+               Return to Dashboard
+            </button>
+         </div>
+       </div>
+     );
+  }
+
+  // Determine if we should wrap in RoleLayout
+  const isAuthor = (session?.user as any)?.role === 'AUTHOR';
+
+  if (isAuthor) {
+    return (
+      <RoleLayout role="AUTHOR">
+        {FormContent}
+      </RoleLayout>
+    );
+  }
+
+  return (
+    <div className="bg-slate-50 min-h-screen">
+      {FormContent}
+    </div>
+  );
 }
 
 export default function SubmissionPage() {
   return (
-    <Suspense fallback={<div>Loading Submission Portal...</div>}>
+    <Suspense fallback={
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+         <Loader2 className="animate-spin text-blue-600" size={40} />
+         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Loading Submission Portal...</p>
+      </div>
+    }>
       <SubmissionForm />
     </Suspense>
   )
