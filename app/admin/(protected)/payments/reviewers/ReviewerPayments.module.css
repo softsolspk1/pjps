@@ -144,6 +144,7 @@
 
 .completed { background-color: #f0fdf4; color: #10b981; }
 .pending { background-color: #fff7ed; color: #f59e0b; }
+.pendingApproval { background-color: #fdf2f2; color: #dc2626; border: 1px solid #fee2e2; }
 
 .paidInfo {
   display: flex;

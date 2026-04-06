@@ -10,7 +10,12 @@ import {
 } from "lucide-react";
 import styles from "./ReviewerPayments.module.css";
 
+import { useSession } from "next-auth/react";
+
 export default function ReviewerPaymentsPage() {
+  const { data: session } = useSession();
+  const userRole = (session?.user as any)?.role;
+  
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
@@ -24,11 +29,7 @@ export default function ReviewerPaymentsPage() {
   const [uploading, setUploading] = useState(false);
   const [success, setSuccess] = useState("");
 
-  useEffect(() => {
-    fetchReviews();
-  }, []);
-
-  async function fetchReviews() {
+  const fetchReviews = async () => {
     try {
       const res = await fetch("/api/admin/payments/reviewers");
       const data = await res.json();
@@ -38,14 +39,18 @@ export default function ReviewerPaymentsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  };
+
+  useEffect(() => {
+    fetchReviews();
+  }, []);
 
   const handleOpenModal = (review: any) => {
     setSelectedReview(review);
     setIsModalOpen(true);
-    setAmount("5000"); // Default scholarly reward
-    setReference("");
-    setChequeUrl("");
+    setAmount(review.paymentAmount || "5000"); // Use existing amount if pending
+    setReference(review.paymentRef || "");
+    setChequeUrl(review.paymentDocUrl || "");
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,7 +60,7 @@ export default function ReviewerPaymentsPage() {
     setUploading(true);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", "pjps_portal"); // Assume this preset exists or using default
+    formData.append("upload_preset", "pjps_portal"); 
 
     try {
       const res = await fetch(`https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`, {
@@ -91,7 +96,10 @@ export default function ReviewerPaymentsPage() {
       });
 
       if (res.ok) {
-        setSuccess(`Institutional disbursement of ${amount} recorded for ${selectedReview.reviewer.name}.`);
+        const feedbackMsg = userRole === 'FINANCE_ADMIN' 
+          ? `Disbursement for ${selectedReview.reviewer.name} submitted for Admin approval.`
+          : `Disbursement of ${amount} finalized for ${selectedReview.reviewer.name}.`;
+        setSuccess(feedbackMsg);
         setIsModalOpen(false);
         fetchReviews();
         setTimeout(() => setSuccess(""), 5000);
@@ -173,15 +181,19 @@ export default function ReviewerPaymentsPage() {
                         <CheckCircle2 size={14} color="#10b981" />
                         <span className={styles.paidAmount}>{r.paymentAmount} (Ref: {r.paymentRef})</span>
                         {r.paymentDocUrl && (
-                          <a href={r.paymentDocUrl} target="_blank" title="View Cheque"><Camera size={14} color="#0061ff" /></a>
+                          <a href={r.paymentDocUrl} target="_blank" title="View Cheque Artifact"><Camera size={14} color="#0061ff" /></a>
                         )}
                      </div>
+                   ) : r.paymentStatus === 'PENDING' ? (
+                     <span className={`${styles.statusBadge} ${styles.pendingApproval}`}>
+                        PENDING APPROVAL
+                     </span>
                    ) : (
-                     <span className={styles.unpaidBadge}>UNPAID / PENDING</span>
+                     <span className={styles.unpaidBadge}>UNPAID</span>
                    )}
                 </td>
                 <td style={{ textAlign: 'right' }}>
-                   {r.paymentStatus !== 'PAID' ? (
+                   {r.paymentStatus === 'UNPAID' ? (
                      <button 
                        onClick={() => handleOpenModal(r)}
                        disabled={updating === r.id}
@@ -189,9 +201,20 @@ export default function ReviewerPaymentsPage() {
                      >
                        {updating === r.id ? <Loader2 size={14} className={styles.spinner} /> : <><DollarSign size={14} /> Record Reward</>}
                      </button>
-                   ) : (
+                   ) : r.paymentStatus === 'PENDING' && (userRole === 'ADMIN' || userRole === 'EDITOR_IN_CHIEF') ? (
+                     <button 
+                       onClick={() => handleOpenModal(r)}
+                       disabled={updating === r.id}
+                       className={styles.payBtn}
+                       style={{ backgroundColor: '#10b981' }}
+                     >
+                       {updating === r.id ? <Loader2 size={14} className={styles.spinner} /> : <><CheckCircle size={14} /> Approve Disbursement</>}
+                     </button>
+                   ) : r.paymentStatus === 'PAID' ? (
                      <div className={styles.completedBadge}><CheckCircle size={14} /> Disbursement Finalized</div>
-                   )}
+                   ) : r.paymentStatus === 'PENDING' ? (
+                     <div className={styles.unpaidBadge} style={{ fontStyle: 'italic' }}>Awaiting Admin Verify</div>
+                   ) : null}
                 </td>
               </tr>
             ))}

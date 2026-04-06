@@ -5,10 +5,11 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { 
   Bell, FileText, Clock, CheckCircle2, ChevronRight, 
-  Search, Filter, BookOpen, Layers,
-  ShieldCheck, AlertCircle, Award
+  Search, BookOpen, 
+  ShieldCheck, AlertCircle, Loader2
 } from "lucide-react";
 import { format } from "date-fns";
+import styles from "./ReviewerInvitations.module.css";
 
 export default function ReviewerInvitationsPage() {
   const { data: session } = useSession();
@@ -49,80 +50,87 @@ export default function ReviewerInvitationsPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-sm font-black text-slate-400 uppercase tracking-widest">Retrieving Expert Invitations...</p>
+      <div className={styles.emptyState} style={{ border: 'none' }}>
+        <Loader2 className="animate-spin" size={40} color="#0061ff" style={{ margin: '0 auto 20px' }} />
+        <p className={styles.emptyText} style={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+          Retrieving Expert Invitations...
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className={styles.container}>
       
       {/* Header Area */}
-      <div className="relative p-10 bg-slate-900 rounded-[2.5rem] text-white shadow-2xl overflow-hidden group mb-10">
-         <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/10 blur-[80px] rounded-full group-hover:scale-110 transition-all duration-1000" />
-         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div>
-               <div className="px-4 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase tracking-widest inline-block mb-4">Urgent Outreach</div>
-               <h1 className="text-4xl font-serif font-bold tracking-tight mb-2">Pending Invitations</h1>
-               <p className="text-slate-400 font-medium text-sm max-w-xl">You have been nominated as an expert referee for the following scholarly research. Please accept or decline the invitation below.</p>
-            </div>
-            <div className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm text-blue-400 font-bold uppercase tracking-widest text-[10px] shadow-xl">
-               <Bell size={16} className="animate-pulse" /> {invitations.length} Requests
-            </div>
-         </div>
+      <div className={styles.hero}>
+        <div className={styles.heroGlow} />
+        <div className={styles.heroContent}>
+           <div>
+              <div className={styles.badge}>Urgent Outreach</div>
+              <h1 className={styles.title}>Pending Invitations</h1>
+              <p className={styles.subtitle}>
+                You have been nominated as an expert referee for the following scholarly research. Please accept or decline the invitation below.
+              </p>
+           </div>
+           <div className={styles.requestBadge}>
+              <Bell size={18} className="animate-pulse" /> {invitations.length} Expert Requests
+           </div>
+        </div>
       </div>
 
       {/* Invitations Feed */}
       {invitations.length === 0 ? (
-        <div className="bg-white border border-slate-100 rounded-[2.5rem] shadow-premium p-20 text-center flex flex-col items-center">
-          <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-6">
+        <div className={styles.emptyState}>
+          <div className={styles.emptyIcon}>
             <Bell size={40} />
           </div>
-          <h3 className="text-lg font-bold text-slate-900 mb-2">Workspace Clear</h3>
-          <p className="text-slate-400 text-sm max-w-xs mx-auto leading-relaxed">
+          <h3 className={styles.emptyTitle}>Workspace Clear</h3>
+          <p className={styles.emptyText}>
             You do not have any pending scholarly invitations at this time.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6">
+        <div className={styles.grid}>
           {invitations.map((inv) => (
-            <div key={inv.id} className="bg-white border border-slate-100 rounded-[2.5rem] shadow-premium p-10 group hover:border-blue-200 transition-all relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-4 h-full bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors" />
-               <div className="flex flex-col lg:flex-row justify-between gap-10">
-                  <div className="flex-1 space-y-6">
-                     <div className="flex items-center gap-4">
-                        <span className="px-3 py-1 bg-amber-50 text-amber-600 border border-amber-100 rounded-full text-[9px] font-black uppercase tracking-widest">Invitation Required</span>
-                        <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest font-mono">ID: #{inv.articleId.slice(-6).toUpperCase()}</span>
+            <div key={inv.id} className={styles.card}>
+               <div className={styles.cardContent}>
+                  <div className={styles.cardMain}>
+                     <div className={styles.invBadgeRow}>
+                        <span className={styles.invStatus}>Invitation Required</span>
+                        <span className={styles.msId}>MS-#[{inv.articleId.slice(-6).toUpperCase()}]</span>
                      </div>
-                     <h2 className="text-3xl font-serif font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors uppercase tracking-tight">
+                     <h2 className={styles.articleTitle}>
                         {inv.article?.title}
                      </h2>
-                     <div className="flex items-center gap-6 text-[11px] font-black uppercase tracking-widest text-slate-400">
-                        <div className="flex items-center gap-2">
-                           <Clock size={14} className="text-amber-500" />
+                     <div className={styles.metaRow}>
+                        <div className={styles.metaItem}>
+                           <Clock size={14} className={styles.metaIcon} />
                            Outreach Sent: {format(new Date(inv.createdAt), 'MMM dd, yyyy')}
                         </div>
+                        <div className={styles.metaItem}>
+                           <ShieldCheck size={14} className={styles.metaIcon} />
+                           Review Policy: Institutional Double-Blind
+                        </div>
                      </div>
-                     <div className="p-8 bg-slate-50 rounded-2xl border border-slate-100 font-medium text-slate-600 text-sm leading-relaxed relative">
-                        <div className="absolute top-4 left-4 text-slate-200"><BookOpen size={24} /></div>
-                        <p className="line-clamp-3 pl-8">
+                     <div className={styles.abstractPreview}>
+                        <div className={styles.abstractIcon}><BookOpen size={24} /></div>
+                        <p className={styles.abstractText}>
                            {inv.article?.abstract || "Abstract content is finalizing in the editorial database."}
                         </p>
                      </div>
                   </div>
 
-                  <div className="flex flex-row lg:flex-col justify-end gap-3 min-w-[220px]">
+                  <div className={styles.btnGroup}>
                      <button 
                         onClick={() => handleResponse(inv.id, 'ACCEPTED')}
-                        className="flex-1 bg-blue-600 hover:bg-blue-500 text-white px-8 py-5 rounded-2xl font-bold uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-3 shadow-xl shadow-blue-600/20 active:scale-95"
+                        className={styles.acceptBtn}
                      >
                         <CheckCircle2 size={20} /> Accept & Review
                      </button>
                      <button 
                         onClick={() => handleResponse(inv.id, 'DECLINED')}
-                        className="flex-1 bg-white hover:bg-red-50 text-red-600 border border-slate-100 px-8 py-5 rounded-2xl font-bold uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-3 active:scale-95"
+                        className={styles.declineBtn}
                      >
                         <AlertCircle size={20} /> Decline Outreach
                      </button>
@@ -134,29 +142,28 @@ export default function ReviewerInvitationsPage() {
       )}
 
       {/* Protocol Note */}
-      <div className="p-10 bg-slate-900 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden group">
-         <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/5 blur-[100px] rounded-full" />
-         <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
-            <div className="flex-1">
-               <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-white/5 rounded-2xl text-blue-400">
+      <div className={styles.protocolCard}>
+         <div className={styles.protocolContent}>
+            <div className={styles.protocolText}>
+               <div className={styles.protocolHeader}>
+                  <div className={styles.protocolIconBox}>
                      <ShieldCheck size={24} />
                   </div>
-                  <h3 className="text-2xl font-serif font-black tracking-tight">Double-Blind protocol</h3>
+                  <h3 className={styles.protocolTitle}>Double-Blind Protocol</h3>
                </div>
-               <p className="text-slate-400 font-medium leading-relaxed mb-0">
+               <p className={styles.protocolDesc}>
                   By accepting this scholarly invitation, you adhere to the PJPS dual-blind peer review integrity standards. 
                   All manuscripts are strictly confidential and must be discarded following scorecard finalization.
                </p>
             </div>
-            <div className="grid grid-cols-2 gap-8 text-center border-l border-white/5 pl-10">
-               <div>
-                  <div className="text-5xl font-serif font-black text-blue-400">14</div>
-                  <div className="text-[10px] font-black uppercase text-slate-500 tracking-widest mt-2">Day Cycle</div>
+            <div className={styles.protocolStats}>
+               <div className={styles.statItem}>
+                  <div className={styles.statValue}>14</div>
+                  <div className={styles.statLabel}>Day Cycle</div>
                </div>
-               <div>
-                  <div className="text-5xl font-serif font-black text-emerald-400">Full</div>
-                  <div className="text-[10px] font-black uppercase text-slate-500 tracking-widest mt-2">Credit</div>
+               <div className={styles.statItem}>
+                  <div className={styles.statValue}>Full</div>
+                  <div className={styles.statLabel}>Reward Credit</div>
                </div>
             </div>
          </div>
