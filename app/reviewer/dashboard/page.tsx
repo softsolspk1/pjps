@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import styles from "./dashboard.module.css";
-import RoleLayout from "@/components/RoleLayout";
 
 export default function ReviewerDashboard() {
   const { data: session } = useSession();
@@ -37,12 +36,10 @@ export default function ReviewerDashboard() {
 
   if (loading) {
     return (
-      <RoleLayout role="REVIEWER">
-        <div className={styles.loaderWrap}>
-          <Loader2 className={styles.spinner} size={40} />
-          <div className={styles.loaderText}>Loading Manuscript Registry...</div>
-        </div>
-      </RoleLayout>
+      <div className={styles.loaderWrap}>
+        <Loader2 className={styles.spinner} size={40} />
+        <div className={styles.loaderText}>Loading Manuscript Registry...</div>
+      </div>
     );
   }
 
@@ -83,8 +80,7 @@ export default function ReviewerDashboard() {
   }
 
   return (
-    <RoleLayout role="REVIEWER">
-      <div className={styles.dashboardContainer}>
+    <div className={styles.dashboardContainer}>
       {/* ── Main Content ─── */}
       <div className={styles.content}>
 
@@ -346,8 +342,7 @@ export default function ReviewerDashboard() {
 
           </div>
         </div>
-        </div>
       </div>
-    </RoleLayout>
+    </div>
   );
 }

@@ -114,10 +114,12 @@ export default function RoleSidebar({ role, userName }: { role: string, userName
                 </>
               ) : (
                 <>
+                <>
                   <SidebarLink href="/author/dashboard" icon={<LayoutDashboard size={18} />} label="Author Dashboard" />
                   <SidebarLink href="/author/submissions" icon={<FileText size={18} />} label="My Submissions" />
                   <SidebarLink href="/tracking" icon={<Search size={18} />} label="Track Manuscript" />
                   <SidebarLink href="/submission" icon={<PlusCircle size={18} />} label="New Submission" />
+                </>
                 </>
               )}
 

@@ -9,7 +9,6 @@ import {
   Search, Filter, BookOpen, Layers
 } from "lucide-react";
 import { format } from "date-fns";
-import RoleLayout from "@/components/RoleLayout";
 
 export default function AuthorDashboard() {
   const { data: session } = useSession();
@@ -45,22 +44,20 @@ export default function AuthorDashboard() {
 
   if (loading) {
     return (
-      <RoleLayout role="AUTHOR">
-        <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-          <Loader2 className="animate-spin text-blue-600" size={40} />
-          <p className="text-sm font-black text-slate-400 uppercase tracking-widest">Retrieving Manuscript Registry...</p>
-        </div>
-      </RoleLayout>
+      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+        <Loader2 className="animate-spin text-blue-600" size={40} />
+        <p className="text-sm font-black text-slate-400 uppercase tracking-widest">Retrieving Manuscript Registry...</p>
+      </div>
     );
   }
 
   const published = articles.filter(a => a.status === 'PUBLISHED').length;
-  const inReview = articles.filter(a => a.status.includes('REVIEW')).length;
-  const pending = articles.length - published - inReview;
+  const trackingCount = articles.filter(a => ['SCREENING', 'UNDER_REVIEW', 'TECHNICAL_CHECK'].includes(a.status)).length;
+  const actionRequired = articles.filter(a => ['REVISIONS_REQUIRED', 'PAYMENT_PENDING', 'MAJOR_REVISION', 'MINOR_REVISION'].includes(a.status)).length;
+  const submittedCount = articles.length;
 
   return (
-    <RoleLayout role="AUTHOR">
-      <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
       
       {/* Welcome Banner */}
       <div className="relative p-10 bg-slate-900 rounded-[2.5rem] text-white shadow-2xl overflow-hidden group">
@@ -90,12 +87,12 @@ export default function AuthorDashboard() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
          {[
-           { label: 'Total Submissions', count: articles.length, icon: Layers, color: 'text-slate-900', bg: 'bg-white' },
-           { label: 'Under Review', count: inReview, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
+           { label: 'Submitted Articles', count: submittedCount, icon: Layers, color: 'text-slate-900', bg: 'bg-white' },
+           { label: 'Manuscript Tracking', count: trackingCount, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
            { label: 'Published Works', count: published, icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-           { label: 'Action Required', count: pending, icon: AlertCircle, color: 'text-blue-600', bg: 'bg-blue-50' },
+           { label: 'Action Required', count: actionRequired, icon: AlertCircle, color: 'text-blue-600', bg: 'bg-blue-50' },
          ].map((stat, i) => (
-           <div key={i} className={`p-8 ${stat.bg} border border-slate-100 rounded-3xl shadow-sm hover:shadow-md transition-all`}>
+           <div key={i} className={`p-8 ${stat.bg} border border-slate-100 rounded-3xl shadow-premium hover:shadow-md transition-all active:scale-95 cursor-default`}>
               <div className="flex items-center justify-between mb-4">
                  <div className={`p-3 rounded-2xl ${stat.bg === 'bg-white' ? 'bg-slate-50' : 'bg-white'} ${stat.color}`}>
                     <stat.icon size={24} />
@@ -175,8 +172,7 @@ export default function AuthorDashboard() {
               </table>
            </div>
          )}
-        </div>
       </div>
-    </RoleLayout>
+    </div>
   );
 }
