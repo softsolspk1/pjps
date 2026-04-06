@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../../lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { logAction } from "@/lib/audit";
 import { v2 as cloudinary } from "cloudinary";
 
