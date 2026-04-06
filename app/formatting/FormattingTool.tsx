@@ -8,15 +8,6 @@ import { FileText, Download, Printer, Users, Layout, PlusCircle, Trash2, Eye, Ed
 import styles from "./formatting.module.css";
 import "react-quill-new/dist/quill.snow.css";
 
-// PDFMake Imports
-import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "pdfmake/build/vfs_fonts";
-// @ts-ignore
-import htmlToPdfmake from "html-to-pdfmake";
-
-// @ts-ignore
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
-
 // Dynamically import Quill
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
@@ -96,10 +87,19 @@ export default function FormattingTool() {
     setSections(prev => ({ ...prev, [key]: value }));
   };
 
-  const generateProfessionalPDF = () => {
+  const generateProfessionalPDF = async () => {
     if (typeof window === 'undefined') return;
+    
+    // Dynamic Imports to avoid SSR issues
+    const pdfMake = (await import("pdfmake/build/pdfmake")).default;
+    const pdfFonts = (await import("pdfmake/build/vfs_fonts")).default;
+    const htmlToPdfmake = (await import("html-to-pdfmake")).default;
 
-    // Helper to parse HTML to pdfmake objects
+    // Set virtual file system
+    // @ts-ignore
+    pdfMake.vfs = pdfFonts.pdfMake.vfs;
+
+    // Helper to parse HTML to pdfmake objects (using the local dynamic import)
     const parseHTML = (html: string) => {
       return htmlToPdfmake(html, {
         defaultStyles: {
