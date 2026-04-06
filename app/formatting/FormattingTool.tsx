@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { useReactToPrint } from "react-to-print";
 import { Document, Packer, Paragraph, TextRun, AlignmentType, HeadingLevel, SectionType, ImageRun, BorderStyle } from "docx";
 import { saveAs } from "file-saver";
-import { FileText, Download, Printer, Users, Layout, PlusCircle, Trash2, Eye, Edit3, BarChart3, Save, Calendar, Globe, Loader2, Sparkles } from "lucide-react";
+import { FileText, Download, Printer, Users, Layout, PlusCircle, Trash2, Eye, Edit3, BarChart3, Save, Calendar, Globe, Sparkles } from "lucide-react";
 import styles from "./formatting.module.css";
 import "react-quill-new/dist/quill.snow.css";
 
@@ -69,7 +69,6 @@ export default function FormattingTool() {
   });
 
   const printRef = useRef(null);
-  const [pdfLoading, setPdfLoading] = useState(false);
 
   const handleAuthorChange = (index: number, field: keyof Author, value: string) => {
     const newAuthors = [...authors];
@@ -94,33 +93,10 @@ export default function FormattingTool() {
     documentTitle: title || "PJPS_Formatted_Article",
   });
 
-  const generateServerPdf = async () => {
-    setPdfLoading(true);
-    try {
-      const res = await fetch("/api/generate-pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, doi, authors, keywords, dates, sections }),
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        alert("PDF generation failed: " + (err.error || "Unknown error"));
-        return;
-      }
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${(title || "PJPS_Article").replace(/\s+/g, "_")}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (err: any) {
-      alert("PDF error: " + err.message);
-    } finally {
-      setPdfLoading(false);
-    }
+  const openPrintView = () => {
+    const payload = { title, doi, authors, keywords, dates, sections };
+    sessionStorage.setItem("pjps_print_data", JSON.stringify(payload));
+    window.open("/formatting/print", "_blank");
   };
 
   const exportToWord = async () => {
@@ -346,19 +322,22 @@ export default function FormattingTool() {
             type: SectionType.CONTINUOUS,
             column: { count: 2, space: 400 },
           },
-          children: Object.entries(sections).filter(([k]) => k !== 'abstract').flatMap(([key, value]) => [
+          children: [
+            { key: 'introduction', label: 'INTRODUCTION' },
+            { key: 'materialsMethods', label: 'MATERIALS AND METHODS' },
+            { key: 'results', label: 'RESULTS' },
+            { key: 'discussion', label: 'DISCUSSION' },
+            { key: 'conclusion', label: 'CONCLUSION' },
+            { key: 'references', label: 'REFERENCES' },
+          ].filter(({ key }) => sections[key as keyof typeof sections]?.trim())
+           .flatMap(({ key, label }) => [
             new Paragraph({ 
               children: [
-                new TextRun({
-                  text: key.toUpperCase(),
-                  bold: true,
-                  size: 24, // 12pt
-                })
+                new TextRun({ text: label, bold: true, size: 22, font: "Times New Roman" })
               ],
-              alignment: AlignmentType.LEFT,
-              spacing: { before: 300, after: 150 } 
+              spacing: { before: 280, after: 120 }
             }),
-            ...parseHtmlToDocx(value),
+            ...parseHtmlToDocx(sections[key as keyof typeof sections]),
           ]),
         }
       ],
@@ -389,15 +368,12 @@ export default function FormattingTool() {
              </button>
           )}
           <button 
-            onClick={generateServerPdf}
-            disabled={pdfLoading}
+            onClick={openPrintView}
             className="btn btn-primary flex items-center gap-2"
-            style={{ background: pdfLoading ? '#475569' : '#002d5e', minWidth: 180 }}
-            title="Generate a pixel-perfect PDF using server-side Chromium"
+            style={{ background: '#002d5e', minWidth: 180 }}
+            title="Open a clean print-ready view — press Ctrl+P to save as PDF"
           >
-            {pdfLoading
-              ? <><Loader2 size={16} className="animate-spin" /> Generating PDF&hellip;</>
-              : <><Sparkles size={16} /> Download PDF (HD)</>}
+            <Sparkles size={16} /> Open Print View
           </button>
           <button onClick={exportToWord} className="btn btn-outline flex items-center gap-2 border-slate-300">
             <Download size={16} /> DOCX
