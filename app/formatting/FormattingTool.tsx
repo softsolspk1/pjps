@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { useReactToPrint } from "react-to-print";
 import { Document, Packer, Paragraph, TextRun, AlignmentType, HeadingLevel, SectionType, ImageRun, BorderStyle } from "docx";
 import { saveAs } from "file-saver";
-import { FileText, Download, Printer, Users, Layout, PlusCircle, Trash2, Eye, Edit3, BarChart3, Save, Calendar, Globe } from "lucide-react";
+import { FileText, Download, Printer, Users, Layout, PlusCircle, Trash2, Eye, Edit3, BarChart3, Save, Calendar, Globe, Loader2, Sparkles } from "lucide-react";
 import styles from "./formatting.module.css";
 import "react-quill-new/dist/quill.snow.css";
 
@@ -69,6 +69,7 @@ export default function FormattingTool() {
   });
 
   const printRef = useRef(null);
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   const handleAuthorChange = (index: number, field: keyof Author, value: string) => {
     const newAuthors = [...authors];
@@ -92,6 +93,35 @@ export default function FormattingTool() {
     contentRef: printRef,
     documentTitle: title || "PJPS_Formatted_Article",
   });
+
+  const generateServerPdf = async () => {
+    setPdfLoading(true);
+    try {
+      const res = await fetch("/api/generate-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, doi, authors, keywords, dates, sections }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        alert("PDF generation failed: " + (err.error || "Unknown error"));
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${(title || "PJPS_Article").replace(/\s+/g, "_")}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      alert("PDF error: " + err.message);
+    } finally {
+      setPdfLoading(false);
+    }
+  };
 
   const exportToWord = async () => {
   const parseHtmlToDocx = (html: string): (Paragraph)[] => {
@@ -358,12 +388,19 @@ export default function FormattingTool() {
                <Edit3 size={16} /> Editor Mode
              </button>
           )}
+          <button 
+            onClick={generateServerPdf}
+            disabled={pdfLoading}
+            className="btn btn-primary flex items-center gap-2"
+            style={{ background: pdfLoading ? '#475569' : '#002d5e', minWidth: 180 }}
+            title="Generate a pixel-perfect PDF using server-side Chromium"
+          >
+            {pdfLoading
+              ? <><Loader2 size={16} className="animate-spin" /> Generating PDF&hellip;</>
+              : <><Sparkles size={16} /> Download PDF (HD)</>}
+          </button>
           <button onClick={exportToWord} className="btn btn-outline flex items-center gap-2 border-slate-300">
             <Download size={16} /> DOCX
-          </button>
-          {/* @ts-ignore */}
-          <button onClick={handlePrint} className="btn btn-primary flex items-center gap-2">
-            <Printer size={16} /> Export PDF
           </button>
         </div>
       </div>
