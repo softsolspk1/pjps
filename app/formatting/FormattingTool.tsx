@@ -94,53 +94,115 @@ export default function FormattingTool() {
   });
 
   const exportToWord = async () => {
-    const parseHtmlToDocx = (html: string): (Paragraph)[] => {
-      if (typeof window === 'undefined') return [];
-      const doc = new DOMParser().parseFromString(html, 'text/html');
-      const paragraphs: Paragraph[] = [];
+  const parseHtmlToDocx = (html: string): (Paragraph)[] => {
+    if (typeof window === 'undefined') return [];
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const paragraphs: Paragraph[] = [];
 
-      doc.body.childNodes.forEach((node: any) => {
-        if (node.nodeName === 'P' || node.nodeName === 'DIV') {
-          const children: any[] = [];
-          node.childNodes.forEach((child: any) => {
-            if (child.nodeName === 'B' || child.nodeName === 'STRONG') {
-              children.push(new TextRun({ text: child.textContent, bold: true, font: "Times New Roman", size: 20 }));
-            } else if (child.nodeName === 'I' || child.nodeName === 'EM') {
-              children.push(new TextRun({ text: child.textContent, italics: true, font: "Times New Roman", size: 20 }));
-            } else if (child.nodeName === 'U') {
-              children.push(new TextRun({ text: child.textContent, underline: {}, font: "Times New Roman", size: 20 }));
-            } else if (child.nodeName === 'IMG') {
-               const src = child.getAttribute('src');
-               if (src?.startsWith('data:image')) {
-                  children.push(new ImageRun({
-                    data: src.split(',')[1],
-                    transformation: { width: 330, height: 220 },
-                  }));
-               }
-            } else {
-              children.push(new TextRun({ text: child.textContent || "", font: "Times New Roman", size: 20 }));
-            }
-          });
-          paragraphs.push(new Paragraph({ children, alignment: AlignmentType.JUSTIFIED, spacing: { after: 120 } }));
-        } else if (node.nodeName === 'IMG') {
-          const src = node.getAttribute('src');
+    const parseInlineNodes = (node: ChildNode): any[] => {
+      const runs: any[] = [];
+      node.childNodes.forEach((child: any) => {
+        const tag = child.nodeName;
+        const text = child.textContent || "";
+        if (tag === 'STRONG' || tag === 'B') {
+          runs.push(new TextRun({ text, bold: true, font: "Times New Roman", size: 20 }));
+        } else if (tag === 'EM' || tag === 'I') {
+          runs.push(new TextRun({ text, italics: true, font: "Times New Roman", size: 20 }));
+        } else if (tag === 'U') {
+          runs.push(new TextRun({ text, underline: {}, font: "Times New Roman", size: 20 }));
+        } else if (tag === 'SUP') {
+          runs.push(new TextRun({ text, superScript: true, font: "Times New Roman", size: 16 }));
+        } else if (tag === 'SUB') {
+          runs.push(new TextRun({ text, subScript: true, font: "Times New Roman", size: 16 }));
+        } else if (tag === 'IMG') {
+          const src = child.getAttribute('src');
           if (src?.startsWith('data:image')) {
-             paragraphs.push(new Paragraph({
-               children: [new ImageRun({
-                 data: src.split(',')[1],
-                 transformation: { width: 400, height: 280 },
-               })],
-               alignment: AlignmentType.CENTER,
-               spacing: { before: 200, after: 200 }
-             }));
+            runs.push(new ImageRun({
+              data: src.split(',')[1],
+              transformation: { width: 330, height: 220 },
+            }));
           }
-        } else if (node.nodeType === 3 && node.textContent?.trim()) {
-           paragraphs.push(new Paragraph({ children: [new TextRun({ text: node.textContent, font: "Times New Roman", size: 20 })], alignment: AlignmentType.JUSTIFIED, spacing: { after: 120 } }));
+        } else if (tag === 'SPAN') {
+          // Recurse for nested spans (Quill color/background spans)
+          runs.push(...parseInlineNodes(child));
+        } else {
+          if (text) runs.push(new TextRun({ text, font: "Times New Roman", size: 20 }));
         }
       });
-
-      return paragraphs;
+      return runs;
     };
+
+    const processNode = (node: any) => {
+      const tag = node.nodeName;
+
+      if (tag === 'P' || tag === 'DIV') {
+        const children = parseInlineNodes(node);
+        if (children.length > 0) {
+          paragraphs.push(new Paragraph({ 
+            children, 
+            alignment: AlignmentType.JUSTIFIED, 
+            spacing: { after: 100, line: 276 } 
+          }));
+        }
+      } else if (tag === 'H1' || tag === 'H2' || tag === 'H3' || tag === 'H4') {
+        const sizeMap: Record<string, number> = { H1: 24, H2: 22, H3: 21, H4: 20 };
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ 
+            text: node.textContent?.toUpperCase() || "", 
+            bold: true, 
+            font: "Times New Roman", 
+            size: sizeMap[tag] 
+          })],
+          spacing: { before: 200, after: 100 },
+        }));
+      } else if (tag === 'UL' || tag === 'OL') {
+        node.querySelectorAll('li').forEach((li: any, idx: number) => {
+          const bullet = tag === 'UL' ? '•  ' : `${idx + 1}.  `;
+          paragraphs.push(new Paragraph({
+            children: [new TextRun({ text: bullet + li.textContent, font: "Times New Roman", size: 20 })],
+            indent: { left: 360 },
+            spacing: { after: 60 },
+          }));
+        });
+      } else if (tag === 'TABLE') {
+        // Tables are not supported inline in docx paragraphs array; emit a placeholder
+        const rows = Array.from(node.querySelectorAll('tr'));
+        rows.forEach((row: any) => {
+          const cells = Array.from(row.querySelectorAll('td, th'));
+          const cellTexts = cells.map((c: any) => c.textContent || "").join(" | ");
+          paragraphs.push(new Paragraph({
+            children: [new TextRun({ text: cellTexts, font: "Times New Roman", size: 18 })],
+            spacing: { after: 60 },
+            border: {
+              bottom: { color: "auto", space: 1, style: BorderStyle.SINGLE, size: 6 },
+            }
+          }));
+        });
+      } else if (tag === 'IMG') {
+        const src = node.getAttribute('src');
+        if (src?.startsWith('data:image')) {
+          paragraphs.push(new Paragraph({
+            children: [new ImageRun({
+              data: src.split(',')[1],
+              transformation: { width: 400, height: 280 },
+            })],
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 160, after: 160 }
+          }));
+        }
+      } else if (node.nodeType === 3 && node.textContent?.trim()) {
+        paragraphs.push(new Paragraph({ 
+          children: [new TextRun({ text: node.textContent, font: "Times New Roman", size: 20 })], 
+          alignment: AlignmentType.JUSTIFIED, 
+          spacing: { after: 100, line: 276 } 
+        }));
+      }
+    };
+
+    doc.body.childNodes.forEach(processNode);
+    return paragraphs;
+  };
+
 
     const doc = new Document({
       creator: "PJPS Manuscript Architect",

@@ -147,17 +147,333 @@
 .articlePreview {
   width: 210mm; 
   background: white;
-  padding: 2.5cm 2cm; /* Professional A4 Margins */
+  /* PJPS standard: 2.5cm top/bottom, 2cm left/right */
+  padding: 2.5cm 2cm;
   box-shadow: 0 0 30px rgba(0,0,0,0.15);
   font-family: "Times New Roman", Times, serif;
+  font-size: 10pt;
   color: black;
-  line-height: 1.1;
+  /* FIX 1: Was 1.1 — PJPS spec is 1.35 */
+  line-height: 1.35;
   position: relative;
   min-height: 297mm;
   margin: 0 auto;
   box-sizing: border-box;
   overflow: visible;
 }
+
+/* Journal Header Styles */
+.journalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-size: 9pt;
+  margin-bottom: 18pt;
+  color: #000;
+  border-bottom: 0.5pt solid #000;
+  padding-bottom: 5pt;
+}
+
+.journalHeaderLeft {
+  font-style: italic;
+  max-width: 70%;
+}
+
+.journalHeaderRight {
+  font-weight: bold;
+}
+
+.articleTitle {
+  font-size: 16pt;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 14pt;
+  line-height: 1.3;
+  text-transform: uppercase;
+  color: #000;
+  letter-spacing: 0.01em;
+}
+
+.articleAuthors {
+  text-align: center;
+  font-size: 12pt;
+  font-weight: bold;
+  margin-bottom: 6pt;
+  line-height: 1.4;
+}
+
+.articleAffiliations {
+  text-align: center;
+  font-size: 10pt;
+  margin-bottom: 18pt;
+  color: #000;
+  line-height: 1.45;
+  font-style: italic;
+}
+
+/* Abstract & Keywords */
+.abstractBlock {
+  font-size: 10pt;
+  margin-bottom: 10pt;
+  text-align: justify;
+  line-height: 1.35;
+}
+
+.keywordsBlock {
+  font-size: 9.5pt;
+  margin-bottom: 12pt;
+  line-height: 1.4;
+}
+
+.dateLine {
+  font-size: 9pt;
+  font-style: italic;
+  margin-bottom: 20pt;
+  border-bottom: 0.75pt solid black;
+  padding-bottom: 6pt;
+  text-align: left;
+}
+
+/* TWO COLUMN BODY - OPTIMIZED FOR SCHOLARLY JOURNALS */
+.scientificBody {
+  column-count: 2;
+  column-gap: 18pt;
+  column-fill: balance;
+  text-align: justify;
+  font-size: 10pt;
+  line-height: 1.35;
+  orphans: 3;
+  widows: 3;
+  width: 100%;
+}
+
+.scientificSection {
+  margin-bottom: 10pt;
+  position: relative;
+  width: 100%;
+  /* Prevent section heading splitting from body */
+  break-inside: auto;
+}
+
+/* Keep heading & its first paragraph together */
+.scientificSection .sectionHeading + * {
+  break-before: avoid;
+}
+
+/* SUPPORT FOR FULL WIDTH ASSETS (Tables, Full Graphs) */
+:global(.full-width-asset) {
+  column-span: all !important;
+  width: 100% !important;
+  margin: 18pt 0 !important;
+  background: white;
+  break-inside: avoid;
+}
+
+:global(.img-inside-column) {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block;
+  margin: 10pt auto;
+}
+
+.sectionHeading {
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 6pt;
+  font-size: 11pt;
+  display: block;
+  /* Keep heading with its following content */
+  break-after: avoid;
+  page-break-after: avoid;
+  margin-top: 10pt;
+}
+
+/* FOOTNOTE & FOOTER */
+.footnoteArea {
+  column-span: all;
+  margin-top: 20pt;
+  font-size: 8pt;
+  color: #000;
+  break-inside: avoid;
+}
+
+.articleFooter {
+  column-span: all;
+  margin-top: 15pt;
+  border-top: 0.75pt solid black;
+  padding-top: 4pt;
+  display: flex;
+  justify-content: space-between;
+  font-size: 8.5pt;
+  color: #000;
+}
+
+/* ============================================
+   RICH CONTENT — FIX 2: Full Quill HTML support
+   ============================================ */
+
+/* Paragraphs */
+:global(.rich-content) p {
+  text-align: justify;
+  text-justify: inter-word;
+  margin-bottom: 8pt;
+  line-height: 1.35;
+  display: block;
+  font-size: 10pt;
+}
+
+/* Headings from Quill h1-h4 */
+:global(.rich-content) h1,
+:global(.rich-content) h2,
+:global(.rich-content) h3,
+:global(.rich-content) h4 {
+  font-family: "Times New Roman", Times, serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-top: 10pt;
+  margin-bottom: 6pt;
+  break-after: avoid;
+  page-break-after: avoid;
+  line-height: 1.2;
+}
+:global(.rich-content) h1 { font-size: 12pt; }
+:global(.rich-content) h2 { font-size: 11pt; }
+:global(.rich-content) h3 { font-size: 10.5pt; font-style: italic; text-transform: none; }
+:global(.rich-content) h4 { font-size: 10pt; font-style: italic; text-transform: none; }
+
+/* Ordered & Unordered Lists */
+:global(.rich-content) ul,
+:global(.rich-content) ol {
+  margin: 6pt 0 6pt 18pt;
+  padding: 0;
+  font-size: 10pt;
+  line-height: 1.35;
+}
+:global(.rich-content) li {
+  margin-bottom: 3pt;
+}
+
+/* Superscript & Subscript (critical for chemical formulas) */
+:global(.rich-content) sup {
+  font-size: 7pt;
+  vertical-align: super;
+  line-height: 0;
+}
+:global(.rich-content) sub {
+  font-size: 7pt;
+  vertical-align: sub;
+  line-height: 0;
+}
+
+/* Bold, Italic, Underline */
+:global(.rich-content) strong, :global(.rich-content) b { font-weight: bold; }
+:global(.rich-content) em, :global(.rich-content) i { font-style: italic; }
+:global(.rich-content) u { text-decoration: underline; }
+
+/* Images inside rich content */
+:global(.rich-content) img {
+  max-width: 100%;
+  height: auto;
+  margin: 12pt 0;
+  display: block;
+}
+
+/* Scientific Table Formatting — FIX 3: Full PJPS table spec */
+:global(.rich-content) table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12pt 0;
+  font-size: 8.5pt;
+  border-top: 1.5pt solid black;
+  border-bottom: 1.5pt solid black;
+  break-inside: avoid;
+  column-span: all;
+}
+
+:global(.rich-content) th {
+  border-bottom: 1pt solid black;
+  padding: 4pt 5pt;
+  text-align: left;
+  font-weight: bold;
+  font-size: 8.5pt;
+  background: white;
+}
+
+:global(.rich-content) td {
+  padding: 3.5pt 5pt;
+  border-bottom: 0.5pt solid #999;
+  text-align: left;
+  font-size: 8.5pt;
+}
+
+/* References section — hanging indent */
+.scientificSection:last-child :global(.rich-content) p {
+  padding-left: 18pt;
+  text-indent: -18pt;
+  font-size: 9pt;
+  line-height: 1.3;
+  margin-bottom: 5pt;
+}
+
+/* ============================================
+   @MEDIA PRINT — FIX 1 CONTINUED
+   Complete suppression of all editor chrome
+   ============================================ */
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  /* Hide EVERYTHING that is not the article preview */
+  body * { visibility: hidden; }
+  
+  /* Only make the print target and its children visible */
+  .articlePreview,
+  .articlePreview * { visibility: visible; }
+
+  /* Position the preview to fill the page */
+  .articlePreview {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 210mm;
+    height: auto;
+    min-height: 297mm;
+    box-shadow: none;
+    border: none;
+    margin: 0;
+    padding: 2.0cm 1.8cm;
+    font-size: 10pt;
+    line-height: 1.35;
+  }
+
+  /* Ensure column layout holds in print */
+  .scientificBody {
+    column-count: 2;
+    column-gap: 18pt;
+  }
+
+  /* Prevent orphan headings */
+  .sectionHeading {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  /* Tables and full-width figures span both columns */
+  :global(.full-width-asset),
+  :global(.rich-content) table {
+    column-span: all;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 
 /* Journal Header Styles */
 .journalHeader {
