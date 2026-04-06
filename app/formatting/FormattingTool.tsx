@@ -1,31 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import dynamic from "next/dynamic";
-import { Document, Packer, Paragraph, TextRun, AlignmentType, SectionType, ImageRun, BorderStyle, Table, TableRow, TableCell, convertInchesToTwip, WidthType } from "docx";
+import { Document, Packer, Paragraph, TextRun, AlignmentType, HeadingLevel, SectionType, ImageRun, BorderStyle } from "docx";
 import { saveAs } from "file-saver";
-import { Download, Edit3, Eye, Sparkles } from "lucide-react";
+import { FileText, Download, Printer, Users, Layout, PlusCircle, Trash2, Eye, Edit3, BarChart3, Save, Calendar, Globe, Sparkles } from "lucide-react";
 import styles from "./formatting.module.css";
 import "react-quill-new/dist/quill.snow.css";
 
-const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
+// PDFMake Imports
+import pdfMake from "pdfmake/build/pdfmake";
+import pdfFonts from "pdfmake/build/vfs_fonts";
+// @ts-ignore
+import htmlToPdfmake from "html-to-pdfmake";
 
-const formats = [
-  "header", "bold", "italic", "underline", "script",
-  "list", "bullet", "align", "image", "clean"
-];
+// @ts-ignore
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
+
+// Dynamically import Quill
+const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
 const modules = {
   toolbar: [
     [{ header: [1, 2, 3, 4, false] }],
-    ["bold", "italic", "underline"],
-    [{ script: "sub" }, { script: "super" }],
+    ["bold", "italic", "underline", "strike"],
+    [{ color: [] }, { background: [] }],
     [{ list: "ordered" }, { list: "bullet" }],
     [{ align: [] }],
-    ["image", "clean"],
+    ["link", "image", "video"],
+    ["clean"],
   ],
-  clipboard: { matchVisual: false },
+  clipboard: {
+    matchVisual: false, // Cleaner pasting
+  },
 };
+
+const formats = [
+  "header", "bold", "italic", "underline", "strike",
+  "color", "background", "list", "bullet", "align",
+  "link", "image", "video"
+];
 
 type Author = { name: string; affiliation: string };
 type Sections = {
@@ -40,241 +54,445 @@ type Sections = {
 
 export default function FormattingTool() {
   const [view, setView] = useState<"EDIT" | "PREVIEW">("EDIT");
-
-  // States
-  const [title, setTitle] = useState("Pharmacodynamic basis of gabapentin combined with Hegu-point catgut embedding for post-herpetic neuralgia");
-  const [doi, setDoi] = useState("doi.org/10.36721/PJPS.2026.39.5.152.1");
+  const [title, setTitle] = useState("");
+  const [doi, setDoi] = useState("");
   const [dates, setDates] = useState({
-    submitted: "06-08-2025",
-    revised: "29-12-2025",
-    accepted: "02-01-2026",
+    submitted: "",
+    revised: "",
+    accepted: ""
   });
-  const [keywords, setKeywords] = useState("Gabapentin; Hegu-point catgut embedding; Neuro-inflammation; Pharmacodynamics; Post-herpetic neuralgia");
+  const [keywords, setKeywords] = useState("");
+  const [currAuthor, setCurrAuthor] = useState("");
   const [authors, setAuthors] = useState<Author[]>([
-    { name: "Li-Ping Li", affiliation: "Dermatology, Sui Ning First People's Hospital in Sichuan Province, Sui Ning, China" },
+    { name: "", affiliation: "" }
   ]);
   const [sections, setSections] = useState<Sections>({
-    abstract: "Background: Post-herpetic neuralgia (PHN) is a common complication. Methods: A randomized study... Results: Both groups displayed significant reduction in pain.",
-    introduction: "<p>Neuropathic pain is the most common complication reported in patients suffering from herpes zoster...</p>",
+    abstract: "",
+    introduction: "",
     materialsMethods: "",
     results: "",
     discussion: "",
     conclusion: "",
-    references: "<p>Abd-Elsalam et al. (2024). Pain Management. <i>Journal of Pain</i>.</p>",
+    references: "",
   });
 
-  const handleAuthor = (i: number, field: "name"|"affiliation", val: string) => {
-    const arr = [...authors]; arr[i][field] = val; setAuthors(arr);
+  const printRef = useRef(null);
+
+  const handleAuthorChange = (index: number, field: keyof Author, value: string) => {
+    const newAuthors = [...authors];
+    newAuthors[index][field] = value;
+    setAuthors(newAuthors);
   };
 
   const addAuthor = () => {
-    setAuthors([...authors, { name: "", affiliation: "" }]);
+    if (authors.length < 8) setAuthors([...authors, { name: "", affiliation: "" }]);
   };
 
   const removeAuthor = (index: number) => {
     setAuthors(authors.filter((_, i) => i !== index));
   };
 
-  const handleSectionChange = (key: keyof Sections, val: string) => {
-    setSections({ ...sections, [key]: val });
+  const handleSectionChange = (key: keyof Sections, value: string) => {
+    setSections(prev => ({ ...prev, [key]: value }));
   };
 
-  // Convert HTML to LaTeX
-  const parseHtmlToLaTeX = (html: string): string => {
-    if (typeof window === 'undefined') return "";
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    
-    const parseNode = (node: ChildNode): string => {
-      let text = "";
-      if (node.nodeType === 3) {
-        // Escape LaTeX special characters
-        return (node.textContent || "")
-          .replace(/&/g, '\\&')
-          .replace(/%/g, '\\%')
-          .replace(/\\$/g, '\\$')
-          .replace(/#/g, '\\#')
-          .replace(/_/g, '\\_');
-      }
-      
-      node.childNodes.forEach(child => {
-        text += parseNode(child);
-      });
-      
-      const tag = node.nodeName.toUpperCase();
-      if (tag === 'STRONG' || tag === 'B') return `\\textbf{${text}}`;
-      if (tag === 'EM' || tag === 'I') return `\\textit{${text}}`;
-      if (tag === 'U') return `\\underline{${text}}`;
-      if (tag === 'SUP') return `\\textsuperscript{${text}}`;
-      if (tag === 'SUB') return `\\textsubscript{${text}}`;
-      if (tag === 'P') return `${text}\n\n`;
-      if (tag === 'DIV') return `${text}\n\n`;
-      if (tag === 'H1' || tag === 'H2') return `\\section*{${text}}\n`;
-      if (tag === 'H3' || tag === 'H4') return `\\subsection*{${text}}\n`;
-      if (tag === 'UL') return `\\begin{itemize}\n${text}\\end{itemize}\n\n`;
-      if (tag === 'OL') return `\\begin{enumerate}\n${text}\\end{enumerate}\n\n`;
-      if (tag === 'LI') return `  \\item ${text}\n`;
-      if (tag === 'BR') return `\\newline\n`;
-      if (tag === 'IMG') return `\n[Image Placeholder - Upload manually in Overleaf]\n`;
+  const generateProfessionalPDF = () => {
+    if (typeof window === 'undefined') return;
 
-      return text;
-    };
-
-    let latex = "";
-    doc.body.childNodes.forEach(node => {
-      latex += parseNode(node);
-    });
-    
-    return latex.trim();
-  };
-
-  const exportToOverleaf = () => {
-    const authorLine = authors.filter(a => a.name).map((a, i) => `${parseHtmlToLaTeX(a.name)}$^{${i+1}}$`).join(", ");
-    const affiliationLine = authors.filter(a => a.affiliation).map((a, i) => `$^{${i+1}}$ ${parseHtmlToLaTeX(a.affiliation)}`).join(" \\\\ ");
-    
-    const bodyStr = [
-      { key: 'introduction', label: 'INTRODUCTION' },
-      { key: 'materialsMethods', label: 'MATERIALS AND METHODS' },
-      { key: 'results', label: 'RESULTS' },
-      { key: 'discussion', label: 'DISCUSSION' },
-      { key: 'conclusion', label: 'CONCLUSION' },
-    ].filter(s => sections[s.key as keyof Sections]?.trim())
-     .map(s => `\\section*{${s.label}}\n` + parseHtmlToLaTeX(sections[s.key as keyof Sections]))
-     .join("\n\n");
-     
-    const refStr = sections.references?.trim() 
-        ? `\\section*{REFERENCES}\n` + parseHtmlToLaTeX(sections.references) 
-        : "";
-
-    const abstractText = sections.abstract.replace(/^Abstract:\s*/i, "").trim();
-
-    const latexTemplate = `\\documentclass[twocolumn,a4paper,10pt]{article}
-\\usepackage[utf8]{inputenc}
-\\usepackage{times}
-\\usepackage[margin=2cm]{geometry}
-\\usepackage{graphicx}
-\\usepackage{hyperref}
-\\usepackage{titlesec}
-\\usepackage{abstract}
-
-\\titleformat{\\section}{\\large\\bfseries\\uppercase}{\\thesection.}{1em}{}
-\\titleformat{\\subsection}{\\normalsize\\bfseries}{\\thesubsection.}{1em}{}
-
-\\title{ \\vspace{-2cm} \\Large \\textbf{ ${parseHtmlToLaTeX(title)} } }
-\\author{ ${authorLine} \\\\ \\vspace{2mm} \\small \\textit{ ${affiliationLine} } }
-\\date{\\vspace{-6ex}}
-
-\\begin{document}
-\\twocolumn[
-  \\begin{center}
-    \\textit{Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610} \\hfill \\textbf{ ${parseHtmlToLaTeX(doi)} }
-  \\end{center}
-  \\maketitle
-  \\begin{abstract}
-    \\noindent \\textbf{Abstract: } ${parseHtmlToLaTeX(abstractText)}
-  \\end{abstract}
-  \\noindent \\textbf{Keywords:} ${parseHtmlToLaTeX(keywords)} \\\\
-  \\vspace{0.5cm} \\\\
-  \\noindent \\textit{Submitted: ${parseHtmlToLaTeX(dates.submitted)} --- Revised: ${parseHtmlToLaTeX(dates.revised)} --- Accepted: ${parseHtmlToLaTeX(dates.accepted)}}
-  \\vspace{1cm}
-]
-
-${bodyStr}
-
-${refStr}
-
-\\end{document}
-`;
-
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = 'https://www.overleaf.com/docs';
-    form.target = '_blank';
-    
-    const snipInput = document.createElement('input');
-    snipInput.type = 'hidden';
-    snipInput.name = 'snip';
-    snipInput.value = latexTemplate;
-    
-    form.appendChild(snipInput);
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
-  };
-
-  /* ── RAW DOCX FALLBACK ── */
-  const exportWord = async () => {
-    const parseHTML = (html: string): (Paragraph | Table)[] => {
-      if (typeof window === 'undefined') return [];
-      const docParser = new DOMParser().parseFromString(html, 'text/html');
-      const docxElements: (Paragraph | Table)[] = [];
-
-      const parseInline = (node: ChildNode): any[] => {
-        const runs: any[] = [];
-        node.childNodes.forEach((child: any) => {
-          const tag = child.nodeName;
-          const text = child.textContent || "";
-          
-          if (tag === 'STRONG' || tag === 'B') runs.push(new TextRun({ text, bold: true, size: 20, font: "Times New Roman" }));
-          else if (tag === 'EM' || tag === 'I') runs.push(new TextRun({ text, italics: true, size: 20, font: "Times New Roman" }));
-          else if (tag === 'SUP') runs.push(new TextRun({ text, superScript: true, size: 14, font: "Times New Roman" }));
-          else if (tag === 'SUB') runs.push(new TextRun({ text, subScript: true, size: 14, font: "Times New Roman" }));
-          else if (tag === 'SPAN') runs.push(...parseInline(child));
-          else if (text) runs.push(new TextRun({ text, size: 20, font: "Times New Roman" }));
-        });
-        return runs;
-      };
-
-      docParser.body.childNodes.forEach((node: any) => {
-        const tag = node.nodeName;
-        if (tag === 'P' || tag === 'DIV') {
-          const children = parseInline(node);
-          if (children.length > 0) docxElements.push(new Paragraph({ children, alignment: AlignmentType.JUSTIFIED, spacing: { after: 120, line: 276 } }));
-        } else if (tag === 'H1' || tag === 'H2') {
-          docxElements.push(new Paragraph({ children: [new TextRun({ text: node.textContent?.toUpperCase() || "", bold: true, size: 22, font: "Times New Roman" })], spacing: { before: 200, after: 120 } }));
-        } else if (tag === 'H3' || tag === 'H4') {
-          docxElements.push(new Paragraph({ children: [new TextRun({ text: node.textContent || "", bold: true, italics: true, size: 20, font: "Times New Roman" })], spacing: { before: 160, after: 80 } }));
-        } else if (tag === 'UL' || tag === 'OL') {
-          node.querySelectorAll('li').forEach((li: any) => {
-            docxElements.push(new Paragraph({ children: parseInline(li), bullet: tag === 'UL' ? { level: 0 } : undefined, spacing: { after: 60, line: 276 } }));
-          });
+    // Helper to parse HTML to pdfmake objects
+    const parseHTML = (html: string) => {
+      return htmlToPdfmake(html, {
+        defaultStyles: {
+          p: { margin: [0, 0, 0, 8], alignment: 'justify', lineHeight: 1.2 },
+          h1: { fontSize: 11, bold: true, margin: [0, 10, 0, 5], textTransform: 'uppercase' },
+          h2: { fontSize: 10, bold: true, margin: [0, 8, 0, 4], textTransform: 'uppercase' },
+          h3: { fontSize: 10, bold: true, italics: true, margin: [0, 6, 0, 3] },
+          ul: { margin: [15, 0, 0, 8] },
+          ol: { margin: [15, 0, 0, 8] },
+          table: { margin: [0, 10, 0, 10] },
+          img: { margin: [0, 10, 0, 10], alignment: 'center' }
         }
       });
-      return docxElements;
     };
 
+    const docDefinition: any = {
+      pageSize: 'A4',
+      pageMargins: [56, 70, 56, 56], // Standard 2cm margins (approx 56 points)
+      defaultStyle: {
+        font: 'Times',
+        fontSize: 10,
+        lineHeight: 1.25
+      },
+      header: (currentPage: number) => {
+        return {
+          margin: [56, 30, 56, 0],
+          columns: [
+            { text: "Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610", style: 'headerLeft' },
+            { text: (doi || "10.36721/PJPS...").toUpperCase(), style: 'headerRight' }
+          ],
+          canvas: [{ type: 'line', x1: 56, y1: 15, x2: 539.27, y2: 15, lineWidth: 0.5 }]
+        };
+      },
+      footer: (currentPage: number, pageCount: number) => {
+        return {
+          margin: [56, 0, 56, 20],
+          stack: [
+             { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 483.27, y2: 0, lineWidth: 0.5 }] },
+             {
+               columns: [
+                 { text: "1602", alignment: 'left' },
+                 { text: "Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610", alignment: 'right' }
+               ],
+               margin: [0, 5, 0, 0]
+             }
+          ]
+        };
+      },
+      content: [
+        // Title
+        { text: (title || "UNTITLED MANUSCRIPT").toUpperCase(), style: 'articleTitle' },
+        
+        // Authors
+        {
+          text: authors.filter(a => a.name).map((a, i) => {
+            return [
+              { text: a.name, bold: true },
+              { text: (i + 1).toString(), superscript: true, bold: true }
+            ];
+          }).reduce((prev: any, curr: any) => prev === null ? [curr] : [...prev, { text: ', ' }, curr], null),
+          alignment: 'center',
+          margin: [0, 0, 0, 10],
+          fontSize: 12
+        },
+
+        // Affiliations
+        {
+          stack: authors.filter(a => a.affiliation).map((a, i) => {
+            return {
+              text: [
+                { text: (i + 1).toString(), superscript: true, italics: true },
+                { text: ' ' + a.affiliation, italics: true }
+              ],
+              alignment: 'center',
+              margin: [0, 0, 0, 2]
+            };
+          }),
+          margin: [0, 0, 0, 20]
+        },
+
+        // Abstract Box
+        {
+          stack: [
+            { text: [ { text: 'Abstract: ', bold: true }, ...parseHTML(sections.abstract) ], alignment: 'justify' }
+          ],
+          margin: [0, 0, 0, 10]
+        },
+
+        // Keywords
+        { text: [ { text: 'Keywords: ', bold: true }, { text: keywords || "Not specified" } ], margin: [0, 0, 0, 15] },
+
+        // Dates
+        {
+          text: `Submitted on ${dates.submitted || "27-08-2024"} — Revised on ${dates.revised || "31-10-2024"} — Accepted on ${dates.accepted || "31-10-2024"}`,
+          italics: true,
+          margin: [0, 0, 0, 20],
+          decoration: 'underline'
+        },        // 2-Column Body
+        {
+          columns: [
+            // Column 1
+            {
+              width: '50%',
+              stack: [
+                { text: 'INTRODUCTION', style: 'sectionHeader' },
+                parseHTML(sections.introduction),
+                { text: 'MATERIALS AND METHODS', style: 'sectionHeader' },
+                parseHTML(sections.materialsMethods),
+                { text: 'RESULTS', style: 'sectionHeader' },
+                parseHTML(sections.results)
+              ],
+              margin: [0, 0, 10, 0]
+            },
+            // Column 2
+            {
+              width: '50%',
+              stack: [
+                { text: 'DISCUSSION', style: 'sectionHeader' },
+                parseHTML(sections.discussion),
+                { text: 'CONCLUSION', style: 'sectionHeader' },
+                parseHTML(sections.conclusion),
+                { text: 'REFERENCES', style: 'sectionHeader' },
+                parseHTML(sections.references),
+                 // Corresponding Author Footnote
+                 {
+                   margin: [0, 30, 0, 0],
+                   stack: [
+                     { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 100, y2: 0, lineWidth: 0.5 }] },
+                     { text: `*Corresponding author: e-mail: ${authors[0]?.name ? authors[0].name.toLowerCase().replace(/\s+/g, '_') + "@pjps.pk" : ""}`, fontSize: 8, margin: [0, 5, 0, 0] }
+                   ]
+                 }
+              ],
+              margin: [10, 0, 0, 0]
+            }
+          ]
+        }
+      ],
+      styles: {
+        headerLeft: { fontSize: 8, italics: true },
+        headerRight: { fontSize: 8, bold: true, alignment: 'right' },
+        articleTitle: { fontSize: 16, bold: true, alignment: 'center', margin: [0, 0, 0, 15] },
+        sectionHeader: { fontSize: 11, bold: true, margin: [0, 15, 0, 5] }
+      }
+    };
+
+    pdfMake.createPdf(docDefinition).download(`${(title || "PJPS_Article").replace(/\\s+/g, '_')}.pdf`);
+  };
+
+  const exportToWord = async () => {
+  const parseHtmlToDocx = (html: string): (Paragraph)[] => {
+    if (typeof window === 'undefined') return [];
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const paragraphs: Paragraph[] = [];
+
+    const parseInlineNodes = (node: ChildNode): any[] => {
+      const runs: any[] = [];
+      node.childNodes.forEach((child: any) => {
+        const tag = child.nodeName;
+        const text = child.textContent || "";
+        if (tag === 'STRONG' || tag === 'B') {
+          runs.push(new TextRun({ text, bold: true, font: "Times New Roman", size: 20 }));
+        } else if (tag === 'EM' || tag === 'I') {
+          runs.push(new TextRun({ text, italics: true, font: "Times New Roman", size: 20 }));
+        } else if (tag === 'U') {
+          runs.push(new TextRun({ text, underline: {}, font: "Times New Roman", size: 20 }));
+        } else if (tag === 'SUP') {
+          runs.push(new TextRun({ text, superScript: true, font: "Times New Roman", size: 16 }));
+        } else if (tag === 'SUB') {
+          runs.push(new TextRun({ text, subScript: true, font: "Times New Roman", size: 16 }));
+        } else if (tag === 'IMG') {
+          const src = child.getAttribute('src');
+          if (src?.startsWith('data:image')) {
+            runs.push(new ImageRun({
+              data: src.split(',')[1],
+              transformation: { width: 330, height: 220 },
+            }));
+          }
+        } else if (tag === 'SPAN') {
+          // Recurse for nested spans (Quill color/background spans)
+          runs.push(...parseInlineNodes(child));
+        } else {
+          if (text) runs.push(new TextRun({ text, font: "Times New Roman", size: 20 }));
+        }
+      });
+      return runs;
+    };
+
+    const processNode = (node: any) => {
+      const tag = node.nodeName;
+
+      if (tag === 'P' || tag === 'DIV') {
+        const children = parseInlineNodes(node);
+        if (children.length > 0) {
+          paragraphs.push(new Paragraph({ 
+            children, 
+            alignment: AlignmentType.JUSTIFIED, 
+            spacing: { after: 100, line: 276 } 
+          }));
+        }
+      } else if (tag === 'H1' || tag === 'H2' || tag === 'H3' || tag === 'H4') {
+        const sizeMap: Record<string, number> = { H1: 24, H2: 22, H3: 21, H4: 20 };
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ 
+            text: node.textContent?.toUpperCase() || "", 
+            bold: true, 
+            font: "Times New Roman", 
+            size: sizeMap[tag] 
+          })],
+          spacing: { before: 200, after: 100 },
+        }));
+      } else if (tag === 'UL' || tag === 'OL') {
+        node.querySelectorAll('li').forEach((li: any, idx: number) => {
+          const bullet = tag === 'UL' ? '•  ' : `${idx + 1}.  `;
+          paragraphs.push(new Paragraph({
+            children: [new TextRun({ text: bullet + li.textContent, font: "Times New Roman", size: 20 })],
+            indent: { left: 360 },
+            spacing: { after: 60 },
+          }));
+        });
+      } else if (tag === 'TABLE') {
+        // Tables are not supported inline in docx paragraphs array; emit a placeholder
+        const rows = Array.from(node.querySelectorAll('tr'));
+        rows.forEach((row: any) => {
+          const cells = Array.from(row.querySelectorAll('td, th'));
+          const cellTexts = cells.map((c: any) => c.textContent || "").join(" | ");
+          paragraphs.push(new Paragraph({
+            children: [new TextRun({ text: cellTexts, font: "Times New Roman", size: 18 })],
+            spacing: { after: 60 },
+            border: {
+              bottom: { color: "auto", space: 1, style: BorderStyle.SINGLE, size: 6 },
+            }
+          }));
+        });
+      } else if (tag === 'IMG') {
+        const src = node.getAttribute('src');
+        if (src?.startsWith('data:image')) {
+          paragraphs.push(new Paragraph({
+            children: [new ImageRun({
+              data: src.split(',')[1],
+              transformation: { width: 400, height: 280 },
+            })],
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 160, after: 160 }
+          }));
+        }
+      } else if (node.nodeType === 3 && node.textContent?.trim()) {
+        paragraphs.push(new Paragraph({ 
+          children: [new TextRun({ text: node.textContent, font: "Times New Roman", size: 20 })], 
+          alignment: AlignmentType.JUSTIFIED, 
+          spacing: { after: 100, line: 276 } 
+        }));
+      }
+    };
+
+    doc.body.childNodes.forEach(processNode);
+    return paragraphs;
+  };
+
+
     const doc = new Document({
-      creator: "PJPS formatting tool",
+      creator: "PJPS Manuscript Architect",
+      title: title || "Scholarly Article",
+      styles: {
+        default: {
+          document: {
+            run: {
+              font: "Times New Roman",
+              size: 20, // 10pt
+            },
+          },
+        },
+      },
       sections: [
         {
-          properties: { page: { margin: { top: convertInchesToTwip(1), right: convertInchesToTwip(0.8), bottom: convertInchesToTwip(1), left: convertInchesToTwip(0.8) } } },
+          properties: { type: SectionType.CONTINUOUS },
           children: [
-            new Paragraph({ children: [new TextRun({ text: title.toUpperCase(), bold: true, size: 32, font: "Times New Roman" })], alignment: AlignmentType.CENTER, spacing: { after: 240 } }),
-            new Paragraph({ children: authors.filter(a => a.name).map((a, i) => new TextRun({ text: `${a.name}${i+1}${i < authors.length-1 ? ', ' : ''}`, bold: true, size: 24, font: "Times New Roman" })), alignment: AlignmentType.CENTER, spacing: { after: 120 } }),
-            ...authors.filter(a => a.affiliation).map((a, i) => new Paragraph({ children: [new TextRun({ text: `${i+1} ${a.affiliation}`, italics: true, size: 20, font: "Times New Roman" })], alignment: AlignmentType.CENTER, spacing: { after: 40 } })),
-            new Paragraph({ children: [new TextRun({ text: "Abstract: ", bold: true, size: 20, font: "Times New Roman" }), new TextRun({ text: sections.abstract.replace("Abstract:", "").trim(), size: 20, font: "Times New Roman" })], alignment: AlignmentType.JUSTIFIED, spacing: { before: 240, after: 160, line: 276 } }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610`,
+                  italics: true,
+                  size: 18,
+                }),
+                new TextRun({
+                  text: `\t${(doi || "10.36721/PJPS...").toUpperCase()}`,
+                  bold: true,
+                  size: 18,
+                }),
+              ],
+              tabStops: [
+                {
+                  type: "right",
+                  position: 9000,
+                },
+              ],
+              spacing: { after: 300 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: (title || "UNTITLED MANUSCRIPT").toUpperCase(),
+                  bold: true,
+                  size: 32, // 16pt
+                  font: "Times New Roman"
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+              spacing: { before: 200, after: 400 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({ 
+                  text: authors.filter(a => a.name).map((a, i) => `${a.name}${i + 1}`).join(", "), 
+                  bold: true,
+                  size: 24, // 12pt
+                  font: "Times New Roman"
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 150 },
+            }),
+            ...authors.filter(a => a.affiliation).map((a, i) => new Paragraph({
+              children: [
+                new TextRun({
+                  text: `${i + 1} ${a.affiliation}`,
+                  size: 20, // 10pt
+                })
+              ],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 80 },
+            })),
+            new Paragraph({ text: "", spacing: { after: 400 } }),
+            new Paragraph({ 
+              children: [new TextRun({ text: "Abstract: ", bold: true, size: 20 })],
+              alignment: AlignmentType.JUSTIFIED,
+              spacing: { after: 100 }
+            }),
+            ...parseHtmlToDocx(sections.abstract),
+            new Paragraph({ 
+              children: [
+                new TextRun({ text: "Keywords: ", bold: true, size: 18 }),
+                new TextRun({ text: keywords, size: 18 }),
+              ],
+              spacing: { before: 200, after: 200 } 
+            }),
+            new Paragraph({ 
+              children: [
+                new TextRun({ 
+                  text: `Submitted: ${dates.submitted || "27-08-2024"} — Revised: ${dates.revised || "31-10-2024"} — Accepted: ${dates.accepted || "31-10-2024"}`,
+                  italics: true,
+                  size: 18
+                }),
+              ],
+              alignment: AlignmentType.LEFT,
+              border: {
+                bottom: {
+                  color: "auto",
+                  space: 10,
+                  style: BorderStyle.SINGLE,
+                  size: 6,
+                },
+              },
+              spacing: { after: 400 },
+            }),
           ],
         },
         {
-          properties: { type: SectionType.CONTINUOUS, column: { count: 2, space: convertInchesToTwip(0.28) } },
-          children: [
-            ...['introduction', 'materialsMethods', 'results', 'discussion', 'conclusion'].filter(k => sections[k as keyof Sections]?.trim()).flatMap(k => [
-               new Paragraph({ children: [new TextRun({ text: k.toUpperCase(), bold: true, size: 22, font: "Times New Roman" })], spacing: { before: 240, after: 120 } }),
-               ...parseHTML(sections[k as keyof Sections])
-            ]),
-            ...(sections.references?.trim() ? [
-               new Paragraph({ children: [new TextRun({ text: "REFERENCES", bold: true, size: 22, font: "Times New Roman" })], spacing: { before: 240, after: 120 } }),
-               ...parseHTML(sections.references).map(p => new Paragraph({ ...(p as any), indent: { left: convertInchesToTwip(0.25), hanging: convertInchesToTwip(0.25) } }))
-            ] : [])
-          ],
+          properties: { 
+            type: SectionType.CONTINUOUS,
+            column: { count: 2, space: 400 },
+          },
+          children: Object.entries(sections).filter(([k]) => k !== 'abstract').flatMap(([key, value]) => [
+            new Paragraph({ 
+              children: [
+                new TextRun({
+                  text: key.toUpperCase(),
+                  bold: true,
+                  size: 24, // 12pt
+                })
+              ],
+              alignment: AlignmentType.LEFT,
+              spacing: { before: 300, after: 150 } 
+            }),
+            ...parseHtmlToDocx(value),
+          ]),
         }
       ],
     });
 
     const blob = await Packer.toBlob(doc);
-    saveAs(blob, `${(title || "PJPS_Article").substring(0,25).replace(/\\s+/g, '_')}.docx`);
+    saveAs(blob, `${(title || "PJPS_Article").replace(/\s+/g, '_')}.docx`);
   };
 
-  /* ── UI RENDERING ── */
   return (
     <div className={styles.container}>
       <div className={styles.toolHeader}>
@@ -286,83 +504,257 @@ ${refStr}
           </div>
         </div>
         <div className={styles.controls}>
-          <button 
-            onClick={exportToOverleaf}
-            className="btn btn-primary flex items-center gap-2"
-            style={{ background: '#002d5e', minWidth: 180 }}
-            title="Automatically format your paper using Overleaf LaTeX"
-          >
-            <Sparkles size={16} /> Format in Overleaf (Precision)
+          {view === "EDIT" ? (
+             <button onClick={() => setView("PREVIEW")} className="btn btn-outline flex items-center gap-2">
+               <Eye size={16} /> Print Preview
+             </button>
+          ) : (
+            <button onClick={() => setView("EDIT")} className="btn btn-outline flex items-center gap-2">
+               <Edit3 size={16} /> Editor Mode
+             </button>
+          )}
+          <button onClick={exportToWord} className="btn btn-outline flex items-center gap-2 border-slate-300">
+            <Download size={16} /> DOCX
           </button>
-          <button onClick={exportWord} className="btn btn-outline flex items-center gap-2 border-slate-300">
-            <Download size={16} /> Raw DOCX
+          <button onClick={generateProfessionalPDF} className="btn btn-primary flex items-center gap-2">
+            <Sparkles size={16} /> Download PDF (HD)
           </button>
         </div>
       </div>
 
-      <div className="space-y-10">
-        <div className={styles.editorSection}>
-          <label className={styles.label}>Full Manuscript Title</label>
-          <textarea 
-            value={title} onChange={(e) => setTitle(e.target.value)}
-            className={styles.titleField} rows={2}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div style={{ display: view === "EDIT" ? "block" : "none" }}>
+        <div className="space-y-10">
           <div className={styles.editorSection}>
-            <label className={styles.label}>Authors & Affiliations</label>
-            <div className={styles.authorsGrid}>
-              {authors.map((author, i) => (
-                <div key={i} className={styles.authorCard}>
-                  <input type="text" value={author.name} onChange={(e) => handleAuthor(i, "name", e.target.value)} placeholder="Full Name" className={styles.authorInput} />
-                  <input type="text" value={author.affiliation} onChange={(e) => handleAuthor(i, "affiliation", e.target.value)} placeholder="Affiliation / University" className={styles.authorInput} />
-                  {authors.length > 1 && (
-                    <button onClick={() => removeAuthor(i)} className="text-xs text-red-500 mt-2 hover:underline">Remove</button>
-                  )}
-                </div>
-              ))}
+            <label className={styles.label}>Full Manuscript Title (Official)</label>
+            <textarea 
+              value={title} onChange={(e) => setTitle(e.target.value)}
+              className={styles.titleField}
+              rows={2}
+              placeholder="Enter full title of your research paper..."
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className={styles.editorSection}>
+              <label className={styles.label}>DOI / Reference ID (Optional)</label>
+              <input type="text" value={doi} onChange={(e) => setDoi(e.target.value)} className={styles.authorInput} placeholder="e.g. doi.org/10.36721..." />
             </div>
-            <button onClick={addAuthor} className="mt-4 text-emerald-600 font-bold text-sm hover:underline">+ Add Author</button>
+            <div className={styles.editorSection}>
+              <label className={styles.label}>Keywords (Semi-colon separated)</label>
+              <input type="text" value={keywords} onChange={(e) => setKeywords(e.target.value)} className={styles.authorInput} placeholder="Keyword 1; Keyword 2..." />
+            </div>
           </div>
 
           <div className={styles.editorSection}>
-            <label className={styles.label}>Manuscript Metadata</label>
-            <div className="space-y-4">
-              <div><label className="text-xs font-bold text-slate-500">DOI Assignment</label><input type="text" className={styles.authorInput} value={doi} onChange={e => setDoi(e.target.value)} /></div>
-              <div><label className="text-xs font-bold text-slate-500">Keywords (; separated)</label><input type="text" className={styles.authorInput} value={keywords} onChange={e => setKeywords(e.target.value)} /></div>
-              <div className={styles.metadataGrid}>
-                <div><label className="text-xs font-bold text-slate-500">Submitted</label><input type="text" className={styles.authorInput} value={dates.submitted} onChange={e => setDates({...dates, submitted: e.target.value})} /></div>
-                <div><label className="text-xs font-bold text-slate-500">Revised</label><input type="text" className={styles.authorInput} value={dates.revised} onChange={e => setDates({...dates, revised: e.target.value})} /></div>
-                <div><label className="text-xs font-bold text-slate-500">Accepted</label><input type="text" className={styles.authorInput} value={dates.accepted} onChange={e => setDates({...dates, accepted: e.target.value})} /></div>
+            <label className={styles.label}>Publication Chronology (Optional)</label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="md:col-start-1">
+                <span className="text-[10px] font-bold text-slate-400 block mb-1 uppercase">Date Submitted</span>
+                <input 
+                  type="date" 
+                  value={dates.submitted} 
+                  onChange={(e) => setDates({...dates, submitted: e.target.value})} 
+                  className={styles.authorInput} 
+                />
               </div>
             </div>
           </div>
-        </div>
 
-        <div className={styles.editorSection}>
-           <label className={styles.label}>Abstract (Required)</label>
-           <textarea 
-             value={sections.abstract} onChange={(e) => setSections({...sections, abstract: e.target.value})}
-             className="w-full p-4 border border-slate-300 rounded-lg text-sm" rows={4}
-           />
-        </div>
-
-        {['introduction', 'materialsMethods', 'results', 'discussion', 'conclusion', 'references'].map((key) => (
-          <div key={key} className={styles.editorSection}>
-            <label className={styles.label}>{key.replace(/([a-z])([A-Z])/g, '$1 $2').toUpperCase()}</label>
-            <div className="bg-white border-2 border-slate-200 rounded-lg overflow-hidden">
-              <ReactQuill 
-                theme="snow" 
-                value={sections[key as keyof Sections]} 
-                onChange={(val) => handleSectionChange(key as keyof Sections, val)}
-                modules={modules} 
-                formats={formats}
-                className="h-64"
-              />
+          <div className={styles.editorSection}>
+            <div className="flex justify-between items-center mb-4">
+              <label className={styles.label}>Author Affiliations ({authors.length}/8)</label>
+              <button onClick={addAuthor} className="text-blue-600 font-bold text-sm flex items-center gap-1">
+                <PlusCircle size={14} /> Add Author
+              </button>
+            </div>
+            <div className={styles.authorsGrid}>
+              {authors.map((auth, idx) => (
+                <div key={idx} className={styles.authorCard}>
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-xs font-black text-slate-400">AUTHOR {idx + 1} {idx === 0 && "(Corresponding)"}</span>
+                    {authors.length > 1 && (
+                       <button onClick={() => removeAuthor(idx)} className="text-red-400 hover:text-red-600">
+                         <Trash2 size={14} />
+                       </button>
+                    )}
+                  </div>
+                  <input 
+                    type="text" value={auth.name} onChange={(e) => handleAuthorChange(idx, "name", e.target.value)}
+                    className={styles.authorInput} placeholder="Author Full Name"
+                  />
+                  <textarea 
+                    value={auth.affiliation} onChange={(e) => handleAuthorChange(idx, "affiliation", e.target.value)}
+                    className={styles.authorInput} placeholder="Institutional Affiliation (Department, University, City, Country)"
+                    rows={2}
+                  />
+                </div>
+              ))}
             </div>
           </div>
-        ))}
+
+          <div className="space-y-12">
+            {Object.keys(sections).map((key) => (
+               <div key={key} className={styles.editorSection}>
+                 <label className={styles.label}>
+                   {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
+                   <span className="ml-2 text-[10px] font-normal lowercase text-slate-400">
+                     ({key === 'abstract' ? 'Single Column Header Block' : 'Two Column Body Section'})
+                   </span>
+                 </label>
+                 <div className={styles.manuscriptBox}>
+                    <div className="bg-slate-50 border-b p-2 flex gap-2">
+                       <button 
+                         type="button"
+                         onClick={() => {
+                           const input = document.createElement('input');
+                           input.type = 'file';
+                           input.accept = 'image/*';
+                           input.onchange = (e: any) => {
+                             const file = e.target.files[0];
+                             if (file) {
+                               const reader = new FileReader();
+                               reader.onload = (re) => {
+                                 const img = `<img src="${re.target?.result}" className="img-inside-column" alt="Section Image" style="max-width: 100%; display: block; margin: 15px 0; border-radius: 4px;" />`;
+                                 handleSectionChange(key as keyof Sections, (sections[key as keyof Sections] || "") + img);
+                               };
+                               reader.readAsDataURL(file);
+                             }
+                           };
+                           input.click();
+                         }}
+                         className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 bg-white border rounded hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-1"
+                       >
+                         <PlusCircle size={10} /> Add Image
+                       </button>
+                       <button 
+                         type="button"
+                         onClick={() => {
+                           const input = document.createElement('input');
+                           input.type = 'file';
+                           input.accept = 'image/*';
+                           input.onchange = (e: any) => {
+                             const file = e.target.files[0];
+                             if (file) {
+                               const reader = new FileReader();
+                               reader.onload = (re) => {
+                                 const img = `<div class="full-width-asset" style="text-align: center; margin: 25px 0; break-inside: avoid; column-span: all;"><p style="font-weight: bold; margin-bottom: 10px; font-size: 11px;">Table ${new Date().getTime().toString().slice(-2)}: [Enter Table Description]</p><img src="${re.target?.result}" alt="Table Image" style="max-width: 100%; border-top: 1.5pt solid black; border-bottom: 1.5pt solid black; padding: 6px; border-radius: 0;" /></div>`;
+                                 handleSectionChange(key as keyof Sections, (sections[key as keyof Sections] || "") + img);
+                               };
+                               reader.readAsDataURL(file);
+                             }
+                           };
+                           input.click();
+                         }}
+                         className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 bg-white border rounded hover:bg-emerald-50 hover:text-emerald-600 transition-colors flex items-center gap-1"
+                       >
+                         <Layout size={10} /> Add Table (Full Width)
+                       </button>
+                       <button 
+                         type="button"
+                         onClick={() => {
+                           const input = document.createElement('input');
+                           input.type = 'file';
+                           input.accept = 'image/*';
+                           input.onchange = (e: any) => {
+                             const file = e.target.files[0];
+                             if (file) {
+                               const reader = new FileReader();
+                               reader.onload = (re) => {
+                                 const img = `<div class="full-width-asset" style="text-align: center; margin: 25px 0; break-inside: avoid; column-span: all;"><img src="${re.target?.result}" alt="Graph Image" style="max-width: 100%;" /><p style="font-weight: bold; margin-top: 10px; font-size: 11px;">Fig. ${new Date().getTime().toString().slice(-2)}</p></div>`;
+                                 handleSectionChange(key as keyof Sections, (sections[key as keyof Sections] || "") + img);
+                               };
+                               reader.readAsDataURL(file);
+                             }
+                           };
+                           input.click();
+                         }}
+                         className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 bg-white border rounded hover:bg-orange-50 hover:text-orange-600 transition-colors flex items-center gap-1"
+                       >
+                         <BarChart3 size={10} /> Add Graph (Full Width)
+                       </button>
+                    </div>
+                    <ReactQuill 
+                       theme="snow"
+                       value={sections[key as keyof Sections]} 
+                       onChange={(val) => handleSectionChange(key as keyof Sections, val)}
+                       modules={modules}
+                       formats={formats}
+                       placeholder={`Draft ${key.replace(/([A-Z])/g, ' $1').toLowerCase()} content with images and tables...`}
+                       className="min-h-[250px]"
+                     />
+                 </div>
+               </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: view === "PREVIEW" ? "block" : "none" }} className={styles.articleViewport}>
+        <div ref={printRef} className={styles.articlePreview}>
+           <div className={styles.journalHeader}>
+             <div className={styles.journalHeaderLeft}>
+               Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610
+             </div>
+             <div className={styles.journalHeaderRight}>
+               {doi || "10.36721/PJPS..."}
+             </div>
+           </div>
+           
+           <h1 className={styles.articleTitle}>{title || "Untitled Manuscript"}</h1>
+           
+           <p className={styles.articleAuthors}>
+             {authors.filter(a => a.name).map((a, i) => (
+                <span key={i}>
+                  {a.name}<sup>{i + 1}</sup>{i < authors.length - 1 ? ', ' : ''}
+                </span>
+             ))}
+             <span className="ml-1">*</span>
+           </p>
+           
+           <div className={styles.articleAffiliations}>
+             {authors.filter(a => a.affiliation).map((a, i) => (
+                <div key={i} className="mb-1 leading-tight">
+                  <sup>{i + 1}</sup> {a.affiliation}
+                </div>
+             ))}
+           </div>
+
+           <div className={`${styles.abstractBlock} rich-content`}>
+             <div dangerouslySetInnerHTML={{ __html: `<b>Abstract: </b>` + sections.abstract }} />
+           </div>
+
+           <div className={styles.keywordsBlock}>
+             <b>Keywords: </b> {keywords || "Not specified"}
+           </div>
+
+           <div className={styles.dateLine}>
+             {dates.submitted ? `Submitted on ${dates.submitted}` : "Submitted on 27-08-2024" } 
+             {dates.revised ? ` — Revised on ${dates.revised}` : " — Revised on 31-10-2024"} 
+             {dates.accepted ? ` — Accepted on ${dates.accepted}` : " — Accepted on 31-10-2024"}
+           </div>
+
+           <div className={styles.scientificBody}>
+             {Object.entries(sections).filter(([k]) => k !== 'abstract').map(([key, content]) => (
+                <div key={key} className={styles.scientificSection}>
+                  <span className={styles.sectionHeading}>
+                    {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
+                  </span>
+                  <div className="rich-content" dangerouslySetInnerHTML={{ __html: content || "Content pending..." }} />
+                </div>
+             ))}
+           </div>
+
+           <div className={styles.footnoteArea}>
+              <div className="border-t border-black pt-2 w-1/2">
+                 *Corresponding author: e-mail: {authors[0]?.name ? authors[0].name.toLowerCase().replace(/\s+/g, '_') + "@pjps.pk" : "---"}
+              </div>
+           </div>
+
+           <div className={styles.articleFooter}>
+              <span>{doi ? doi.split('/').pop()?.toUpperCase() : "1602"}</span>
+              <span>Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610</span>
+           </div>
+        </div>
       </div>
     </div>
   );
