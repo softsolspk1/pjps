@@ -406,11 +406,20 @@ export default function ArticleDesignTool() {
             </div>
 
             <div style={{ borderTop: "1px solid #edf2f7", paddingTop: "20px" }}>
-               <label className={styles.label}>Chronology</label>
+               <label className={styles.label}>Publication Chronology (Optional)</label>
                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }}>
-                  <input type="date" value={dates.submitted} onChange={(e) => setDates({ ...dates, submitted: e.target.value })} className={styles.authorInput} />
-                  <input type="date" value={dates.revised} onChange={(e) => setDates({ ...dates, revised: e.target.value })} className={styles.authorInput} />
-                  <input type="date" value={dates.accepted} onChange={(e) => setDates({ ...dates, accepted: e.target.value })} className={styles.authorInput} />
+                  <div>
+                    <span style={{ fontSize: "10px", fontWeight: 800, color: "#a0aec0", display: "block", marginBottom: "6px", textTransform: "uppercase" }}>Submitted Date</span>
+                    <input type="date" value={dates.submitted} onChange={(e) => setDates({ ...dates, submitted: e.target.value })} className={styles.authorInput} />
+                  </div>
+                  <div>
+                    <span style={{ fontSize: "10px", fontWeight: 800, color: "#a0aec0", display: "block", marginBottom: "6px", textTransform: "uppercase" }}>Revised Date</span>
+                    <input type="date" value={dates.revised} onChange={(e) => setDates({ ...dates, revised: e.target.value })} className={styles.authorInput} />
+                  </div>
+                  <div>
+                    <span style={{ fontSize: "10px", fontWeight: 800, color: "#a0aec0", display: "block", marginBottom: "6px", textTransform: "uppercase" }}>Accepted Date</span>
+                    <input type="date" value={dates.accepted} onChange={(e) => setDates({ ...dates, accepted: e.target.value })} className={styles.authorInput} />
+                  </div>
                </div>
             </div>
         </div>
