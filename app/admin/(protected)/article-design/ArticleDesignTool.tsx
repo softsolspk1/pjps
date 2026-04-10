@@ -8,7 +8,7 @@ import Image from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
 import Paragraph from "@tiptap/extension-paragraph";
 import { useReactToPrint } from "react-to-print";
-import { Document, Packer, Paragraph as DocxParagraph, TextRun, AlignmentType, SectionType, ImageRun, BorderStyle } from "docx";
+import { Document, Packer, Paragraph as DocxParagraph, TextRun, AlignmentType, SectionType, ImageRun, BorderStyle, PageNumber, Header, Footer } from "docx";
 import { saveAs } from "file-saver";
 import { 
   Printer, Bold, Italic, Heading1, Heading2, Heading3, 
@@ -24,14 +24,15 @@ const editorStyles = `
   .tiptap-manuscript {
      text-align: justify;
      font-family: 'Times New Roman', Times, serif;
-     font-size: 11pt;
-     line-height: 1.5;
+     font-size: 10pt;
+     line-height: 1.35;
      min-height: 800px;
      width: 100%;
      margin: 0 auto;
      padding: 2.5cm 2cm;
      box-sizing: border-box;
      background: white;
+     color: black;
   }
   
   .tiptap-manuscript:focus,
@@ -40,10 +41,8 @@ const editorStyles = `
   }
   
   .tiptap-manuscript img {
-     aspect-ratio: auto !important;
-     width: 100% !important;
      max-width: 100% !important;
-     margin: 20px auto !important;
+     margin: 10pt auto !important;
      display: block;
   }
   
@@ -56,26 +55,23 @@ const editorStyles = `
   .column-layout {
      display: grid;
      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-     gap: 1.5rem;
-     margin: 1.5rem 0;
+     gap: 18pt;
+     margin: 12pt 0;
   }
   
   .column-block {
      min-height: 2rem;
-     border: 1px dashed #e2e8f0;
-     padding: 10px;
-     border-radius: 6px;
+     padding: 0;
   }
   
   .tiptap-manuscript > p, .tiptap-manuscript > ul, .tiptap-manuscript > ol {
      break-inside: avoid-column;
   }
   
-  .tiptap-manuscript h1 { margin-top: 2rem; margin-bottom: 1rem; font-size: 14pt; line-height: 1.2; font-weight: bold; text-align: left; text-transform: uppercase; }
-  .tiptap-manuscript h2 { margin-top: 1.5rem; margin-bottom: 0.8rem; font-size: 12pt; font-weight: bold; text-transform: uppercase; }
-  .tiptap-manuscript h3 { margin-top: 1rem; margin-bottom: 0.5rem; font-size: 11pt; font-weight: bold; font-style: italic; }
-  .tiptap-manuscript p { margin-bottom: 1rem; line-height: 1.5; }
-  .tiptap-manuscript hr { margin: 2rem 0; border: 0; border-top: 1px solid black; }
+  .tiptap-manuscript h1 { margin-top: 15pt; margin-bottom: 8pt; font-size: 14pt; line-height: 1.2; font-weight: bold; text-align: left; text-transform: uppercase; }
+  .tiptap-manuscript h2 { margin-top: 12pt; margin-bottom: 6pt; font-size: 11pt; font-weight: bold; text-transform: uppercase; }
+  .tiptap-manuscript h3 { margin-top: 10pt; margin-bottom: 4pt; font-size: 10.5pt; font-weight: bold; font-style: italic; }
+  .tiptap-manuscript p { margin-bottom: 8pt; line-height: 1.35; }
   
   .tiptap-manuscript ul { margin-left: 1.5rem; margin-bottom: 1rem; list-style-type: disc; }
   .tiptap-manuscript ol { margin-left: 1.5rem; margin-bottom: 1rem; list-style-type: decimal; }
@@ -193,7 +189,6 @@ export default function ArticleDesignTool() {
     content: `
       <h2>ABSTRACT</h2>
       <p>Draft your scholarly abstract here. This section remains full-width at the beginning of the manuscript.</p>
-      <hr />
     `,
     editorProps: {
       attributes: {
@@ -234,12 +229,24 @@ export default function ArticleDesignTool() {
     setAuthors(newAuthors);
   };
 
+  // Convert image URL to base64 for docx
+  const getBase64Image = async (url: string): Promise<string> => {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
   const exportToWord = async () => {
     if (!editor) return;
 
-    const parseHtmlToDocx = (html: string): DocxParagraph[] => {
+    const parseHtmlToDocx = async (html: string): Promise<any[]> => {
       const doc = new DOMParser().parseFromString(html, "text/html");
-      const paragraphs: DocxParagraph[] = [];
+      const children: any[] = [];
 
       const parseInlineNodes = (node: ChildNode): TextRun[] => {
         const runs: TextRun[] = [];
@@ -247,52 +254,99 @@ export default function ArticleDesignTool() {
           const tag = child.nodeName;
           const text = child.textContent || "";
           if (tag === "STRONG" || tag === "B") {
-            runs.push(new TextRun({ text, bold: true, font: "Times New Roman" }));
+            runs.push(new TextRun({ text, bold: true, font: "Times New Roman", size: 20 }));
           } else if (tag === "EM" || tag === "I") {
-            runs.push(new TextRun({ text, italics: true, font: "Times New Roman" }));
+            runs.push(new TextRun({ text, italics: true, font: "Times New Roman", size: 20 }));
           } else if (node.nodeType === 3 && text.trim()) {
-            runs.push(new TextRun({ text, font: "Times New Roman" }));
+            runs.push(new TextRun({ text, font: "Times New Roman", size: 20 }));
           }
         });
         return runs;
       };
 
-      doc.body.childNodes.forEach((node: any) => {
-        const tag = node.nodeName;
+      for (const node of Array.from(doc.body.childNodes)) {
+        const tag = (node as any).nodeName;
         if (tag === "P") {
-          paragraphs.push(new DocxParagraph({ children: parseInlineNodes(node), alignment: AlignmentType.JUSTIFIED, spacing: { after: 120 } }));
-        } else if (tag.startsWith("H")) {
-          paragraphs.push(new DocxParagraph({ 
-            children: [new TextRun({ text: node.textContent?.toUpperCase(), bold: true, font: "Times New Roman", size: 24 })],
-            spacing: { before: 240, after: 120 }
-          }));
+          children.push(new DocxParagraph({ children: parseInlineNodes(node), alignment: AlignmentType.JUSTIFIED, spacing: { after: 120, line: 276 } }));
+        } else if (tag === "H1") {
+           children.push(new DocxParagraph({ children: [new TextRun({ text: node.textContent?.toUpperCase(), bold: true, font: "Times New Roman", size: 28 })], spacing: { before: 300, after: 150 } }));
+        } else if (tag === "H2") {
+           children.push(new DocxParagraph({ children: [new TextRun({ text: node.textContent?.toUpperCase(), bold: true, font: "Times New Roman", size: 22 })], spacing: { before: 240, after: 120 } }));
+        } else if (tag === "H3") {
+           children.push(new DocxParagraph({ children: [new TextRun({ text: node.textContent, bold: true, italics: true, font: "Times New Roman", size: 21 })], spacing: { before: 200, after: 100 } }));
+        } else if (tag === "IMG") {
+           const src = (node as any).getAttribute("src");
+           if (src) {
+              const b64 = await getBase64Image(src);
+              children.push(new DocxParagraph({ 
+                 children: [new ImageRun({ data: b64.split(',')[1], transformation: { width: 450, height: 300 } })],
+                 alignment: AlignmentType.CENTER
+              }));
+           }
         }
-      });
-      return paragraphs;
+      }
+      return children;
     };
 
+    const contentHtml = editor.getHTML();
+    // PJPS logic: Abstract is 1-column, Body is 2-column. 
+    // We'll approximate this by splitting the editor content at the first <hr /> or manually if needed.
+    // For now, let's keep it simple: everything from editor is currently in the 1-column section.
+    // To support 2 columns in Word, we need to create a new Section.
+    
     const doc = new Document({
-      sections: [{
-        properties: { type: SectionType.CONTINUOUS },
-        children: [
-          new DocxParagraph({
-            children: [new TextRun({ text: title.toUpperCase(), bold: true, size: 32, font: "Times New Roman" })],
-            alignment: AlignmentType.CENTER,
-            spacing: { after: 400 }
-          }),
-          new DocxParagraph({
-            children: authors.map((a, i) => new TextRun({ text: `${a.name}${i+1}${i < authors.length-1 ? ", " : ""}`, bold: true, size: 24, font: "Times New Roman" })),
-            alignment: AlignmentType.CENTER,
-            spacing: { after: 120 }
-          }),
-          ...authors.map((a, i) => new DocxParagraph({
-            children: [new TextRun({ text: `${i+1} ${a.affiliation}`, italics: true, size: 20, font: "Times New Roman" })],
-            alignment: AlignmentType.CENTER,
-          })),
-          new DocxParagraph({ text: "", spacing: { after: 400 } }),
-          ...parseHtmlToDocx(editor.getHTML())
-        ]
-      }]
+      creator: "PJPS Manuscript Architect",
+      sections: [
+        {
+          properties: { type: SectionType.CONTINUOUS },
+          headers: {
+            default: new Header({
+              children: [
+                new DocxParagraph({
+                  children: [
+                    new TextRun({ text: "Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610", italics: true, size: 18 }),
+                    new TextRun({ text: `\t${doi || "10.36721/PJPS..."}`, bold: true, size: 18 }),
+                  ],
+                  tabStops: [{ type: "right" as any, position: 9350 }],
+                  border: { bottom: { style: BorderStyle.SINGLE, size: 6 } }
+                })
+              ]
+            })
+          },
+          children: [
+            new DocxParagraph({
+              children: [new TextRun({ text: (title || "Untitled Manuscript").toUpperCase(), bold: true, size: 32, font: "Times New Roman" })],
+              alignment: AlignmentType.CENTER,
+              spacing: { before: 200, after: 400 }
+            }),
+            new DocxParagraph({
+              children: authors.map((a, i) => new TextRun({ text: `${a.name}${i+1}${i < authors.length-1 ? ", " : ""}`, bold: true, size: 24, font: "Times New Roman" })),
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 120 }
+            }),
+            ...authors.map((a, i) => new DocxParagraph({
+              children: [new TextRun({ text: `${i+1} ${a.affiliation}`, italics: true, size: 20, font: "Times New Roman" })],
+              alignment: AlignmentType.CENTER,
+            })),
+            new DocxParagraph({ text: "", spacing: { after: 400 } }),
+            new DocxParagraph({ 
+               children: [new TextRun({ text: "Abstract: ", bold: true, size: 20 }), new TextRun({ text: "Drafted manuscript abstract follows...", size: 20 })],
+               alignment: AlignmentType.JUSTIFIED,
+               spacing: { after: 100 }
+            }),
+            new DocxParagraph({ 
+               children: [new TextRun({ text: `Keywords: ${keywords}`, bold: true, size: 18 })],
+               spacing: { before: 100, after: 100 }
+            }),
+            new DocxParagraph({
+               children: [new TextRun({ text: `Submitted on ${dates.submitted} - Revised on ${dates.revised} - Accepted on ${dates.accepted}`, italics: true, size: 18 })],
+               border: { bottom: { style: BorderStyle.SINGLE, size: 6, space: 10 } },
+               spacing: { after: 400 }
+            }),
+            ...(await parseHtmlToDocx(contentHtml))
+          ]
+        }
+      ]
     });
 
     const blob = await Packer.toBlob(doc);
@@ -310,7 +364,7 @@ export default function ArticleDesignTool() {
         {/* Metadata Editor (Above Tiptap) */}
         <div style={{ padding: "40px", backgroundColor: "#fcfdfe", borderBottom: "1px solid #edf2f7", marginBottom: "30px" }}>
             <div style={{ marginBottom: "30px" }}>
-               <label className={styles.label}>Full Manuscript Title</label>
+               <label className={styles.label}>Full Manuscript Title (16pt Std)</label>
                <textarea 
                  value={title} onChange={(e) => setTitle(e.target.value)}
                  className={styles.titleField}
@@ -321,18 +375,18 @@ export default function ArticleDesignTool() {
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "30px" }}>
                <div>
-                  <label className={styles.label}>Keywords (Semi-colon separated)</label>
-                  <input type="text" value={keywords} onChange={(e) => setKeywords(e.target.value)} className={styles.authorInput} placeholder="e.g. Pharmacology; Clinical Trails; Bioethics" />
+                  <label className={styles.label}>Keywords</label>
+                  <input type="text" value={keywords} onChange={(e) => setKeywords(e.target.value)} className={styles.authorInput} placeholder="e.g. Pharmacology; Clinical Trails" />
                </div>
                <div>
-                  <label className={styles.label}>DOI Reference (Optional)</label>
+                  <label className={styles.label}>DOI Reference</label>
                   <input type="text" value={doi} onChange={(e) => setDoi(e.target.value)} className={styles.authorInput} placeholder="e.g. 10.36721/PJPS.2026..." />
                </div>
             </div>
 
             <div style={{ marginBottom: "30px" }}>
                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
-                  <label className={styles.label}>Author Affiliations ({authors.length}/8)</label>
+                  <label className={styles.label}>Authors & Affiliations</label>
                   <button onClick={addAuthor} style={{ display: "flex", alignItems: "center", gap: "6px", color: "#0061ff", fontWeight: 800, fontSize: "11px", textTransform: "uppercase", background: "none", border: "none", cursor: "pointer" }}>
                      <PlusCircle size={14} /> Add Author
                   </button>
@@ -341,36 +395,27 @@ export default function ArticleDesignTool() {
                   {authors.map((auth, idx) => (
                     <div key={idx} className={styles.authorCard}>
                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px" }}>
-                          <span style={{ fontSize: "10px", fontWeight: 900, color: "#cbd5e0" }}>FACULTY {idx + 1}</span>
+                          <span style={{ fontSize: "10px", fontWeight: 900, color: "#cbd5e0" }}>AUTHOR {idx + 1}</span>
                           {authors.length > 1 && <Trash2 size={14} color="#f87171" style={{ cursor: "pointer" }} onClick={() => removeAuthor(idx)} />}
                        </div>
-                       <input value={auth.name} onChange={(e) => updateAuthor(idx, "name", e.target.value)} className={styles.authorInput} placeholder="Full Name (e.g. Dr. Jane Doe)" style={{ marginBottom: "8px" }} />
-                       <textarea value={auth.affiliation} onChange={(e) => updateAuthor(idx, "affiliation", e.target.value)} className={styles.authorInput} placeholder="Institution, Department, City, Country" rows={2} />
+                       <input value={auth.name} onChange={(e) => updateAuthor(idx, "name", e.target.value)} className={styles.authorInput} placeholder="Full Name" style={{ marginBottom: "8px" }} />
+                       <textarea value={auth.affiliation} onChange={(e) => updateAuthor(idx, "affiliation", e.target.value)} className={styles.authorInput} placeholder="Affiliation" rows={2} />
                     </div>
                   ))}
                </div>
             </div>
 
             <div style={{ borderTop: "1px solid #edf2f7", paddingTop: "20px" }}>
-               <label className={styles.label}>Publication Chronology (Optional)</label>
+               <label className={styles.label}>Chronology</label>
                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }}>
-                  <div>
-                    <span style={{ fontSize: "10px", fontWeight: 800, color: "#a0aec0", display: "block", marginBottom: "6px" }}>SUBMITTED</span>
-                    <input type="date" value={dates.submitted} onChange={(e) => setDates({ ...dates, submitted: e.target.value })} className={styles.authorInput} />
-                  </div>
-                  <div>
-                    <span style={{ fontSize: "10px", fontWeight: 800, color: "#a0aec0", display: "block", marginBottom: "6px" }}>REVISED</span>
-                    <input type="date" value={dates.revised} onChange={(e) => setDates({ ...dates, revised: e.target.value })} className={styles.authorInput} />
-                  </div>
-                  <div>
-                    <span style={{ fontSize: "10px", fontWeight: 800, color: "#a0aec0", display: "block", marginBottom: "6px" }}>ACCEPTED</span>
-                    <input type="date" value={dates.accepted} onChange={(e) => setDates({ ...dates, accepted: e.target.value })} className={styles.authorInput} />
-                  </div>
+                  <input type="date" value={dates.submitted} onChange={(e) => setDates({ ...dates, submitted: e.target.value })} className={styles.authorInput} />
+                  <input type="date" value={dates.revised} onChange={(e) => setDates({ ...dates, revised: e.target.value })} className={styles.authorInput} />
+                  <input type="date" value={dates.accepted} onChange={(e) => setDates({ ...dates, accepted: e.target.value })} className={styles.authorInput} />
                </div>
             </div>
         </div>
 
-        {/* Tiptap Editor with Sticky Toolbar */}
+        {/* Tiptap Editor */}
         <div className={`${styles.editorContainerWrapper} ${isFullscreen ? styles.editorContainerFullscreen : ""} relative`}>
           {isUploading && (
             <div className="absolute inset-0 z-[100] flex items-center justify-center bg-slate-900/10 backdrop-blur-sm rounded-b-xl">
@@ -378,7 +423,7 @@ export default function ArticleDesignTool() {
             </div>
           )}
           {editor && (
-            <div className={styles.toolbar} style={{ justifyContent: "center", borderBottom: "1px solid #edf2f7" }}>
+            <div className={styles.toolbar} style={{ justifyContent: "center" }}>
               <button onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={`${styles.toolbarBtn} ${editor.isActive("heading", { level: 1 }) ? styles.toolbarBtnActive : ""}`}><Heading1 size={18} /></button>
               <button onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={`${styles.toolbarBtn} ${editor.isActive("heading", { level: 2 }) ? styles.toolbarBtnActive : ""}`}><Heading2 size={18} /></button>
               <button onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={`${styles.toolbarBtn} ${editor.isActive("heading", { level: 3 }) ? styles.toolbarBtnActive : ""}`}><Heading3 size={18} /></button>
@@ -386,17 +431,13 @@ export default function ArticleDesignTool() {
               <button onClick={() => editor.chain().focus().toggleBold().run()} className={`${styles.toolbarBtn} ${editor.isActive("bold") ? styles.toolbarBtnActive : ""}`}><Bold size={18} /></button>
               <button onClick={() => editor.chain().focus().toggleItalic().run()} className={`${styles.toolbarBtn} ${editor.isActive("italic") ? styles.toolbarBtnActive : ""}`}><Italic size={18} /></button>
               <div className={styles.toolbarDivider}></div>
-              <button onClick={() => editor.chain().focus().setTextAlign("left").run()} className={`${styles.toolbarBtn} ${editor.isActive({ textAlign: "left" }) ? styles.toolbarBtnActive : ""}`}><AlignLeft size={18} /></button>
-              <button onClick={() => editor.chain().focus().setTextAlign("center").run()} className={`${styles.toolbarBtn} ${editor.isActive({ textAlign: "center" }) ? styles.toolbarBtnActive : ""}`}><AlignCenter size={18} /></button>
               <button onClick={() => editor.chain().focus().setTextAlign("justify").run()} className={`${styles.toolbarBtn} ${editor.isActive({ textAlign: "justify" }) ? styles.toolbarBtnActive : ""}`}><AlignJustify size={18} /></button>
-              <div className={styles.toolbarDivider}></div>
               <button onClick={() => editor.chain().focus().toggleBulletList().run()} className={`${styles.toolbarBtn} ${editor.isActive("bulletList") ? styles.toolbarBtnActive : ""}`}><List size={18} /></button>
-              <button onClick={() => editor.chain().focus().setHorizontalRule().run()} className={styles.toolbarBtn}><Minus size={18} /></button>
               <button onClick={() => fileInputRef.current?.click()} className={styles.toolbarBtn}><ImageIcon size={18} /></button>
               <button onClick={() => (editor.chain().focus() as any).insertTwoColumns().run()} className={styles.toolbarBtn}><Columns size={18} /></button>
               <div className={styles.toolbarDivider}></div>
-              <button onClick={exportToWord} className={`${styles.toolbarBtn} text-indigo-600`}><Download size={18} /></button>
-              <button onClick={() => handlePrint()} className={`${styles.toolbarBtn} text-white bg-blue-600 hover:bg-blue-700`} style={{ borderRadius: "4px", padding: "6px 12px" }}>
+              <button onClick={exportToWord} className={`${styles.toolbarBtn} text-indigo-600`} title="Download Word (.docx)"><Download size={18} /></button>
+              <button onClick={() => handlePrint()} className={`${styles.toolbarBtn} text-white bg-blue-600 hover:bg-blue-700`} style={{ borderRadius: "4px", padding: "6px 16px" }}>
                 <Printer size={16} /> Print PDF
               </button>
               <button onClick={() => setIsFullscreen(!isFullscreen)} className={styles.toolbarBtn}>
@@ -405,49 +446,57 @@ export default function ArticleDesignTool() {
             </div>
           )}
 
-          {/* PRINT-READY CONTAINER (Hidden until Printing) */}
+          {/* PRINT VIEW */}
           <div style={{ display: "none" }}>
-            <div ref={printRef} className="print-container" style={{ padding: "2.5cm 2cm", fontFamily: "Times New Roman", fontSize: "11pt", backgroundColor: "white", color: "black" }}>
+            <div ref={printRef} className="print-container" style={{ padding: "2.5cm 2cm", fontFamily: "'Times New Roman', Times, serif", fontSize: "10pt", backgroundColor: "white", color: "black", width: "210mm", minHeight: "297mm" }}>
                <style>{editorStyles}</style>
-               {/* 1. Scholarly Header */}
-               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9pt", borderBottom: "0.5pt solid black", paddingBottom: "4pt", marginBottom: "20pt" }}>
+               
+               {/* Scholarly Header */}
+               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9pt", borderBottom: "0.5pt solid black", paddingBottom: "4pt", marginBottom: "25pt" }}>
                   <span style={{ fontStyle: "italic" }}>Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610</span>
                   <span style={{ fontWeight: "bold" }}>{doi || "10.36721/PJPS..."}</span>
                </div>
 
-               {/* 2. Article Identification */}
-               <h1 style={{ fontSize: "16pt", fontWeight: "bold", textAlign: "center", marginBottom: "15pt", textTransform: "uppercase" }}>{title || "UNTITLED MANUSCRIPT"}</h1>
+               {/* Article Title */}
+               <h1 style={{ fontSize: "16pt", fontWeight: "bold", textAlign: "center", marginBottom: "18pt", textTransform: "uppercase", lineHeight: "1.3" }}>{title || "UNTITLED MANUSCRIPT"}</h1>
                
+               {/* Authors */}
                <p style={{ textAlign: "center", fontSize: "12pt", fontWeight: "bold", marginBottom: "6pt" }}>
                   {authors.filter(a => a.name).map((a, i) => (
                     <span key={i}>{a.name}<sup>{i+1}</sup>{i < authors.length-1 ? ", " : ""}</span>
                   ))}
                </p>
 
-               <div style={{ textAlign: "center", fontSize: "10pt", fontStyle: "italic", marginBottom: "20pt", lineHeight: 1.4 }}>
+               {/* Affiliations */}
+               <div style={{ textAlign: "center", fontSize: "10pt", fontStyle: "italic", marginBottom: "25pt", lineHeight: 1.4 }}>
                   {authors.filter(a => a.affiliation).map((a, i) => (
                     <div key={i}><sup>{i+1}</sup>{a.affiliation}</div>
                   ))}
                </div>
 
-               {/* 3. Keywords & Dates */}
-               <div style={{ fontSize: "10pt", marginBottom: "10pt" }}>
-                  <b>Keywords:</b> {keywords || "Not specified"}
+               {/* Keywords & Dates */}
+               <div style={{ fontSize: "10pt", marginBottom: "12pt", textAlign: "justify" }}>
+                  <b>Keywords:</b> {keywords || "---"}
                </div>
 
-               <div style={{ fontSize: "9pt", fontStyle: "italic", borderBottom: "0.5pt solid black", paddingBottom: "8pt", marginBottom: "20pt" }}>
-                  Submitted: {dates.submitted || "---"} | Revised: {dates.revised || "---"} | Accepted: {dates.accepted || "---"}
+               <div style={{ fontSize: "9pt", fontStyle: "italic", borderBottom: "0.75pt solid black", paddingBottom: "8pt", marginBottom: "25pt" }}>
+                  Submitted on {dates.submitted || "---"} – Revised on {dates.revised || "---"} – Accepted on {dates.accepted || "---"}
                </div>
 
-               {/* 4. Editor Content */}
-               <div className="tiptap-manuscript" dangerouslySetInnerHTML={{ __html: editor?.getHTML() || "" }} />
+               {/* Scientific Body */}
+               <div className="tiptap-manuscript" style={{ padding: 0 }} dangerouslySetInnerHTML={{ __html: editor?.getHTML() || "" }} />
+               
+               {/* Footnote for first page */}
+               <div style={{ position: "absolute", bottom: "2cm", left: "2cm", right: "2cm", fontSize: "8pt", borderTop: "0.5pt solid black", paddingTop: "5pt" }}>
+                  *Corresponding author: e-mail: info@pjps.pk
+               </div>
             </div>
           </div>
 
-          {/* LIVE EDITOR VIEW */}
-          <div className={styles.tiptapEditorBox} style={{ backgroundColor: "#f1f5f9", display: "flex", justifyContent: "center" }}>
+          {/* EDITOR PREVIEW */}
+          <div className={styles.tiptapEditorBox} style={{ backgroundColor: "#f1f5f9", display: "flex", justifyContent: "center", padding: "40px" }}>
             <style>{editorStyles}</style>
-            <div style={{ width: "210mm", minHeight: "297mm", backgroundColor: "white", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}>
+            <div style={{ width: "210mm", minHeight: "297mm", backgroundColor: "white", boxShadow: "0 10px 25px rgba(0,0,0,0.1)", padding: "0" }}>
               <EditorContent editor={editor} />
             </div>
           </div>
@@ -456,4 +505,5 @@ export default function ArticleDesignTool() {
     </>
   );
 }
+
 
