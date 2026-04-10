@@ -110,3 +110,69 @@
   display: flex;
   gap: 12px;
 }
+.label {
+  display: block;
+  font-weight: 800;
+  color: var(--primary-navy);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+}
+
+.titleField {
+  width: 100%;
+  padding: 18px 24px;
+  border: 1px solid var(--border-medium);
+  border-radius: 8px;
+  font-size: 1.6rem;
+  font-family: "Times New Roman", Times, serif;
+  font-weight: 700;
+  color: #1a1a1a;
+  outline: none;
+  transition: all 0.3s ease;
+  line-height: 1.3;
+  resize: vertical;
+}
+
+.titleField:focus {
+  border-color: var(--primary-navy);
+  box-shadow: 0 4px 20px rgba(0, 45, 94, 0.08);
+}
+
+.authorInput {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border-medium);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.authorInput:focus {
+  border-color: var(--primary-navy);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 45, 94, 0.1);
+}
+
+.authorsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.authorCard {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  transition: all 0.3s ease;
+}
+
+.authorCard:hover {
+  border-color: var(--primary-navy);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
