@@ -9,7 +9,7 @@ import {
   Users, LogOut, ShieldCheck, Inbox, 
   BarChart3, ClipboardCheck, UserPlus, 
   Bell, Search, Globe, UserCircle,
-  DollarSign, CreditCard, Mail
+  DollarSign, CreditCard, Mail, Palette
 } from "lucide-react";
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
@@ -57,7 +57,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         {/* 2. Scrollable Navigation Area */}
         <div id="sidebar-nav" style={{ flex: 1, overflowY: 'auto', padding: '0 32px 32px' }}>
            <nav style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-              {session.user.role !== "FINANCE_ADMIN" && (
+              {session.user.role !== "FINANCE_ADMIN" && session.user.role !== "DESIGNER" && (
                 <>
                   <div style={{ padding: '10px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Journal Management</div>
                   <SidebarLink href="/admin/dashboard" icon={<LayoutDashboard size={18} />} label="System Overview" />
@@ -65,6 +65,20 @@ export default async function AdminLayout({ children }: { children: ReactNode })
                   <SidebarLink href="/admin/reviews" icon={<ClipboardCheck size={18} />} label="Review Pool" />
                   <SidebarLink href="/admin/users" icon={<Users size={18} />} label="User Directory" />
                   <SidebarLink href="/admin/issues" icon={<Layers size={18} />} label="Issue Catalog" />
+                </>
+              )}
+
+              {session.user.role === "DESIGNER" && (
+                <>
+                  <div style={{ padding: '10px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Journal Management</div>
+                  <SidebarLink href="/admin/dashboard" icon={<LayoutDashboard size={18} />} label="System Overview" />
+                </>
+              )}
+
+              {["ADMIN", "EDITOR_IN_CHIEF", "ASSOCIATE_EDITOR", "EDITOR", "DESIGNER"].includes(session.user.role) && (
+                <>
+                  <div style={{ padding: '10px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Article Production</div>
+                  <SidebarLink href="/admin/article-design" icon={<Palette size={18} />} label="Article Design" />
                 </>
               )}
               
@@ -77,7 +91,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
                 </>
               )}
               
-              {session.user.role !== "FINANCE_ADMIN" && (
+              {session.user.role !== "FINANCE_ADMIN" && session.user.role !== "DESIGNER" && (
                 <>
                   <div style={{ padding: '10px 20px 10px', fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Communication</div>
                   <SidebarLink href="/admin/messages" icon={<Mail size={18} />} label="Editorial Dispatch" />

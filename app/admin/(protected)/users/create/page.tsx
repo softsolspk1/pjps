@@ -137,6 +137,7 @@ export default function CreateUserPage() {
                  <option value="REVIEWER">PEER REVIEWER</option>
                  <option value="ADMIN">ADMINISTRATOR</option>
                  <option value="AUTHOR">AUTHOR</option>
+                 <option value="DESIGNER">DESIGNER</option>
                </select>
             </div>
           </div>

@@ -16,7 +16,8 @@ const ROLES = [
   "ASSOCIATE_EDITOR", 
   "FINANCE_ADMIN", 
   "REVIEWER", 
-  "AUTHOR"
+  "AUTHOR",
+  "DESIGNER"
 ];
 
 export default function UserEditPage() {

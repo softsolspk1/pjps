@@ -19,7 +19,7 @@ export default withAuth(
 
     // 2. Role-based protection
     if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-      const allowedRoles = ["ADMIN", "EDITOR_IN_CHIEF", "ASSOCIATE_EDITOR", "EDITOR", "FINANCE_ADMIN"];
+      const allowedRoles = ["ADMIN", "EDITOR_IN_CHIEF", "ASSOCIATE_EDITOR", "EDITOR", "FINANCE_ADMIN", "DESIGNER"];
       if (!token || !allowedRoles.includes(token.role as string)) {
         return NextResponse.redirect(new URL("/", req.url));
       }
@@ -29,6 +29,15 @@ export default withAuth(
         const financePaths = ["/admin/dashboard", "/admin/payments", "/admin/pricing"];
         const isFinancePath = financePaths.some(p => pathname.startsWith(p));
         if (!isFinancePath) {
+          return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+        }
+      }
+
+      // 4. Designer Isolation
+      if (token.role === "DESIGNER") {
+        const designerPaths = ["/admin/dashboard", "/admin/article-design"];
+        const isDesignerPath = designerPaths.some(p => pathname.startsWith(p));
+        if (!isDesignerPath) {
           return NextResponse.redirect(new URL("/admin/dashboard", req.url));
         }
       }
