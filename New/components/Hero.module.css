@@ -1,0 +1,158 @@
+.hero {
+  position: relative;
+  min-height: 70vh;
+  background-color: var(--background);
+  display: flex;
+  align-items: center;
+  padding-top: 40px;
+  padding-bottom: 60px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.heroDecorative {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60%;
+  height: 100%;
+  background-image: url('/pharma-hero.png');
+  background-size: cover;
+  background-position: center left;
+  z-index: 1;
+  opacity: 0.15;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.8) 50%, black 100%);
+  mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.8) 50%, black 100%);
+}
+
+.heroDecorative::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -5%;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(var(--accent-gold) 1.5px, transparent 1.5px);
+  background-size: 50px 50px;
+  transform: skewX(-10deg);
+  opacity: 0.15;
+  z-index: 2;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+  color: var(--text-main);
+  width: 100%;
+  max-width: none;
+}
+
+.heroBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--primary-navy);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 20px;
+}
+
+.badgeLine {
+  width: 40px;
+  height: 2px;
+  background: var(--accent-gold);
+}
+
+.heroTitle {
+  font-family: var(--font-serif);
+  font-size: 4.2rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--primary-navy);
+  margin-bottom: 24px;
+  letter-spacing: -0.02em;
+}
+
+.titleAccent {
+  color: var(--accent-gold);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.heroSubtitle {
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: var(--text-muted);
+  margin-bottom: 40px;
+  max-width: 650px;
+}
+
+.heroActions {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 60px;
+}
+
+.statsStrip {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  padding-top: 40px;
+  border-top: 1px solid var(--border-light);
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.statDivider {
+  height: 40px;
+  width: 1px;
+  background: var(--border-medium);
+}
+
+.statValue {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--primary-navy);
+  font-family: var(--font-serif);
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+@media (max-width: 1024px) {
+  .heroTitle {
+    font-size: 3.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .heroTitle {
+    font-size: 2.8rem;
+  }
+  
+  .statsStrip {
+    flex-wrap: wrap;
+    gap: 30px;
+  }
+  
+  .statDivider {
+    display: none;
+  }
+  
+  .statItem {
+    width: calc(50% - 15px);
+  }
+}
+

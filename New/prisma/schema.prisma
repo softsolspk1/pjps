@@ -1,0 +1,192 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Volume {
+  id        String   @id @default(cuid())
+  number    Int      @unique
+  year      Int
+  createdAt DateTime @default(now())
+  issues    Issue[]
+}
+
+model Issue {
+  id           String    @id @default(cuid())
+  volumeId     String
+  number       Int
+  month        String
+  isContinuous Boolean   @default(false)
+  isPublished  Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  doi          String?   @unique
+  articles     Article[]
+  volume       Volume    @relation(fields: [volumeId], references: [id], onDelete: Cascade)
+
+  @@unique([volumeId, number])
+}
+
+model Article {
+  id                String          @id @default(cuid())
+  title             String
+  abstract          String?
+  content           String?
+  keywords          String?
+  introduction      String?
+  materialsMethods  String?
+  results           String?
+  discussion        String?
+  conclusion        String?
+  references        String?
+  status            String          @default("DRAFT")
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  submissionType    String?         @default("REGULAR")
+  copyeditingStatus String          @default("PENDING")
+  issueId           String?
+  reviewType        String          @default("DOUBLE_BLIND")
+  origin            String?         @default("PAKISTANI")
+  paymentProofUrl   String?
+  paymentStatus     String          @default("UNPAID")
+  trackingType      String          @default("REGULAR")
+  userId            String?
+  doi               String?         @unique
+  indexingStatus    Json?
+  downloadCount     Int             @default(0)
+  parentId          String?
+  version           Int             @default(1)
+  issue             Issue?          @relation(fields: [issueId], references: [id])
+  parentArticle     Article?        @relation("ArticleVersions", fields: [parentId], references: [id])
+  revisions         Article[]       @relation("ArticleVersions")
+  submitter         User?           @relation("SubmittedArticles", fields: [userId], references: [id])
+  authors           AuthorMapping[]
+  media             Media[]
+  reviews           Review[]
+}
+
+model Review {
+  id               String    @id @default(cuid())
+  articleId        String
+  reviewerId       String
+  originality      Int       @default(0)
+  quality          Int       @default(0)
+  importance       Int       @default(0)
+  comments         String?
+  recommendation   String    @default("PENDING")
+  status           String    @default("PENDING")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  paymentAmount    Float?    @default(0)
+  paymentRef       String?
+  paymentStatus    String?   @default("UNPAID")
+  paymentDocUrl    String?
+  commentsToAuthor String?
+  commentsToEditor String?
+  dueDate          DateTime?
+  rating           Int       @default(0)
+  article          Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  reviewer         User      @relation("ReviewAssignments", fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  @@index([articleId])
+  @@index([reviewerId])
+}
+
+model AuthorMapping {
+  id        String  @id @default(cuid())
+  articleId String
+  name      String
+  address   String?
+  sequence  Int     @default(0)
+  email     String?
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@index([articleId])
+}
+
+model Media {
+  id           String   @id @default(cuid())
+  articleId    String
+  publicId     String
+  secureUrl    String
+  resourceType String   @default("image")
+  section      String?
+  createdAt    DateTime @default(now())
+  version      Int      @default(1)
+  article      Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@index([articleId])
+}
+
+model Analytics {
+  id              String   @id @default("global")
+  formattingCount Int      @default(0)
+  totalExports    Int      @default(0)
+  updatedAt       DateTime @updatedAt
+  totalPageViews  Int      @default(0)
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  action     String
+  entityType String
+  entityId   String?
+  userId     String?
+  details    Json?
+  createdAt  DateTime @default(now())
+  user       User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([entityId])
+}
+
+model PageView {
+  id        String   @id @default(cuid())
+  path      String
+  ipHash    String?
+  userAgent String?
+  userId    String?
+  referrer  String?
+  createdAt DateTime @default(now())
+
+  @@index([path])
+  @@index([createdAt])
+}
+
+model User {
+  id               String     @id @default(cuid())
+  email            String     @unique
+  password         String
+  name             String?
+  role             String     @default("AUTHOR")
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  affiliation      String?
+  biography        String?
+  interests        String?
+  orcid            String?
+  country          String?    @default("Pakistan")
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  articles         Article[]  @relation("SubmittedArticles")
+  auditLogs        AuditLog[]
+  reviewsGiven     Review[]   @relation("ReviewAssignments")
+}
+
+model Pricing {
+  id                    String   @id @default(cuid())
+  origin                String   @unique
+  updatedAt             DateTime @updatedAt
+  annualSubscriptionFee Float    @default(0)
+  extraCopyFee          Float    @default(0)
+  extraPageFee          Float    @default(0)
+  processingFast        Float    @default(0)
+  processingRegular     Float    @default(0)
+  processingUltraFast   Float    @default(0)
+  publicationFast       Float    @default(0)
+  publicationRegular    Float    @default(0)
+  publicationUltraFast  Float    @default(0)
+}

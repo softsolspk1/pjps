@@ -7,8 +7,17 @@ import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
 import Paragraph from "@tiptap/extension-paragraph";
+import Underline from "@tiptap/extension-underline";
+import Link from "@tiptap/extension-link";
+import Subscript from "@tiptap/extension-subscript";
+import Superscript from "@tiptap/extension-superscript";
+import Highlight from "@tiptap/extension-highlight";
+import Table from "@tiptap/extension-table";
+import TableRow from "@tiptap/extension-table-row";
+import TableCell from "@tiptap/extension-table-cell";
+import TableHeader from "@tiptap/extension-table-header";
 import { useReactToPrint } from "react-to-print";
-import { Document, Packer, Paragraph as DocxParagraph, TextRun, AlignmentType, SectionType, ImageRun, BorderStyle, PageNumber, Header, Footer } from "docx";
+import { Document, Packer, Paragraph as DocxParagraph, TextRun, AlignmentType, SectionType, ImageRun, BorderStyle, PageNumber, Header, Footer, Table as DocxTable, TableRow as DocxTableRow, TableCell as DocxTableCell, WidthType, HeightRule, VerticalAlign, ExternalHyperlink, UnderlineType } from "docx";
 import { saveAs } from "file-saver";
 import { 
   Printer, Bold, Italic, Heading1, Heading2, Heading3, 
@@ -16,7 +25,12 @@ import {
   AlignCenter, AlignRight, AlignJustify, List, 
   ListOrdered, Minimize, Maximize, Columns, 
   Loader2, Download, PlusCircle, Trash2, Calendar, 
-  FileText, Globe 
+  FileText, Globe, Underline as UnderlineIcon, Link as LinkIcon, 
+  Grid, MousePointer2, Highlighter, Quote, 
+  Subscript as SubIcon, Superscript as SuperIcon, 
+  Undo2, Redo2, Type, Table2, PlusSquare, 
+  ArrowDownToLine, ArrowRightToLine, Eraser, 
+  Strikethrough
 } from "lucide-react";
 import styles from "./article-design.module.css";
 
@@ -76,9 +90,73 @@ const editorStyles = `
   .tiptap-manuscript ul { margin-left: 1.5rem; margin-bottom: 1rem; list-style-type: disc; }
   .tiptap-manuscript ol { margin-left: 1.5rem; margin-bottom: 1rem; list-style-type: decimal; }
 
+  .tiptap-manuscript blockquote {
+     border-left: 3px solid #cbd5e0;
+     padding-left: 1rem;
+     margin: 1rem 0;
+     font-style: italic;
+     color: #4a5568;
+  }
+
+  .tiptap-manuscript table {
+     border-collapse: collapse;
+     table-layout: fixed;
+     width: 100%;
+     margin: 0;
+     overflow: hidden;
+  }
+
+  .tiptap-manuscript table td,
+  .tiptap-manuscript table th {
+     min-width: 1em;
+     border: 1px solid #cbd5e0;
+     padding: 3px 5px;
+     vertical-align: top;
+     box-sizing: border-box;
+     position: relative;
+  }
+
+  .tiptap-manuscript table th {
+     font-weight: bold;
+     text-align: left;
+     background-color: #f7fafc;
+  }
+
+  .tiptap-manuscript table .selectedCell:after {
+     z-index: 2;
+     content: "";
+     position: absolute;
+     left: 0; right: 0; top: 0; bottom: 0;
+     background: rgba(200, 200, 255, 0.4);
+     pointer-events: none;
+  }
+
+  .tiptap-manuscript table .column-resize-handle {
+     position: absolute;
+     right: -2px;
+     top: 0;
+     bottom: -2px;
+     width: 4px;
+     background-color: #adf;
+     pointer-events: none;
+  }
+
+  .tiptap-manuscript a {
+     color: #3182ce;
+     text-decoration: underline;
+     cursor: pointer;
+  }
+
+  .tiptap-manuscript mark {
+     background-color: #faf089;
+     border-radius: 2px;
+     padding: 0 2px;
+  }
+
   @media print { 
      .tiptap-manuscript { padding: 0 !important; width: 100% !important; }
      .column-block { border: none !important; padding: 0 !important; }
+     .tiptap-manuscript table td, .tiptap-manuscript table th { border: 0.5pt solid black !important; }
   }
 `;
 
@@ -182,6 +260,15 @@ export default function ArticleDesignTool() {
       StarterKit.configure({ paragraph: false }),
       CustomParagraph,
       CustomImage,
+      Underline,
+      Link.configure({ openOnClick: false, HTMLAttributes: { class: 'manuscript-link' } }),
+      Subscript,
+      Superscript,
+      Highlight.configure({ multicolor: true }),
+      Table.configure({ resizable: true }),
+      TableRow,
+      TableHeader,
+      TableCell,
       TextAlign.configure({ types: ['heading', 'paragraph', 'image'] }),
       ColumnLayout,
       ColumnBlock,
@@ -248,42 +335,86 @@ export default function ArticleDesignTool() {
       const doc = new DOMParser().parseFromString(html, "text/html");
       const children: any[] = [];
 
-      const parseInlineNodes = (node: ChildNode): TextRun[] => {
-        const runs: TextRun[] = [];
+      const parseInline = (node: Node | ChildNode, styles: any = {}): any[] => {
+        const runs: any[] = [];
         node.childNodes.forEach((child: any) => {
           const tag = child.nodeName;
           const text = child.textContent || "";
-          if (tag === "STRONG" || tag === "B") {
-            runs.push(new TextRun({ text, bold: true, font: "Times New Roman", size: 20 }));
+          
+          const newStyles = { ...styles, font: "Times New Roman", size: 20 };
+          
+          if (tag === "#text") {
+            if (text.trim() || text === " ") {
+              runs.push(new TextRun({ text, ...newStyles }));
+            }
+          } else if (tag === "STRONG" || tag === "B") {
+            runs.push(...parseInline(child, { ...newStyles, bold: true }));
           } else if (tag === "EM" || tag === "I") {
-            runs.push(new TextRun({ text, italics: true, font: "Times New Roman", size: 20 }));
-          } else if (node.nodeType === 3 && text.trim()) {
-            runs.push(new TextRun({ text, font: "Times New Roman", size: 20 }));
+            runs.push(...parseInline(child, { ...newStyles, italics: true }));
+          } else if (tag === "U") {
+            runs.push(...parseInline(child, { ...newStyles, underline: { type: UnderlineType.SINGLE } }));
+          } else if (tag === "SUB") {
+            runs.push(...parseInline(child, { ...newStyles, subScript: true }));
+          } else if (tag === "SUP") {
+            runs.push(...parseInline(child, { ...newStyles, superScript: true }));
+          } else if (tag === "A") {
+             const href = child.getAttribute("href");
+             runs.push(new ExternalHyperlink({
+                children: parseInline(child, newStyles),
+                link: href || "#"
+             }));
+          } else if (tag === "BR") {
+             runs.push(new TextRun({ break: 1, ...newStyles }));
+          } else if (tag === "SPAN" && child.classList.contains('manuscript-link')) {
+             runs.push(...parseInline(child, newStyles));
           }
         });
         return runs;
       };
 
-      for (const node of Array.from(doc.body.childNodes)) {
-        const tag = (node as any).nodeName;
+      const processNode = async (node: any) => {
+        const tag = node.nodeName;
         if (tag === "P") {
-          children.push(new DocxParagraph({ children: parseInlineNodes(node), alignment: AlignmentType.JUSTIFIED, spacing: { after: 120, line: 276 } }));
+          children.push(new DocxParagraph({ children: parseInline(node), alignment: AlignmentType.JUSTIFIED, spacing: { after: 120, line: 276 } }));
         } else if (tag === "H1") {
-           children.push(new DocxParagraph({ children: [new TextRun({ text: (node.textContent?.toUpperCase() || ""), bold: true, font: "Times New Roman", size: 28 })], spacing: { before: 300, after: 150 } }));
+          children.push(new DocxParagraph({ children: [new TextRun({ text: (node.textContent?.toUpperCase() || ""), bold: true, font: "Times New Roman", size: 28 })], spacing: { before: 300, after: 150 } }));
         } else if (tag === "H2") {
-           children.push(new DocxParagraph({ children: [new TextRun({ text: (node.textContent?.toUpperCase() || ""), bold: true, font: "Times New Roman", size: 22 })], spacing: { before: 240, after: 120 } }));
+          children.push(new DocxParagraph({ children: [new TextRun({ text: (node.textContent?.toUpperCase() || ""), bold: true, font: "Times New Roman", size: 22 })], spacing: { before: 240, after: 120 } }));
         } else if (tag === "H3") {
-           children.push(new DocxParagraph({ children: [new TextRun({ text: (node.textContent || ""), bold: true, italics: true, font: "Times New Roman", size: 21 })], spacing: { before: 200, after: 100 } }));
+          children.push(new DocxParagraph({ children: [new TextRun({ text: (node.textContent || ""), bold: true, italics: true, font: "Times New Roman", size: 21 })], spacing: { before: 200, after: 100 } }));
+        } else if (tag === "BLOCKQUOTE") {
+          children.push(new DocxParagraph({ children: parseInline(node), indent: { left: 720 }, spacing: { before: 200, after: 200 } }));
+        } else if (tag === "HR") {
+          children.push(new DocxParagraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6 } }, spacing: { after: 200 } }));
         } else if (tag === "IMG") {
-           const src = (node as any).getAttribute("src");
-           if (src) {
-              const b64 = await getBase64Image(src);
-              children.push(new DocxParagraph({ 
-                 children: [new ImageRun({ data: b64.split(',')[1], transformation: { width: 450, height: 300 } })],
-                 alignment: AlignmentType.CENTER
+          const src = node.getAttribute("src");
+          if (src) {
+            const b64 = await getBase64Image(src);
+            children.push(new DocxParagraph({ children: [new ImageRun({ data: b64.split(',')[1], transformation: { width: 450, height: 300 } })], alignment: AlignmentType.CENTER }));
+          }
+        } else if (tag === "TABLE") {
+          const rows: DocxTableRow[] = [];
+          const trs = Array.from(node.querySelectorAll("tr"));
+          for (const tr of trs) {
+            const cells: DocxTableCell[] = [];
+            const tds = Array.from((tr as any).children);
+            for (const td of tds) {
+              cells.push(new DocxTableCell({
+                children: [new DocxParagraph({ children: parseInline(td as any), spacing: { after: 0 } })],
+                verticalAlign: VerticalAlign.CENTER,
+                shading: (td as any).nodeName === "TH" ? { fill: "F7FAFC", type: "clear" as any } : undefined
               }));
-           }
+            }
+            rows.push(new DocxTableRow({ children: cells }));
+          }
+          children.push(new DocxTable({ rows, width: { size: 100, type: WidthType.PERCENTAGE } }));
+        } else {
+           // Handle other elements or skip
         }
+      };
+
+      for (const node of Array.from(doc.body.childNodes)) {
+        await processNode(node);
       }
       return children;
     };
@@ -432,26 +563,86 @@ export default function ArticleDesignTool() {
             </div>
           )}
           {editor && (
-            <div className={styles.toolbar} style={{ justifyContent: "center" }}>
-              <button onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={`${styles.toolbarBtn} ${editor.isActive("heading", { level: 1 }) ? styles.toolbarBtnActive : ""}`}><Heading1 size={18} /></button>
-              <button onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={`${styles.toolbarBtn} ${editor.isActive("heading", { level: 2 }) ? styles.toolbarBtnActive : ""}`}><Heading2 size={18} /></button>
-              <button onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={`${styles.toolbarBtn} ${editor.isActive("heading", { level: 3 }) ? styles.toolbarBtnActive : ""}`}><Heading3 size={18} /></button>
-              <div className={styles.toolbarDivider}></div>
-              <button onClick={() => editor.chain().focus().toggleBold().run()} className={`${styles.toolbarBtn} ${editor.isActive("bold") ? styles.toolbarBtnActive : ""}`}><Bold size={18} /></button>
-              <button onClick={() => editor.chain().focus().toggleItalic().run()} className={`${styles.toolbarBtn} ${editor.isActive("italic") ? styles.toolbarBtnActive : ""}`}><Italic size={18} /></button>
-              <div className={styles.toolbarDivider}></div>
-              <button onClick={() => editor.chain().focus().setTextAlign("justify").run()} className={`${styles.toolbarBtn} ${editor.isActive({ textAlign: "justify" }) ? styles.toolbarBtnActive : ""}`}><AlignJustify size={18} /></button>
-              <button onClick={() => editor.chain().focus().toggleBulletList().run()} className={`${styles.toolbarBtn} ${editor.isActive("bulletList") ? styles.toolbarBtnActive : ""}`}><List size={18} /></button>
-              <button onClick={() => fileInputRef.current?.click()} className={styles.toolbarBtn}><ImageIcon size={18} /></button>
-              <button onClick={() => (editor.chain().focus() as any).insertTwoColumns().run()} className={styles.toolbarBtn}><Columns size={18} /></button>
-              <div className={styles.toolbarDivider}></div>
-              <button onClick={exportToWord} className={`${styles.toolbarBtn} text-indigo-600`} title="Download Word (.docx)"><Download size={18} /></button>
-              <button onClick={() => handlePrint()} className={`${styles.toolbarBtn} text-white bg-blue-600 hover:bg-blue-700`} style={{ borderRadius: "4px", padding: "6px 16px" }}>
-                <Printer size={16} /> Print PDF
-              </button>
-              <button onClick={() => setIsFullscreen(!isFullscreen)} className={styles.toolbarBtn}>
-                {isFullscreen ? <Minimize size={18} /> : <Maximize2 size={18} />}
-              </button>
+            <div className={styles.toolbar} style={{ justifyContent: "center", display: "flex", flexWrap: "wrap", gap: "4px", padding: "10px", backgroundColor: "#fff", borderBottom: "1px solid #edf2f7", position: "sticky", top: 0, zIndex: 50 }}>
+              
+              {/* History Group */}
+              <div className={styles.toolbarGroup} style={{ display: "flex", gap: "2px", marginRight: "8px", borderRight: "1px solid #e2e8f0", paddingRight: "8px" }}>
+                <button onClick={() => editor.chain().focus().undo().run()} className={styles.toolbarBtn} title="Undo (Ctrl+Z)"><Undo2 size={16} /></button>
+                <button onClick={() => editor.chain().focus().redo().run()} className={styles.toolbarBtn} title="Redo (Ctrl+Y)"><Redo2 size={16} /></button>
+              </div>
+
+              {/* Headings Group */}
+              <div className={styles.toolbarGroup} style={{ display: "flex", gap: "2px", marginRight: "8px", borderRight: "1px solid #e2e8f0", paddingRight: "8px" }}>
+                <button onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={`${styles.toolbarBtn} ${editor.isActive("heading", { level: 1 }) ? styles.toolbarBtnActive : ""}`} title="Heading 1"><Heading1 size={16} /></button>
+                <button onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={`${styles.toolbarBtn} ${editor.isActive("heading", { level: 2 }) ? styles.toolbarBtnActive : ""}`} title="Heading 2"><Heading2 size={16} /></button>
+                <button onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={`${styles.toolbarBtn} ${editor.isActive("heading", { level: 3 }) ? styles.toolbarBtnActive : ""}`} title="Heading 3"><Heading3 size={16} /></button>
+              </div>
+
+              {/* Basic Formatting */}
+              <div className={styles.toolbarGroup} style={{ display: "flex", gap: "2px", marginRight: "8px", borderRight: "1px solid #e2e8f0", paddingRight: "8px" }}>
+                <button onClick={() => editor.chain().focus().toggleBold().run()} className={`${styles.toolbarBtn} ${editor.isActive("bold") ? styles.toolbarBtnActive : ""}`} title="Bold"><Bold size={16} /></button>
+                <button onClick={() => editor.chain().focus().toggleItalic().run()} className={`${styles.toolbarBtn} ${editor.isActive("italic") ? styles.toolbarBtnActive : ""}`} title="Italic"><Italic size={16} /></button>
+                <button onClick={() => editor.chain().focus().toggleUnderline().run()} className={`${styles.toolbarBtn} ${editor.isActive("underline") ? styles.toolbarBtnActive : ""}`} title="Underline"><UnderlineIcon size={16} /></button>
+                <button onClick={() => editor.chain().focus().toggleStrike().run()} className={`${styles.toolbarBtn} ${editor.isActive("strike") ? styles.toolbarBtnActive : ""}`} title="Strikethrough"><Strikethrough size={16} /></button>
+              </div>
+
+              {/* Script Formatting */}
+              <div className={styles.toolbarGroup} style={{ display: "flex", gap: "2px", marginRight: "8px", borderRight: "1px solid #e2e8f0", paddingRight: "8px" }}>
+                <button onClick={() => editor.chain().focus().toggleSubscript().run()} className={`${styles.toolbarBtn} ${editor.isActive("subscript") ? styles.toolbarBtnActive : ""}`} title="Subscript"><SubIcon size={16} /></button>
+                <button onClick={() => editor.chain().focus().toggleSuperscript().run()} className={`${styles.toolbarBtn} ${editor.isActive("superscript") ? styles.toolbarBtnActive : ""}`} title="Superscript"><SuperIcon size={16} /></button>
+                <button onClick={() => editor.chain().focus().toggleHighlight().run()} className={`${styles.toolbarBtn} ${editor.isActive("highlight") ? styles.toolbarBtnActive : ""}`} title="Highlight"><Highlighter size={16} /></button>
+              </div>
+
+              {/* Alignment Group */}
+              <div className={styles.toolbarGroup} style={{ display: "flex", gap: "2px", marginRight: "8px", borderRight: "1px solid #e2e8f0", paddingRight: "8px" }}>
+                <button onClick={() => editor.chain().focus().setTextAlign("left").run()} className={`${styles.toolbarBtn} ${editor.isActive({ textAlign: "left" }) ? styles.toolbarBtnActive : ""}`} title="Align Left"><AlignLeft size={16} /></button>
+                <button onClick={() => editor.chain().focus().setTextAlign("center").run()} className={`${styles.toolbarBtn} ${editor.isActive({ textAlign: "center" }) ? styles.toolbarBtnActive : ""}`} title="Align Center"><AlignCenter size={16} /></button>
+                <button onClick={() => editor.chain().focus().setTextAlign("right").run()} className={`${styles.toolbarBtn} ${editor.isActive({ textAlign: "right" }) ? styles.toolbarBtnActive : ""}`} title="Align Right"><AlignRight size={16} /></button>
+                <button onClick={() => editor.chain().focus().setTextAlign("justify").run()} className={`${styles.toolbarBtn} ${editor.isActive({ textAlign: "justify" }) ? styles.toolbarBtnActive : ""}`} title="Justify"><AlignJustify size={16} /></button>
+              </div>
+
+              {/* Lists & Blockquote */}
+              <div className={styles.toolbarGroup} style={{ display: "flex", gap: "2px", marginRight: "8px", borderRight: "1px solid #e2e8f0", paddingRight: "8px" }}>
+                <button onClick={() => editor.chain().focus().toggleBulletList().run()} className={`${styles.toolbarBtn} ${editor.isActive("bulletList") ? styles.toolbarBtnActive : ""}`} title="Bullet List"><List size={16} /></button>
+                <button onClick={() => editor.chain().focus().toggleOrderedList().run()} className={`${styles.toolbarBtn} ${editor.isActive("orderedList") ? styles.toolbarBtnActive : ""}`} title="Ordered List"><ListOrdered size={16} /></button>
+                <button onClick={() => editor.chain().focus().toggleBlockquote().run()} className={`${styles.toolbarBtn} ${editor.isActive("blockquote") ? styles.toolbarBtnActive : ""}`} title="Blockquote"><Quote size={16} /></button>
+              </div>
+
+              {/* Insertions Group */}
+              <div className={styles.toolbarGroup} style={{ display: "flex", gap: "2px", marginRight: "8px", borderRight: "1px solid #e2e8f0", paddingRight: "8px" }}>
+                <button onClick={() => {
+                  const url = window.prompt("Enter URL:");
+                  if (url) editor.chain().focus().setLink({ href: url }).run();
+                }} className={`${styles.toolbarBtn} ${editor.isActive("link") ? styles.toolbarBtnActive : ""}`} title="Insert Link"><LinkIcon size={16} /></button>
+                <button onClick={() => fileInputRef.current?.click()} className={styles.toolbarBtn} title="Insert Image"><ImageIcon size={16} /></button>
+                <button onClick={() => editor.chain().focus().setHorizontalRule().run()} className={styles.toolbarBtn} title="Insert Divider (HR)"><Minus size={16} /></button>
+                <button onClick={() => (editor.chain().focus() as any).insertTwoColumns().run()} className={styles.toolbarBtn} title="Two Column Layout"><Columns size={16} /></button>
+              </div>
+
+              {/* Table Group */}
+              <div className={styles.toolbarGroup} style={{ display: "flex", gap: "2px", marginRight: "8px", borderRight: "1px solid #e2e8f0", paddingRight: "8px" }}>
+                <button onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()} className={styles.toolbarBtn} title="Insert Table (3x3)"><Table2 size={16} /></button>
+                {editor.isActive('table') && (
+                  <>
+                    <button onClick={() => editor.chain().focus().addColumnBefore().run()} className={styles.toolbarBtn} title="Add Column Before"><ArrowRightToLine size={14} style={{ transform: "rotate(180deg)" }} /></button>
+                    <button onClick={() => editor.chain().focus().addColumnAfter().run()} className={styles.toolbarBtn} title="Add Column After"><ArrowRightToLine size={14} /></button>
+                    <button onClick={() => editor.chain().focus().addRowBefore().run()} className={styles.toolbarBtn} title="Add Row Before"><ArrowDownToLine size={14} style={{ transform: "rotate(180deg)" }} /></button>
+                    <button onClick={() => editor.chain().focus().addRowAfter().run()} className={styles.toolbarBtn} title="Add Row After"><ArrowDownToLine size={14} /></button>
+                    <button onClick={() => editor.chain().focus().deleteTable().run()} className={styles.toolbarBtn} title="Delete Table"><Eraser size={14} color="#f87171" /></button>
+                  </>
+                )}
+              </div>
+
+              {/* Actions Group */}
+              <div className={styles.toolbarGroup} style={{ display: "flex", gap: "6px" }}>
+                <button onClick={exportToWord} className={`${styles.toolbarBtn} text-indigo-600`} title="Export to Word (.docx)"><Download size={18} /></button>
+                <button onClick={() => handlePrint()} className={`${styles.toolbarBtn} text-white bg-blue-600 hover:bg-blue-700`} style={{ borderRadius: "4px", padding: "6px 16px" }}>
+                  <Printer size={16} /> Print PDF
+                </button>
+                <button onClick={() => setIsFullscreen(!isFullscreen)} className={styles.toolbarBtn} title="Toggle Fullscreen">
+                  {isFullscreen ? <Minimize size={18} /> : <Maximize2 size={18} />}
+                </button>
+              </div>
             </div>
           )}
 

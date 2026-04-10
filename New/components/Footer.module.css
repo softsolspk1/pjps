@@ -1,0 +1,148 @@
+.footer {
+  background-color: var(--bg-soft);
+  color: var(--text-main);
+  padding: 80px 0 0 0;
+  border-top: 1px solid var(--border-light);
+}
+
+.footerContent {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.5fr;
+  gap: var(--spacing-lg);
+  padding-bottom: 60px;
+}
+
+.footerSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.footerLogo {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 24px;
+}
+
+.logoAbbr {
+  font-family: var(--font-serif);
+  font-weight: 800;
+  font-size: 2.2rem;
+  line-height: 1;
+  color: var(--primary-navy);
+  letter-spacing: -0.02em;
+}
+
+.logoFull {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 6px;
+}
+
+.footerDesc {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-main);
+  margin-bottom: 24px;
+}
+
+.accreditation {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.sectionTitle {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.sectionTitle:after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 30px;
+  height: 2px;
+  background-color: var(--primary-navy);
+}
+
+.linkList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.linkList li a {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  transition: var(--transition);
+}
+
+.linkList li a:hover {
+  color: var(--primary-navy);
+  transform: translateX(4px);
+}
+
+.contactList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.contactList li {
+  color: var(--text-main);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.contactList li strong {
+  color: var(--primary-navy);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.bottomBar {
+  background-color: var(--background);
+  padding: 30px 0;
+  border-top: 1px solid var(--border-light);
+}
+
+.bottomContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.bottomLinks {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.separator {
+  opacity: 0.3;
+}
+
+.bottomLinks a:hover {
+  color: var(--primary-navy);
+}
+
+@media (max-width: 768px) {
+  .footerContent {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}

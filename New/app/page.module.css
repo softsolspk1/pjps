@@ -1,0 +1,303 @@
+.home {
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 80px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.preTitle {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent-gold);
+  margin-bottom: 12px;
+}
+
+.sectionTitle {
+  font-family: var(--font-serif);
+  font-size: 3.5rem;
+  margin-bottom: 20px;
+  color: var(--primary-navy);
+  line-height: 1.1;
+}
+
+.sectionSubtitle {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.articlesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
+  margin-bottom: 60px;
+}
+
+.archiveGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+  margin-top: 40px;
+}
+
+.archiveCard {
+  background: var(--bg-soft);
+  padding: 60px 40px;
+  border-radius: var(--border-radius);
+  text-align: center;
+  border: 1px solid var(--border-light);
+  transition: var(--transition);
+}
+
+.archiveCard:hover {
+  transform: translateY(-5px);
+  background: white;
+  border-color: var(--border-medium);
+  box-shadow: var(--shadow-premium);
+}
+
+.archiveCard h3 {
+  font-size: 2.2rem;
+  margin-bottom: 16px;
+  color: var(--primary-navy);
+}
+
+.archiveCard p {
+  color: var(--text-muted);
+  margin-bottom: 32px;
+  font-size: 1.1rem;
+}
+
+.viewMore {
+  display: flex;
+  justify-content: center;
+}
+
+.indexingSection {
+  background-color: var(--bg-soft);
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+  position: relative;
+  overflow: hidden;
+}
+
+.indexingSection::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(var(--border-medium) 1px, transparent 1px);
+  background-size: 30px 30px;
+  opacity: 0.2;
+}
+
+.indexingGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 24px;
+}
+
+.indexItem {
+  padding: 40px 20px;
+  background-color: white;
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius);
+  color: var(--primary-navy);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  box-shadow: var(--shadow-subtle);
+  transition: var(--transition);
+}
+
+.indexItem span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.indexIcon {
+  width: 100px;
+  height: 60px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 4px;
+  transition: var(--transition);
+}
+
+.indexLogo {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: grayscale(100%);
+  opacity: 0.7;
+  transition: var(--transition);
+}
+
+.indexItem:hover .indexLogo {
+  filter: grayscale(0%);
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.indexItem:hover {
+  transform: translateY(-8px);
+  border-color: var(--accent-gold);
+  box-shadow: var(--shadow-premium);
+}
+
+.indexItem:hover .indexIcon {
+  background: var(--primary-navy);
+  color: white;
+}
+
+.aboutJournal {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 60px;
+  align-items: flex-start;
+}
+
+.aboutText h2 {
+  font-family: var(--font-serif);
+  font-size: 3.5rem;
+  margin-bottom: 32px;
+  line-height: 1.1;
+}
+
+.aboutText p {
+  font-size: 1.15rem;
+  margin-bottom: 28px;
+  color: var(--text-main);
+  line-height: 1.8;
+}
+
+.aboutActions {
+  display: flex;
+  gap: 20px;
+  margin-top: 40px;
+}
+
+.aboutStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  width: 100%;
+}
+
+.impactCard, .impactCardGold {
+  padding: 40px 30px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.impactCard {
+  background: white;
+  box-shadow: var(--shadow-subtle);
+}
+
+.impactCardGold {
+  background: var(--primary-navy);
+  color: white;
+  text-align: center;
+  border: 1px solid var(--primary-navy);
+}
+
+.impactNum {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 900;
+  margin-bottom: 8px;
+  font-family: var(--font-serif);
+  line-height: 1;
+}
+
+.impactCardGold .impactNum {
+  color: var(--accent-gold);
+}
+
+.impactLabel {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+/* Reveal Animations - Refined for CSS-only stability */
+@keyframes fadeInUpSubtle {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal {
+  animation: fadeInUpSubtle 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.visible {
+  /* Kept for legacy client hooks but redundant since reveal now auto-animates */
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 1024px) {
+  .articlesGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .indexingGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .aboutJournal {
+    grid-template-columns: 1fr;
+    gap: 60px;
+  }
+  
+  .indexingGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .sectionTitle {
+    font-size: 2.8rem;
+  }
+  
+  .impactCardGold {
+    grid-column: span 1;
+  }
+  
+  .aboutStatsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+

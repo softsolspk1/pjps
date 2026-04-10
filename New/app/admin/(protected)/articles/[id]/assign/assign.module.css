@@ -1,0 +1,520 @@
+/* ───────────────────────────────────────────────
+   Peer Reviewer Assignment - Professional UI
+   Institutional List + Selection Pattern
+─────────────────────────────────────────────── */
+
+.container {
+  padding: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Page Header ─── */
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #a0aec0;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 40px;
+  transition: color 0.2s;
+}
+.backBtn:hover { color: #1a202c; }
+
+.pageHeader {
+  margin-bottom: 40px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.badge {
+  display: inline-block;
+  background-color: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #dcfce7;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 5px 12px;
+  border-radius: 100px;
+  margin-bottom: 12px;
+}
+
+.pageTitle {
+  font-size: 28px;
+  font-weight: 900;
+  color: #1a202c;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.manuscriptTitle {
+  font-size: 14px;
+  color: #718096;
+  font-style: italic;
+  font-family: 'Georgia', serif;
+  max-width: 800px;
+  line-height: 1.6;
+}
+
+/* ── Currently Assigned Banner ─── */
+.assignedInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #ebf4ff;
+  border: 1px solid #bee3f8;
+  border-radius: 12px;
+  padding: 14px 20px;
+  margin-bottom: 24px;
+}
+.assignedInfo p {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2b6cb0;
+}
+.assignedAvatars {
+  display: flex;
+  gap: -4px;
+}
+.assignedAvatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #3182ce;
+  color: white;
+  font-size: 11px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  margin-right: -6px;
+}
+
+/* ── Alert Message ─── */
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+.alertSuccess {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+.alertError {
+  background: #fff5f5;
+  color: #c53030;
+  border: 1px solid #fed7d7;
+}
+
+/* ── Main Card Container ─── */
+.mainCard {
+  background: white;
+  border: 1px solid #edf2f7;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* ── Search Bar ─── */
+.searchBar {
+  padding: 20px 28px;
+  background: #f8fafc;
+  border-bottom: 1px solid #edf2f7;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.searchWrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0 16px;
+  height: 46px;
+}
+
+.searchWrapper input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a202c;
+  background: transparent;
+}
+
+.searchWrapper input::placeholder {
+  color: #a0aec0;
+}
+
+.searchCount {
+  font-size: 10px;
+  font-weight: 800;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+/* ── List Table Header ─── */
+.listHeader {
+  display: grid;
+  grid-template-columns: 40px 1fr 220px 160px 140px 160px;
+  gap: 0;
+  padding: 14px 28px;
+  background: #f8fafc;
+  border-bottom: 2px solid #edf2f7;
+}
+
+.listHeaderCell {
+  font-size: 9px;
+  font-weight: 900;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+/* ── Reviewer List Row ─── */
+.reviewerList {
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+.reviewerList::-webkit-scrollbar { width: 4px; }
+.reviewerList::-webkit-scrollbar-track { background: transparent; }
+.reviewerList::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+
+.reviewerRow {
+  display: grid;
+  grid-template-columns: 40px 1fr 220px 160px 140px 160px;
+  gap: 0;
+  align-items: center;
+  padding: 16px 28px;
+  border-bottom: 1px solid #f7fafc;
+  transition: background 0.15s;
+  cursor: pointer;
+}
+
+.reviewerRow:last-child { border-bottom: none; }
+
+.reviewerRow:hover {
+  background: #f8faff;
+}
+
+.reviewerRow.selected {
+  background: #eff6ff;
+  border-left: 3px solid #0061ff;
+}
+
+.reviewerRow.alreadyAssigned {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* Radio Selection */
+.radioCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.radioOuter {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #cbd5e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  background: white;
+}
+
+.reviewerRow.selected .radioOuter {
+  border-color: #0061ff;
+  background: #0061ff;
+}
+
+.radioInner {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: white;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.reviewerRow.selected .radioInner { opacity: 1; }
+
+/* Identity Cell */
+.identityCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #e2e8f0, #cbd5e0);
+  color: #475569;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 900;
+  flex-shrink: 0;
+  font-family: 'Georgia', serif;
+  text-transform: uppercase;
+}
+
+.reviewerName {
+  font-size: 13px;
+  font-weight: 800;
+  color: #1a202c;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reviewerEmail {
+  font-size: 10px;
+  color: #a0aec0;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Affiliation Cell */
+.affiliationCell {
+  font-size: 11px;
+  color: #4a5568;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 16px;
+}
+
+/* Interests Cell */
+.interestsCell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.interestTag {
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+/* Workload Cell */
+.workloadCell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.workloadBadge {
+  font-size: 18px;
+  font-weight: 900;
+  color: #1a202c;
+  line-height: 1;
+}
+
+.workloadLabel {
+  font-size: 9px;
+  font-weight: 700;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+}
+
+.workloadHigh { color: #f59e0b; }
+.workloadNormal { color: #10b981; }
+
+/* Action Cell */
+.actionCell { 
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.assignedBadge {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 5px 12px;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ── Bottom Action Bar ─── */
+.actionBar {
+  background: #f8fafc;
+  border-top: 1px solid #edf2f7;
+  padding: 20px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.selectionInfo {
+  font-size: 12px;
+  font-weight: 600;
+  color: #718096;
+}
+
+.selectionInfoBold {
+  font-weight: 900;
+  color: #1a202c;
+}
+
+.assignBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #1a202c;
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.assignBtn:hover:not(:disabled) {
+  background: #0061ff;
+  box-shadow: 0 8px 20px -4px rgba(0, 97, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+.assignBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Empty State ─── */
+.emptyState {
+  padding: 80px 40px;
+  text-align: center;
+}
+
+.emptyIcon {
+  width: 56px;
+  height: 56px;
+  background: #f1f5f9;
+  color: #94a3b8;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.emptyTitle {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1a202c;
+  margin-bottom: 6px;
+}
+
+.emptyText {
+  font-size: 13px;
+  color: #a0aec0;
+  font-weight: 500;
+}
+
+/* ── Loader ─── */
+.loaderContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  gap: 20px;
+}
+
+.loaderText {
+  font-size: 10px;
+  font-weight: 800;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  color: #cbd5e0;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── Role Badge ─── */
+.roleBadge {
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 100px;
+  border: 1px solid transparent;
+}
+
+.roleReviewer {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+
+.roleEditor {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fde68a;
+}

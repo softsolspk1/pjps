@@ -1,0 +1,335 @@
+.container {
+  padding: 40px;
+  background-color: #fcfdfe;
+  min-height: 100vh;
+  font-family: 'Inter', 'Outfit', sans-serif;
+}
+
+.header {
+  margin-bottom: 40px;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: #a0aec0;
+  font-weight: 800;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  margin-bottom: 24px;
+  transition: color 0.2s ease;
+}
+
+.backBtn:hover {
+  color: #1a202c;
+}
+
+.titleBadge {
+  display: inline-block;
+  background-color: #ebf4ff;
+  color: #0061ff;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 6px 14px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 900;
+  color: #1a202c;
+  margin-bottom: 16px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #718096;
+}
+
+.statusBadge {
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 6px 16px;
+  border-radius: 100px;
+}
+
+.accepted { background-color: #ecfdf5; color: #10b981; }
+.revision { background-color: #fff7ed; color: #f59e0b; }
+.rejected { background-color: #fef2f2; color: #ef4444; }
+.submitted { background-color: #f1f5f9; color: #475569; }
+
+.workspace {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 40px;
+}
+
+.manuscriptSection {
+  background-color: white;
+  border: 1px solid #edf2f7;
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 900;
+  color: #1a202c;
+  margin-bottom: 24px;
+}
+
+.abstractContent {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #4a5568;
+  margin-bottom: 40px;
+  font-style: italic;
+}
+
+.downloadCard {
+  background-color: #f7fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.downloadIcon {
+  width: 56px;
+  height: 56px;
+  background-color: white;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0061ff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.downloadText h4 {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1a202c;
+  margin-bottom: 4px;
+}
+
+.downloadText p {
+  font-size: 12px;
+  font-weight: 600;
+  color: #a0aec0;
+}
+
+.downloadBtn {
+  margin-left: auto;
+  background-color: #1a202c;
+  color: white;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 12px 24px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.downloadBtn:hover {
+  background-color: #4a5568;
+  transform: translateY(-2px);
+}
+
+.decisionSection {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.statCard {
+  background-color: white;
+  border: 1px solid #edf2f7;
+  border-radius: 20px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.statLabel {
+  font-size: 11px;
+  font-weight: 800;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.statValue {
+  font-size: 24px;
+  font-weight: 900;
+  color: #1a202c;
+}
+
+.statIcon {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  color: #edf2f7;
+}
+
+.reviewList {
+  background-color: white;
+  border: 1px solid #edf2f7;
+  border-radius: 24px;
+  padding: 32px;
+}
+
+.subTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  font-weight: 900;
+  color: #1a202c;
+  margin-bottom: 24px;
+}
+
+.reviewItem {
+  background-color: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.reviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.reviewerName {
+  font-size: 12px;
+  font-weight: 800;
+  color: #475569;
+  text-transform: uppercase;
+}
+
+.reviewRec {
+  font-size: 10px;
+  font-weight: 900;
+  background-color: #f1f5f9;
+  color: #475569;
+  padding: 4px 10px;
+  border-radius: 100px;
+}
+
+.reviewComments {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #4a5568;
+}
+
+.decisionActions {
+  background-color: white;
+  border: 1px solid #edf2f7;
+  border-radius: 24px;
+  padding: 32px;
+}
+
+.actionGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+.actionBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid transparent;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.accept { background-color: #ecfdf5; color: #10b981; }
+.accept:hover { background-color: #10b981; color: white; }
+
+.revision { background-color: #fff7ed; color: #f59e0b; }
+.revision:hover { background-color: #f59e0b; color: white; }
+
+.reject { background-color: #fef2f2; color: #ef4444; }
+.reject:hover { background-color: #ef4444; color: white; }
+
+.loaderContainer {
+  height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  color: #0061ff;
+  animation: spin 1s linear infinite;
+}
+
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 800;
+  margin-bottom: 40px;
+}
+
+.success { background-color: #ecfdf5; color: #10b981; border: 1px solid #d1fae5; }
+.error { background-color: #fef2f2; color: #ef4444; border: 1px solid #fee2e2; }
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
