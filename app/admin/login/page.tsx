@@ -110,6 +110,7 @@ export default function LoginPage() {
                 { email: "finance@pjps.pk", role: "Finance Admin" },
                 { email: "editor@pjps.pk", role: "Associate Editor" },
                 { email: "reviewer@pjps.pk", role: "Peer Reviewer" },
+                { email: "designer@pjps.pk", role: "Article Designer" },
                 { email: "author@pjps.pk", role: "Scholarly Author" },
               ].map((demo, idx) => (
                 <tr key={idx} style={{ borderBottom: idx === 4 ? 'z' : '1px solid #dcd8c9' }}>
