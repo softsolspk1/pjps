@@ -269,11 +269,11 @@ export default function ArticleDesignTool() {
         if (tag === "P") {
           children.push(new DocxParagraph({ children: parseInlineNodes(node), alignment: AlignmentType.JUSTIFIED, spacing: { after: 120, line: 276 } }));
         } else if (tag === "H1") {
-           children.push(new DocxParagraph({ children: [new TextRun({ text: node.textContent?.toUpperCase(), bold: true, font: "Times New Roman", size: 28 })], spacing: { before: 300, after: 150 } }));
+           children.push(new DocxParagraph({ children: [new TextRun({ text: (node.textContent?.toUpperCase() || ""), bold: true, font: "Times New Roman", size: 28 })], spacing: { before: 300, after: 150 } }));
         } else if (tag === "H2") {
-           children.push(new DocxParagraph({ children: [new TextRun({ text: node.textContent?.toUpperCase(), bold: true, font: "Times New Roman", size: 22 })], spacing: { before: 240, after: 120 } }));
+           children.push(new DocxParagraph({ children: [new TextRun({ text: (node.textContent?.toUpperCase() || ""), bold: true, font: "Times New Roman", size: 22 })], spacing: { before: 240, after: 120 } }));
         } else if (tag === "H3") {
-           children.push(new DocxParagraph({ children: [new TextRun({ text: node.textContent, bold: true, italics: true, font: "Times New Roman", size: 21 })], spacing: { before: 200, after: 100 } }));
+           children.push(new DocxParagraph({ children: [new TextRun({ text: (node.textContent || ""), bold: true, italics: true, font: "Times New Roman", size: 21 })], spacing: { before: 200, after: 100 } }));
         } else if (tag === "IMG") {
            const src = (node as any).getAttribute("src");
            if (src) {
