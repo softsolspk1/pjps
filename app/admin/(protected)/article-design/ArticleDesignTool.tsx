@@ -1,37 +1,11 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { useEditor, EditorContent } from "@tiptap/react";
-import { Node as TiptapNode, mergeAttributes } from "@tiptap/core";
-import { StarterKit } from "@tiptap/starter-kit";
-import { Image } from "@tiptap/extension-image";
-import { TextAlign } from "@tiptap/extension-text-align";
-import { Paragraph } from "@tiptap/extension-paragraph";
-import { Underline } from "@tiptap/extension-underline";
-import { Link } from "@tiptap/extension-link";
-import { Subscript } from "@tiptap/extension-subscript";
-import { Superscript } from "@tiptap/extension-superscript";
-import { Highlight } from "@tiptap/extension-highlight";
-import { Table } from "@tiptap/extension-table";
-import { TableRow } from "@tiptap/extension-table-row";
-import { TableCell } from "@tiptap/extension-table-cell";
-import { TableHeader } from "@tiptap/extension-table-header";
+
 import { useReactToPrint } from "react-to-print";
 import { Document, Packer, Paragraph as DocxParagraph, TextRun, AlignmentType, SectionType, ImageRun, BorderStyle, PageNumber, Header, Footer, Table as DocxTable, TableRow as DocxTableRow, TableCell as DocxTableCell, WidthType, HeightRule, VerticalAlign, ExternalHyperlink, UnderlineType } from "docx";
 import { saveAs } from "file-saver";
-import { 
-  Printer, Bold, Italic, Heading1, Heading2, Heading3, 
-  Minus, Image as ImageIcon, Maximize2, AlignLeft, 
-  AlignCenter, AlignRight, AlignJustify, List, 
-  ListOrdered, Minimize, Maximize, Columns, 
-  Loader2, Download, PlusCircle, Trash2, Calendar, 
-  FileText, Globe, Underline as UnderlineIcon, Link as LinkIcon, 
-  Grid, MousePointer2, Highlighter, Quote, 
-  Subscript as SubIcon, Superscript as SuperIcon, 
-  Undo2, Redo2, Type, Table2, PlusSquare, 
-  ArrowDownToLine, ArrowRightToLine, Eraser, 
-  Strikethrough
-} from "lucide-react";
+import { Printer, Loader2, Download, PlusCircle, Trash2 } from "lucide-react";
 import styles from "./article-design.module.css";
 
 const editorStyles = `
@@ -160,74 +134,6 @@ const editorStyles = `
   }
 `;
 
-const CustomParagraph = Paragraph.extend({
-  addAttributes() {
-    return {
-      fullWidth: {
-        default: false,
-        parseHTML: element => element.classList.contains('full-width-block'),
-        renderHTML: attributes => {
-          if (!attributes.fullWidth) return {};
-          return { class: 'full-width-block' };
-        },
-      },
-    };
-  },
-});
-
-const CustomImage = Image.extend({
-  addAttributes() {
-    return {
-      ...this.parent?.(),
-      fullWidth: {
-        default: false,
-        parseHTML: element => element.classList.contains('full-width-block'),
-        renderHTML: attributes => {
-          if (!attributes.fullWidth) return {};
-          return { class: 'full-width-block' };
-        },
-      },
-    };
-  },
-});
-
-const ColumnBlock = TiptapNode.create({
-  name: 'columnBlock',
-  content: 'block+',
-  isolating: true,
-  parseHTML() {
-    return [{ tag: 'div.column-block' }];
-  },
-  renderHTML({ HTMLAttributes }) {
-    return ['div', mergeAttributes(HTMLAttributes, { class: 'column-block' }), 0];
-  },
-});
-
-const ColumnLayout = TiptapNode.create({
-  name: 'columnLayout',
-  group: 'block',
-  content: 'columnBlock columnBlock',
-  parseHTML() {
-    return [{ tag: 'div.column-layout' }];
-  },
-  renderHTML({ HTMLAttributes }) {
-    return ['div', mergeAttributes(HTMLAttributes, { class: 'column-layout' }), 0];
-  },
-  addCommands() {
-    return {
-      // @ts-ignore
-      insertTwoColumns: () => ({ commands }: any) => {
-        return commands.insertContent({
-          type: 'columnLayout',
-          content: [
-            { type: 'columnBlock', content: [{ type: 'paragraph' }] },
-            { type: 'columnBlock', content: [{ type: 'paragraph' }] },
-          ],
-        });
-      },
-    } as any;
-  },
-});
 
 type Author = { name: string; affiliation: string };
 

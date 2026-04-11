@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from "react";
 import { useEditor, EditorContent, ReactNodeViewRenderer, NodeViewWrapper } from "@tiptap/react";
+import { Node as TiptapNode, mergeAttributes } from "@tiptap/core";
 import { StarterKit } from "@tiptap/starter-kit";
 import { Image as TiptapImage } from "@tiptap/extension-image";
 import { TextAlign } from "@tiptap/extension-text-align";
@@ -19,7 +20,7 @@ import {
   Bold, Italic, Heading1, Heading2, Heading3, 
   Minus, Image as ImageIcon, Maximize2, AlignLeft, 
   AlignCenter, AlignRight, AlignJustify, List, 
-  ListOrdered, Minimize,
+  ListOrdered, Minimize, Columns,
   Link as LinkIcon, Underline as UnderlineIcon,
   Highlighter, Quote, Subscript as SubIcon, Superscript as SuperIcon, 
   Undo2, Redo2, Table2, ArrowDownToLine, ArrowRightToLine, Eraser, 
@@ -50,7 +51,40 @@ const editorStyles = `
   .tiptap-section table { border-collapse: collapse; table-layout: fixed; width: 100%; margin: 0; overflow: hidden; }
   .tiptap-section table td, .tiptap-section table th { min-width: 1em; border: 1px solid #cbd5e0; padding: 3px 5px; vertical-align: top; box-sizing: border-box; position: relative; }
   .tiptap-section table th { font-weight: bold; text-align: left; background-color: #f7fafc; }
+  .column-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18pt; margin: 12pt 0; }
+  .column-block { min-height: 2rem; padding: 0; }
+  @media print { .column-block { border: none !important; padding: 0 !important; } }
 `;
+
+const ColumnBlock = TiptapNode.create({
+  name: 'columnBlock',
+  content: 'block+',
+  isolating: true,
+  parseHTML() { return [{ tag: 'div.column-block' }]; },
+  renderHTML({ HTMLAttributes }) { return ['div', mergeAttributes(HTMLAttributes, { class: 'column-block' }), 0]; },
+});
+
+const ColumnLayout = TiptapNode.create({
+  name: 'columnLayout',
+  group: 'block',
+  content: 'columnBlock columnBlock',
+  parseHTML() { return [{ tag: 'div.column-layout' }]; },
+  renderHTML({ HTMLAttributes }) { return ['div', mergeAttributes(HTMLAttributes, { class: 'column-layout' }), 0]; },
+  addCommands() {
+    return {
+      // @ts-ignore
+      insertTwoColumns: () => ({ commands }: any) => {
+        return commands.insertContent({
+          type: 'columnLayout',
+          content: [
+            { type: 'columnBlock', content: [{ type: 'paragraph' }] },
+            { type: 'columnBlock', content: [{ type: 'paragraph' }] },
+          ],
+        });
+      },
+    } as any;
+  },
+});
 
 interface SectionEditorProps {
   title: string;
@@ -76,7 +110,9 @@ export default function SectionEditor({ title, html, onChange, onImageUpload }: 
       Table.configure({ resizable: true }),
       TableRow,
       TableHeader,
-      TableCell
+      TableCell,
+      ColumnBlock,
+      ColumnLayout
     ],
     content: html,
     editorProps: { attributes: { class: 'tiptap-section' } },
@@ -138,6 +174,9 @@ export default function SectionEditor({ title, html, onChange, onImageUpload }: 
             <button onClick={() => { const url = window.prompt("Enter URL:"); if (url) editor.chain().focus().setLink({ href: url }).run(); }} className={`${styles.toolbarBtn} ${editor.isActive("link") ? styles.toolbarBtnActive : ""}`} title="Insert Link"><LinkIcon size={16} /></button>
             <button onClick={() => fileInputRef.current?.click()} className={styles.toolbarBtn} title="Insert Image"><ImageIcon size={16} /></button>
             <button onClick={() => editor.chain().focus().setHorizontalRule().run()} className={styles.toolbarBtn} title="Insert Divider (HR)"><Minus size={16} /></button>
+            {title !== "ABSTRACT" && (
+              <button onClick={() => (editor.chain().focus() as any).insertTwoColumns().run()} className={styles.toolbarBtn} title="Two Column Layout"><Columns size={16} /></button>
+            )}
           </div>
 
           <div className={styles.toolbarGroup} style={{ display: "flex", gap: "2px", marginRight: "8px", borderRight: "1px solid #e2e8f0", paddingRight: "8px" }}>
