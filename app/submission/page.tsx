@@ -12,6 +12,8 @@ import {
   Clock, Zap, Gauge, CreditCard, DollarSign,
   History, RotateCcw, Layers, Globe, ArrowLeft
 } from "lucide-react";
+import HeaderWrapper from "@/components/HeaderWrapper";
+import FooterWrapper from "@/components/FooterWrapper";
 
 type Author = {
   name: string;
@@ -601,8 +603,12 @@ function SubmissionForm() {
   }
 
   return (
-    <div className="bg-slate-50 min-h-screen">
-      {FormContent}
+    <div className="bg-slate-50 min-h-screen flex flex-col">
+      <HeaderWrapper />
+      <div className="flex-1" style={{ paddingTop: '100px' }}>
+         {FormContent}
+      </div>
+      <FooterWrapper />
     </div>
   );
 }
