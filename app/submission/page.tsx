@@ -310,7 +310,7 @@ function SubmissionForm() {
                 />
               </div>
               
-              <div className={`col-span-1 md:col-span-2 ${styles.formGroup}`}>
+              <div className={`col-span-1 md:col-span-2 max-w-4xl ${styles.formGroup}`}>
                 <label className={styles.label}>Full Manuscript Title</label>
                 <input 
                   type="text" required value={title} onChange={(e) => setTitle(e.target.value)}
@@ -319,7 +319,7 @@ function SubmissionForm() {
                 />
               </div>
               
-              <div className={`col-span-1 md:col-span-2 ${styles.formGroup}`}>
+              <div className={`col-span-1 md:col-span-2 max-w-4xl ${styles.formGroup}`}>
                 <label className={styles.label}>Abstract (Scoping Summary)</label>
                 <textarea 
                   required value={abstract} onChange={(e) => setAbstract(e.target.value)}
