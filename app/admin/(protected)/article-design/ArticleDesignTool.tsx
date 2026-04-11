@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
-import { Node, mergeAttributes } from "@tiptap/core";
+import { Node as TiptapNode, mergeAttributes } from "@tiptap/core";
 import { StarterKit } from "@tiptap/starter-kit";
 import { Image } from "@tiptap/extension-image";
 import { TextAlign } from "@tiptap/extension-text-align";
@@ -191,7 +191,7 @@ const CustomImage = Image.extend({
   },
 });
 
-const ColumnBlock = Node.create({
+const ColumnBlock = TiptapNode.create({
   name: 'columnBlock',
   content: 'block+',
   isolating: true,
@@ -203,7 +203,7 @@ const ColumnBlock = Node.create({
   },
 });
 
-const ColumnLayout = Node.create({
+const ColumnLayout = TiptapNode.create({
   name: 'columnLayout',
   group: 'block',
   content: 'columnBlock columnBlock',
