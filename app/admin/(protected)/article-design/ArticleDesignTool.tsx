@@ -231,11 +231,31 @@ const ColumnLayout = TiptapNode.create({
 
 type Author = { name: string; affiliation: string };
 
+function toTitleCase(str: string) {
+  return str.replace(
+    /\w\S*/g,
+    function(txt) {
+      return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+    }
+  );
+}
+
+import SectionEditor from "./SectionEditor";
+
 export default function ArticleDesignTool() {
   const [isMounted, setIsMounted] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const [sections, setSections] = useState([
+    { id: 'abstract', title: 'ABSTRACT', html: 'Draft your scholarly abstract here. This section remains full-width.' },
+    { id: 'introduction', title: 'INTRODUCTION', html: '' },
+    { id: 'methods', title: 'MATERIALS AND METHODS', html: '' },
+    { id: 'results', title: 'RESULTS', html: '' },
+    { id: 'discussion', title: 'DISCUSSION', html: '' },
+    { id: 'conclusion', title: 'CONCLUSION', html: '' },
+    { id: 'references', title: 'REFERENCES', html: '' }
+  ]);
   const printRef = useRef<HTMLDivElement>(null);
 
   // Metadata State
@@ -256,37 +276,7 @@ export default function ArticleDesignTool() {
     setIsMounted(true);
   }, []);
 
-  const editor = useEditor({
-    immediatelyRender: false,
-    extensions: [
-      StarterKit.configure({ paragraph: false }),
-      CustomParagraph,
-      CustomImage,
-      Underline,
-      Link.configure({ openOnClick: false, HTMLAttributes: { class: 'manuscript-link' } }),
-      Subscript,
-      Superscript,
-      Highlight.configure({ multicolor: true }),
-      Table.configure({ resizable: true }),
-      TableRow,
-      TableHeader,
-      TableCell,
-      TextAlign.configure({ types: ['heading', 'paragraph', 'image'] }),
-      ColumnLayout,
-      ColumnBlock,
-    ],
-    content: `
-      <h2>ABSTRACT</h2>
-      <p>Draft your scholarly abstract here. This section remains full-width at the beginning of the manuscript.</p>
-    `,
-    editorProps: {
-      attributes: {
-        className: 'tiptap-manuscript',
-      },
-    },
-  });
-
-  const uploadImageNative = async (files: File[]) => {
+  const uploadImageNative = async (files: File[], editorInstance: any) => {
     setIsUploading(true);
     let successCount = 0;
     try {
@@ -296,8 +286,8 @@ export default function ArticleDesignTool() {
           formData.append("file", file);
           const res = await fetch("/api/upload", { method: "POST", body: formData });
           const data = await res.json();
-          if (data.success && editor) {
-            editor.chain().focus().setImage({ src: data.url }).run();
+          if (data.success && editorInstance) {
+            editorInstance.chain().focus().setImage({ src: data.url }).run();
             successCount++;
           }
         })
@@ -306,7 +296,7 @@ export default function ArticleDesignTool() {
       console.error(error);
     } finally {
       setIsUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      // We don't reset file input here because it belongs to the child component
     }
   };
 
@@ -331,7 +321,6 @@ export default function ArticleDesignTool() {
   };
 
     const exportToWord = async () => {
-      if (!editor) return;
 
       const parseHtmlToDocx = async (html: string, isTwoColumn: boolean = false): Promise<any[]> => {
         const doc = new DOMParser().parseFromString(html, "text/html");
@@ -364,8 +353,9 @@ export default function ArticleDesignTool() {
               const src = (child as any).getAttribute("src");
               if (src) {
                 try {
-                  const b64 = await getBase64Image(src);
-                  runs.push(new ImageRun({ data: b64.split(',')[1], transformation: { width: isTwoColumn ? 300 : 450, height: isTwoColumn ? 200 : 300 } }));
+                  const blob = await fetch(src).then(r => r.blob());
+                  const buf = await blob.arrayBuffer();
+                  runs.push(new ImageRun({ data: buf, transformation: { width: isTwoColumn ? 300 : 450, height: isTwoColumn ? 200 : 300 } }));
                 } catch(e) { console.error("Image loading failed in export", e); }
               }
             }
@@ -404,8 +394,9 @@ export default function ArticleDesignTool() {
           } else if (tag === "IMG") {
             const src = node.getAttribute("src");
             if (src) {
-              const b64 = await getBase64Image(src);
-              children.push(new DocxParagraph({ children: [new ImageRun({ data: b64.split(',')[1], transformation: { width: isTwoColumn ? 300 : 450, height: isTwoColumn ? 200 : 300 } })], alignment: AlignmentType.CENTER }));
+              const blob = await fetch(src).then(r => r.blob());
+              const buf = await blob.arrayBuffer();
+              children.push(new DocxParagraph({ children: [new ImageRun({ data: buf, transformation: { width: isTwoColumn ? 300 : 450, height: isTwoColumn ? 200 : 300 } })], alignment: AlignmentType.CENTER }));
             }
           }
         };
@@ -416,19 +407,8 @@ export default function ArticleDesignTool() {
         return children;
       };
 
-      const fullHtml = editor.getHTML();
-      let abstractHtml = "";
-      let bodyHtml = "";
-      
-      const introMatch = fullHtml.match(/<h[1-6][^>]*>\s*INTRODUCTION\s*<\/h[1-6]>/i);
-      if (introMatch && introMatch.index !== undefined) {
-         abstractHtml = fullHtml.substring(0, introMatch.index);
-         bodyHtml = fullHtml.substring(introMatch.index);
-      } else {
-         const parts = fullHtml.split(/<hr[^>]*>/i);
-         abstractHtml = parts.length > 1 ? parts[0] : "";
-         bodyHtml = parts.length > 1 ? parts.slice(1).join('<hr>') : parts[0];
-      }
+      const abstractHtml = sections[0].html;
+      const bodyHtml = sections.slice(1).map(s => `<h2>${s.title}</h2>${s.html}`).join('');
 
       const firstAuthor = authors[0]?.name || "Author";
 
@@ -467,7 +447,7 @@ export default function ArticleDesignTool() {
                 spacing: { before: 0, after: 200 }
               }),
               new DocxParagraph({
-                children: [new TextRun({ text: (title || "UNTITLED MANUSCRIPT").toUpperCase(), bold: true, size: 36, font: "Times New Roman" })],
+                children: [new TextRun({ text: toTitleCase(title || "UNTITLED MANUSCRIPT"), bold: true, size: 30, font: "Times New Roman" })],
                 spacing: { before: 100, after: 400 }
               }),
               new DocxParagraph({
@@ -540,27 +520,13 @@ export default function ArticleDesignTool() {
       const blob = await Packer.toBlob(doc);
       saveAs(blob, `${(title || "PJPS_Article").replace(/\s+/g, "_")}.docx`);
     };
-  let printAbstractHtml = "";
-  let printBodyHtml = "";
-  if (editor) {
-      const fullHtml = editor.getHTML();
-      const introMatch = fullHtml.match(/<h[1-6][^>]*>\s*INTRODUCTION\s*<\/h[1-6]>/i);
-      if (introMatch && introMatch.index !== undefined) {
-         printAbstractHtml = fullHtml.substring(0, introMatch.index);
-         printBodyHtml = fullHtml.substring(introMatch.index);
-      } else {
-         const parts = fullHtml.split(/<hr[^>]*>/i);
-         printAbstractHtml = parts.length > 1 ? parts[0] : "";
-         printBodyHtml = parts.length > 1 ? parts.slice(1).join('<hr>') : parts[0];
-      }
-  }
+  const printAbstractHtml = sections[0].html;
+  const printBodyHtml = sections.slice(1).map(s => `<h2>${s.title}</h2>${s.html}`).join('');
 
   if (!isMounted) return null;
 
   return (
     <>
-      <input type="file" ref={fileInputRef} onChange={(e) => e.target.files && uploadImageNative(Array.from(e.target.files))} accept="image/*" multiple className="hidden" style={{display: "none"}} />
-      
       <div className={styles.container} style={{ maxWidth: "100%", padding: 0, boxShadow: "none", border: "none" }}>
         
         {/* Metadata Editor (Above Tiptap) */}
@@ -630,96 +596,36 @@ export default function ArticleDesignTool() {
             </div>
         </div>
 
-        {/* Tiptap Editor */}
-        <div className={`${styles.editorContainerWrapper} ${isFullscreen ? styles.editorContainerFullscreen : ""} relative`}>
+        {/* Sectioned Editors */}
+        <div style={{ position: "relative" }}>
           {isUploading && (
             <div className="absolute inset-0 z-[100] flex items-center justify-center bg-slate-900/10 backdrop-blur-sm rounded-b-xl">
                <Loader2 className="animate-spin text-blue-600" size={36} />
             </div>
           )}
-          {editor && (
-            <div className={styles.toolbar} style={{ justifyContent: "center", display: "flex", flexWrap: "wrap", gap: "4px", padding: "10px", backgroundColor: "#fff", borderBottom: "1px solid #edf2f7", position: "sticky", top: 0, zIndex: 50 }}>
-              
-              {/* History Group */}
-              <div className={styles.toolbarGroup} style={{ display: "flex", gap: "2px", marginRight: "8px", borderRight: "1px solid #e2e8f0", paddingRight: "8px" }}>
-                <button onClick={() => editor.chain().focus().undo().run()} className={styles.toolbarBtn} title="Undo (Ctrl+Z)"><Undo2 size={16} /></button>
-                <button onClick={() => editor.chain().focus().redo().run()} className={styles.toolbarBtn} title="Redo (Ctrl+Y)"><Redo2 size={16} /></button>
-              </div>
+          
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "20px", gap: "10px" }}>
+             <button onClick={exportToWord} className={`${styles.toolbarBtn} text-indigo-600`} style={{ padding: "8px 16px", borderRadius: "4px", backgroundColor: "white", border: "1px solid #e2e8f0" }}>
+               <Download size={18} style={{ marginRight: "6px" }} /> Export to Word
+             </button>
+             <button onClick={() => handlePrint()} className={`${styles.toolbarBtn} text-white bg-blue-600 hover:bg-blue-700`} style={{ padding: "8px 16px", borderRadius: "4px" }}>
+               <Printer size={16} style={{ marginRight: "6px" }} /> Print PDF
+             </button>
+          </div>
 
-              {/* Headings Group */}
-              <div className={styles.toolbarGroup} style={{ display: "flex", gap: "2px", marginRight: "8px", borderRight: "1px solid #e2e8f0", paddingRight: "8px" }}>
-                <button onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={`${styles.toolbarBtn} ${editor.isActive("heading", { level: 1 }) ? styles.toolbarBtnActive : ""}`} title="Heading 1"><Heading1 size={16} /></button>
-                <button onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={`${styles.toolbarBtn} ${editor.isActive("heading", { level: 2 }) ? styles.toolbarBtnActive : ""}`} title="Heading 2"><Heading2 size={16} /></button>
-                <button onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={`${styles.toolbarBtn} ${editor.isActive("heading", { level: 3 }) ? styles.toolbarBtnActive : ""}`} title="Heading 3"><Heading3 size={16} /></button>
-              </div>
-
-              {/* Basic Formatting */}
-              <div className={styles.toolbarGroup} style={{ display: "flex", gap: "2px", marginRight: "8px", borderRight: "1px solid #e2e8f0", paddingRight: "8px" }}>
-                <button onClick={() => editor.chain().focus().toggleBold().run()} className={`${styles.toolbarBtn} ${editor.isActive("bold") ? styles.toolbarBtnActive : ""}`} title="Bold"><Bold size={16} /></button>
-                <button onClick={() => editor.chain().focus().toggleItalic().run()} className={`${styles.toolbarBtn} ${editor.isActive("italic") ? styles.toolbarBtnActive : ""}`} title="Italic"><Italic size={16} /></button>
-                <button onClick={() => editor.chain().focus().toggleUnderline().run()} className={`${styles.toolbarBtn} ${editor.isActive("underline") ? styles.toolbarBtnActive : ""}`} title="Underline"><UnderlineIcon size={16} /></button>
-                <button onClick={() => editor.chain().focus().toggleStrike().run()} className={`${styles.toolbarBtn} ${editor.isActive("strike") ? styles.toolbarBtnActive : ""}`} title="Strikethrough"><Strikethrough size={16} /></button>
-              </div>
-
-              {/* Script Formatting */}
-              <div className={styles.toolbarGroup} style={{ display: "flex", gap: "2px", marginRight: "8px", borderRight: "1px solid #e2e8f0", paddingRight: "8px" }}>
-                <button onClick={() => editor.chain().focus().toggleSubscript().run()} className={`${styles.toolbarBtn} ${editor.isActive("subscript") ? styles.toolbarBtnActive : ""}`} title="Subscript"><SubIcon size={16} /></button>
-                <button onClick={() => editor.chain().focus().toggleSuperscript().run()} className={`${styles.toolbarBtn} ${editor.isActive("superscript") ? styles.toolbarBtnActive : ""}`} title="Superscript"><SuperIcon size={16} /></button>
-                <button onClick={() => editor.chain().focus().toggleHighlight().run()} className={`${styles.toolbarBtn} ${editor.isActive("highlight") ? styles.toolbarBtnActive : ""}`} title="Highlight"><Highlighter size={16} /></button>
-              </div>
-
-              {/* Alignment Group */}
-              <div className={styles.toolbarGroup} style={{ display: "flex", gap: "2px", marginRight: "8px", borderRight: "1px solid #e2e8f0", paddingRight: "8px" }}>
-                <button onClick={() => editor.chain().focus().setTextAlign("left").run()} className={`${styles.toolbarBtn} ${editor.isActive({ textAlign: "left" }) ? styles.toolbarBtnActive : ""}`} title="Align Left"><AlignLeft size={16} /></button>
-                <button onClick={() => editor.chain().focus().setTextAlign("center").run()} className={`${styles.toolbarBtn} ${editor.isActive({ textAlign: "center" }) ? styles.toolbarBtnActive : ""}`} title="Align Center"><AlignCenter size={16} /></button>
-                <button onClick={() => editor.chain().focus().setTextAlign("right").run()} className={`${styles.toolbarBtn} ${editor.isActive({ textAlign: "right" }) ? styles.toolbarBtnActive : ""}`} title="Align Right"><AlignRight size={16} /></button>
-                <button onClick={() => editor.chain().focus().setTextAlign("justify").run()} className={`${styles.toolbarBtn} ${editor.isActive({ textAlign: "justify" }) ? styles.toolbarBtnActive : ""}`} title="Justify"><AlignJustify size={16} /></button>
-              </div>
-
-              {/* Lists & Blockquote */}
-              <div className={styles.toolbarGroup} style={{ display: "flex", gap: "2px", marginRight: "8px", borderRight: "1px solid #e2e8f0", paddingRight: "8px" }}>
-                <button onClick={() => editor.chain().focus().toggleBulletList().run()} className={`${styles.toolbarBtn} ${editor.isActive("bulletList") ? styles.toolbarBtnActive : ""}`} title="Bullet List"><List size={16} /></button>
-                <button onClick={() => editor.chain().focus().toggleOrderedList().run()} className={`${styles.toolbarBtn} ${editor.isActive("orderedList") ? styles.toolbarBtnActive : ""}`} title="Ordered List"><ListOrdered size={16} /></button>
-                <button onClick={() => editor.chain().focus().toggleBlockquote().run()} className={`${styles.toolbarBtn} ${editor.isActive("blockquote") ? styles.toolbarBtnActive : ""}`} title="Blockquote"><Quote size={16} /></button>
-              </div>
-
-              {/* Insertions Group */}
-              <div className={styles.toolbarGroup} style={{ display: "flex", gap: "2px", marginRight: "8px", borderRight: "1px solid #e2e8f0", paddingRight: "8px" }}>
-                <button onClick={() => {
-                  const url = window.prompt("Enter URL:");
-                  if (url) editor.chain().focus().setLink({ href: url }).run();
-                }} className={`${styles.toolbarBtn} ${editor.isActive("link") ? styles.toolbarBtnActive : ""}`} title="Insert Link"><LinkIcon size={16} /></button>
-                <button onClick={() => fileInputRef.current?.click()} className={styles.toolbarBtn} title="Insert Image"><ImageIcon size={16} /></button>
-                <button onClick={() => editor.chain().focus().setHorizontalRule().run()} className={styles.toolbarBtn} title="Insert Divider (HR)"><Minus size={16} /></button>
-                <button onClick={() => (editor.chain().focus() as any).insertTwoColumns().run()} className={styles.toolbarBtn} title="Two Column Layout"><Columns size={16} /></button>
-              </div>
-
-              {/* Table Group */}
-              <div className={styles.toolbarGroup} style={{ display: "flex", gap: "2px", marginRight: "8px", borderRight: "1px solid #e2e8f0", paddingRight: "8px" }}>
-                <button onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()} className={styles.toolbarBtn} title="Insert Table (3x3)"><Table2 size={16} /></button>
-                {editor.isActive('table') && (
-                  <>
-                    <button onClick={() => editor.chain().focus().addColumnBefore().run()} className={styles.toolbarBtn} title="Add Column Before"><ArrowRightToLine size={14} style={{ transform: "rotate(180deg)" }} /></button>
-                    <button onClick={() => editor.chain().focus().addColumnAfter().run()} className={styles.toolbarBtn} title="Add Column After"><ArrowRightToLine size={14} /></button>
-                    <button onClick={() => editor.chain().focus().addRowBefore().run()} className={styles.toolbarBtn} title="Add Row Before"><ArrowDownToLine size={14} style={{ transform: "rotate(180deg)" }} /></button>
-                    <button onClick={() => editor.chain().focus().addRowAfter().run()} className={styles.toolbarBtn} title="Add Row After"><ArrowDownToLine size={14} /></button>
-                    <button onClick={() => editor.chain().focus().deleteTable().run()} className={styles.toolbarBtn} title="Delete Table"><Eraser size={14} color="#f87171" /></button>
-                  </>
-                )}
-              </div>
-
-              {/* Actions Group */}
-              <div className={styles.toolbarGroup} style={{ display: "flex", gap: "6px" }}>
-                <button onClick={exportToWord} className={`${styles.toolbarBtn} text-indigo-600`} title="Export to Word (.docx)"><Download size={18} /></button>
-                <button onClick={() => handlePrint()} className={`${styles.toolbarBtn} text-white bg-blue-600 hover:bg-blue-700`} style={{ borderRadius: "4px", padding: "6px 16px" }}>
-                  <Printer size={16} /> Print PDF
-                </button>
-                <button onClick={() => setIsFullscreen(!isFullscreen)} className={styles.toolbarBtn} title="Toggle Fullscreen">
-                  {isFullscreen ? <Minimize size={18} /> : <Maximize2 size={18} />}
-                </button>
-              </div>
-            </div>
-          )}
+          {sections.map((sec, idx) => (
+             <SectionEditor 
+               key={sec.id}
+               title={sec.title}
+               html={sec.html}
+               onChange={(newHtml) => {
+                 const newSecs = [...sections];
+                 newSecs[idx].html = newHtml;
+                 setSections(newSecs);
+               }}
+               onImageUpload={uploadImageNative}
+             />
+          ))}
 
           {/* PRINT VIEW */}
           <div style={{ display: "none" }}>
@@ -739,7 +645,7 @@ export default function ArticleDesignTool() {
                   </div>
 
                   {/* Article Title */}
-                  <h1 style={{ fontFamily: "Times New Roman, serif", fontSize: "18pt", fontWeight: "bold", textAlign: "left", marginBottom: "12pt", textTransform: "uppercase", lineHeight: "1.2" }}>{title || "UNTITLED MANUSCRIPT"}</h1>
+                  <h1 style={{ fontFamily: "Times New Roman, serif", fontSize: "15pt", fontWeight: "bold", textAlign: "left", marginBottom: "12pt", lineHeight: "1.2" }}>{toTitleCase(title || "UNTITLED MANUSCRIPT")}</h1>
                   
                   {/* Authors */}
                   <p style={{ textAlign: "left", fontSize: "12pt", fontWeight: "bold", marginBottom: "6pt", fontFamily: "Times New Roman, serif" }}>
@@ -787,13 +693,6 @@ export default function ArticleDesignTool() {
             </div>
           </div>
 
-          {/* EDITOR PREVIEW */}
-          <div className={styles.tiptapEditorBox} style={{ backgroundColor: "#f1f5f9", display: "flex", justifyContent: "center", padding: "40px" }}>
-            <style>{editorStyles}</style>
-            <div style={{ width: "210mm", minHeight: "297mm", backgroundColor: "white", boxShadow: "0 10px 25px rgba(0,0,0,0.1)", padding: "0" }}>
-              <EditorContent editor={editor} />
-            </div>
-          </div>
         </div>
       </div>
     </>
