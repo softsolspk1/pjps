@@ -90,11 +90,12 @@ interface SectionEditorProps {
   title: string;
   html: string;
   onChange: (html: string) => void;
-  onImageUpload: (files: File[], editor: any) => Promise<void>;
+  onImageUpload: (files: File[], editor: any, position?: number | null) => Promise<void>;
 }
 
 export default function SectionEditor({ title, html, onChange, onImageUpload }: SectionEditorProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [savedSelection, setSavedSelection] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const editor = useEditor({
@@ -126,7 +127,12 @@ export default function SectionEditor({ title, html, onChange, onImageUpload }: 
   return (
     <div className={`${styles.editorContainerWrapper} ${isFullscreen ? styles.editorContainerFullscreen : ""} relative`} style={{ marginBottom: "20px", border: "1px solid #edf2f7", borderRadius: "8px", overflow: "hidden", backgroundColor: "white" }}>
         
-        <input type="file" ref={fileInputRef} onChange={(e) => e.target.files && onImageUpload(Array.from(e.target.files), editor)} accept="image/*" multiple className="hidden" style={{display: "none"}} />
+        <input type="file" ref={fileInputRef} onChange={(e) => {
+          if (e.target.files) {
+            onImageUpload(Array.from(e.target.files), editor, savedSelection);
+            setSavedSelection(null);
+          }
+        }} accept="image/*" multiple className="hidden" style={{display: "none"}} />
 
         <div style={{ backgroundColor: "#f8fafc", padding: "12px 20px", borderBottom: "1px solid #edf2f7", fontWeight: "bold", fontSize: "12px", color: "#475569", textTransform: "uppercase", letterSpacing: "0.5px" }}>
           {title}
@@ -172,7 +178,10 @@ export default function SectionEditor({ title, html, onChange, onImageUpload }: 
 
           <div className={styles.toolbarGroup} style={{ display: "flex", gap: "2px", marginRight: "8px", borderRight: "1px solid #e2e8f0", paddingRight: "8px" }}>
             <button onClick={() => { const url = window.prompt("Enter URL:"); if (url) editor.chain().focus().setLink({ href: url }).run(); }} className={`${styles.toolbarBtn} ${editor.isActive("link") ? styles.toolbarBtnActive : ""}`} title="Insert Link"><LinkIcon size={16} /></button>
-            <button onClick={() => fileInputRef.current?.click()} className={styles.toolbarBtn} title="Insert Image"><ImageIcon size={16} /></button>
+            <button onClick={() => {
+              setSavedSelection(editor.state.selection.from);
+              fileInputRef.current?.click();
+            }} className={styles.toolbarBtn} title="Insert Image"><ImageIcon size={16} /></button>
             <button onClick={() => editor.chain().focus().setHorizontalRule().run()} className={styles.toolbarBtn} title="Insert Divider (HR)"><Minus size={16} /></button>
             {title !== "ABSTRACT" && (
               <button onClick={() => (editor.chain().focus() as any).insertTwoColumns().run()} className={styles.toolbarBtn} title="Two Column Layout"><Columns size={16} /></button>

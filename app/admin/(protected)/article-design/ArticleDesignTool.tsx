@@ -182,7 +182,7 @@ export default function ArticleDesignTool() {
     setIsMounted(true);
   }, []);
 
-  const uploadImageNative = async (files: File[], editorInstance: any) => {
+  const uploadImageNative = async (files: File[], editorInstance: any, position?: number | null) => {
     setIsUploading(true);
     let successCount = 0;
     try {
@@ -193,7 +193,11 @@ export default function ArticleDesignTool() {
           const res = await fetch("/api/upload", { method: "POST", body: formData });
           const data = await res.json();
           if (data.success && editorInstance) {
-            editorInstance.chain().focus().setImage({ src: data.url }).run();
+            if (position !== undefined && position !== null) {
+               editorInstance.chain().focus().insertContentAt(position, { type: 'image', attrs: { src: data.url } }).run();
+            } else {
+               editorInstance.chain().focus().setImage({ src: data.url }).run();
+            }
             successCount++;
           }
         })
@@ -202,7 +206,6 @@ export default function ArticleDesignTool() {
       console.error(error);
     } finally {
       setIsUploading(false);
-      // We don't reset file input here because it belongs to the child component
     }
   };
 
