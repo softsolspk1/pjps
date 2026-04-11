@@ -337,9 +337,9 @@ export default function ArticleDesignTool() {
         const doc = new DOMParser().parseFromString(html, "text/html");
         const children: any[] = [];
 
-        const parseInline = (node: Node | ChildNode, styles: any = {}): any[] => {
+        const parseInline = async (node: Node | ChildNode, styles: any = {}): Promise<any[]> => {
           const runs: any[] = [];
-          node.childNodes.forEach((child: any) => {
+          for (const child of Array.from(node.childNodes)) {
             const tag = child.nodeName;
             const text = child.textContent || "";
             const newStyles = { ...styles, font: "Times New Roman", size: 20 };
@@ -347,21 +347,29 @@ export default function ArticleDesignTool() {
             if (tag === "#text") {
               if (text.trim() || text === " ") runs.push(new TextRun({ text, ...newStyles }));
             } else if (tag === "STRONG" || tag === "B") {
-              runs.push(...parseInline(child, { ...newStyles, bold: true }));
+              runs.push(...await parseInline(child, { ...newStyles, bold: true }));
             } else if (tag === "EM" || tag === "I") {
-              runs.push(...parseInline(child, { ...newStyles, italics: true }));
+              runs.push(...await parseInline(child, { ...newStyles, italics: true }));
             } else if (tag === "U") {
-              runs.push(...parseInline(child, { ...newStyles, underline: { type: UnderlineType.SINGLE } }));
+              runs.push(...await parseInline(child, { ...newStyles, underline: { type: UnderlineType.SINGLE } }));
             } else if (tag === "SUB") {
-              runs.push(...parseInline(child, { ...newStyles, subScript: true }));
+              runs.push(...await parseInline(child, { ...newStyles, subScript: true }));
             } else if (tag === "SUP") {
-              runs.push(...parseInline(child, { ...newStyles, superScript: true }));
+              runs.push(...await parseInline(child, { ...newStyles, superScript: true }));
             } else if (tag === "A") {
-              runs.push(new ExternalHyperlink({ children: parseInline(child, newStyles), link: child.getAttribute("href") || "#" }));
+              runs.push(new ExternalHyperlink({ children: await parseInline(child, newStyles), link: (child as any).getAttribute("href") || "#" }));
             } else if (tag === "BR") {
               runs.push(new TextRun({ break: 1, ...newStyles }));
+            } else if (tag === "IMG") {
+              const src = (child as any).getAttribute("src");
+              if (src) {
+                try {
+                  const b64 = await getBase64Image(src);
+                  runs.push(new ImageRun({ data: b64.split(',')[1], transformation: { width: isTwoColumn ? 300 : 450, height: isTwoColumn ? 200 : 300 } }));
+                } catch(e) { console.error("Image loading failed in export", e); }
+              }
             }
-          });
+          }
           return runs;
         };
 
@@ -371,7 +379,7 @@ export default function ArticleDesignTool() {
           const headingStyles = { font: "Arial", bold: true };
           
           if (tag === "P") {
-            children.push(new DocxParagraph({ children: parseInline(node), alignment: AlignmentType.JUSTIFIED, spacing: { line: 276 } }));
+            children.push(new DocxParagraph({ children: await parseInline(node), alignment: AlignmentType.JUSTIFIED, spacing: { line: 276 } }));
           } else if (tag === "H1") {
             children.push(new DocxParagraph({ children: [new TextRun({ text: node.textContent?.toUpperCase() || "", ...headingStyles, size: 22 })], spacing: { before: 240, after: 120 } }));
           } else if (tag === "H2") {
@@ -379,14 +387,14 @@ export default function ArticleDesignTool() {
           } else if (tag === "H3") {
             children.push(new DocxParagraph({ children: [new TextRun({ text: node.textContent || "", ...headingStyles, italics: true, size: 17 })], spacing: { before: 180, after: 90 } }));
           } else if (tag === "BLOCKQUOTE") {
-            children.push(new DocxParagraph({ children: parseInline(node), indent: { left: 720 }, spacing: { before: 150, after: 150 } }));
+            children.push(new DocxParagraph({ children: await parseInline(node), indent: { left: 720 }, spacing: { before: 150, after: 150 } }));
           } else if (tag === "TABLE") {
             const rows: DocxTableRow[] = [];
             for (const tr of Array.from(node.querySelectorAll("tr"))) {
               const cells: DocxTableCell[] = [];
               for (const td of Array.from((tr as any).children)) {
                  cells.push(new DocxTableCell({ 
-                   children: [new DocxParagraph({ children: parseInline(td as any), spacing: { after: 0 } })],
+                   children: [new DocxParagraph({ children: await parseInline(td as any), spacing: { after: 0 } })],
                    shading: (td as any).nodeName === "TH" ? { fill: "F7FAFC", type: "clear" as any } : undefined
                  }));
               }
@@ -409,12 +417,20 @@ export default function ArticleDesignTool() {
       };
 
       const fullHtml = editor.getHTML();
-      const parts = fullHtml.split('<hr>');
-      const abstractHtml = parts[0] || "";
-      const bodyHtml = parts.slice(1).join('<hr>') || "";
+      let abstractHtml = "";
+      let bodyHtml = "";
+      
+      const introMatch = fullHtml.match(/<h[1-6][^>]*>\s*INTRODUCTION\s*<\/h[1-6]>/i);
+      if (introMatch && introMatch.index !== undefined) {
+         abstractHtml = fullHtml.substring(0, introMatch.index);
+         bodyHtml = fullHtml.substring(introMatch.index);
+      } else {
+         const parts = fullHtml.split(/<hr[^>]*>/i);
+         abstractHtml = parts.length > 1 ? parts[0] : "";
+         bodyHtml = parts.length > 1 ? parts.slice(1).join('<hr>') : parts[0];
+      }
 
       const firstAuthor = authors[0]?.name || "Author";
-      const shortTitle = (title.length > 50 ? title.substring(0, 50) + "..." : title) || "Short Title";
 
       const doc = new Document({
         creator: "PJPS Manuscript Architect",
@@ -427,11 +443,9 @@ export default function ArticleDesignTool() {
                 children: [
                    new DocxParagraph({
                       children: [
-                        new TextRun({ text: "Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610", italics: true, size: 18 }),
-                        new TextRun({ text: `\t${doi || "10.36721/PJPS..."}`, bold: true, size: 18 }),
+                        new TextRun({ text: `\t${doi || "doi.org/10.36721/PJPS..."}`, size: 18, font: "Times New Roman" }),
                       ],
                       tabStops: [{ type: "right" as any, position: 9350 }],
-                      border: { bottom: { style: BorderStyle.SINGLE, size: 6 } }
                    })
                 ]
               })
@@ -439,40 +453,49 @@ export default function ArticleDesignTool() {
             footers: {
               default: new Footer({
                 children: [
-                  new DocxParagraph({
-                    children: [
-                      new TextRun({ text: `*Corresponding author: e-mail: ${correspondingEmail || "info@pjps.pk"}`, size: 16 }),
-                      new TextRun({ text: `\t${startPage}`, size: 18 }),
-                    ],
-                    tabStops: [{ type: "right" as any, position: 9350 }],
-                    border: { top: { style: BorderStyle.SINGLE, size: 4 } }
-                  })
+                   // Intentionally left blank or simple. We removed the corresponding author block based on feedback.
+                   new DocxParagraph({ text: "" })
                 ]
               })
             },
             children: [
               new DocxParagraph({
-                children: [new TextRun({ text: (title || "UNTITLED MANUSCRIPT").toUpperCase(), bold: true, size: 36, font: "Arial" })],
-                spacing: { before: 0, after: 400 }
+                children: [
+                  new TextRun({ text: `${startPage}`, size: 18, font: "Times New Roman" }),
+                  new TextRun({ text: `\tPak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610`, size: 18, font: "Times New Roman" }),
+                ],
+                spacing: { before: 0, after: 200 }
               }),
               new DocxParagraph({
-                children: authors.map((a, i) => new TextRun({ text: `${a.name}${i+1}${i < authors.length-1 ? ", " : ""}`, bold: true, size: 24, font: "Arial" })),
+                children: [new TextRun({ text: (title || "UNTITLED MANUSCRIPT").toUpperCase(), bold: true, size: 36, font: "Times New Roman" })],
+                spacing: { before: 100, after: 400 }
+              }),
+              new DocxParagraph({
+                children: authors.map((a, i) => new TextRun({ text: `${a.name}${i+1}${i < authors.length-1 ? ", " : ""}`, bold: true, size: 24, font: "Times New Roman" })),
                 spacing: { after: 120 }
               }),
               ...authors.map((a, i) => new DocxParagraph({
                 children: [new TextRun({ text: `${i+1} ${a.affiliation}`, italics: true, size: 18, font: "Times New Roman" })],
               })),
               new DocxParagraph({ text: "", spacing: { after: 400 } }),
+              
+              ...(abstractHtml.trim() ? [
+                  new DocxParagraph({ 
+                     children: [new TextRun({ text: "Abstract: ", bold: true, size: 20, font: "Times New Roman" })],
+                     alignment: AlignmentType.JUSTIFIED,
+                  }),
+                  ...await parseHtmlToDocx(abstractHtml)
+              ] : []),
+              
               new DocxParagraph({ 
-                 children: [new TextRun({ text: "Abstract: ", bold: true, size: 20 }), ...await parseHtmlToDocx(abstractHtml)],
-                 alignment: AlignmentType.JUSTIFIED,
-              }),
-              new DocxParagraph({ 
-                 children: [new TextRun({ text: `Keywords: ${keywords}`, bold: true, size: 18 })],
+                 children: [
+                   new TextRun({ text: `Keywords: `, bold: true, size: 18, font: "Times New Roman" }),
+                   new TextRun({ text: keywords, size: 18, font: "Times New Roman" })
+                 ],
                  spacing: { before: 100, after: 100 }
               }),
               new DocxParagraph({
-                 children: [new TextRun({ text: `Submitted on ${dates.submitted} - Revised on ${dates.revised} - Accepted on ${dates.accepted}`, italics: true, size: 18 })],
+                 children: [new TextRun({ text: `Submitted on ${dates.submitted} - Revised on ${dates.revised} - Accepted on ${dates.accepted}`, italics: true, size: 18, font: "Times New Roman" })],
                  border: { bottom: { style: BorderStyle.SINGLE, size: 6, space: 10 } },
                  spacing: { after: 400 }
               }),
@@ -488,7 +511,7 @@ export default function ArticleDesignTool() {
               default: new Header({
                 children: [
                   new DocxParagraph({
-                    children: [new TextRun({ text: `${firstAuthor} et al`, italics: true, size: 18 })],
+                    children: [new TextRun({ text: `${firstAuthor} et al`, italics: true, size: 18, font: "Times New Roman" })],
                     alignment: AlignmentType.CENTER,
                     border: { bottom: { style: BorderStyle.SINGLE, size: 4 } }
                   })
@@ -500,8 +523,8 @@ export default function ArticleDesignTool() {
                 children: [
                   new DocxParagraph({
                     children: [
-                      new TextRun({ text: `Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610`, italics: true, size: 16 }),
-                      new TextRun({ text: `\t{PAGE_NUMBER}`, size: 18 }),
+                      new TextRun({ text: `Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610`, italics: true, size: 16, font: "Times New Roman" }),
+                      new TextRun({ text: `\t{PAGE_NUMBER}`, size: 18, font: "Times New Roman" }),
                     ],
                     tabStops: [{ type: "right" as any, position: 9350 }],
                     border: { top: { style: BorderStyle.SINGLE, size: 4 } }
@@ -517,6 +540,20 @@ export default function ArticleDesignTool() {
       const blob = await Packer.toBlob(doc);
       saveAs(blob, `${(title || "PJPS_Article").replace(/\s+/g, "_")}.docx`);
     };
+  let printAbstractHtml = "";
+  let printBodyHtml = "";
+  if (editor) {
+      const fullHtml = editor.getHTML();
+      const introMatch = fullHtml.match(/<h[1-6][^>]*>\s*INTRODUCTION\s*<\/h[1-6]>/i);
+      if (introMatch && introMatch.index !== undefined) {
+         printAbstractHtml = fullHtml.substring(0, introMatch.index);
+         printBodyHtml = fullHtml.substring(introMatch.index);
+      } else {
+         const parts = fullHtml.split(/<hr[^>]*>/i);
+         printAbstractHtml = parts.length > 1 ? parts[0] : "";
+         printBodyHtml = parts.length > 1 ? parts.slice(1).join('<hr>') : parts[0];
+      }
+  }
 
   if (!isMounted) return null;
 
@@ -549,16 +586,12 @@ export default function ArticleDesignTool() {
                </div>
                <div>
                   <label className={styles.label}>Starting Page</label>
-                  <input type="number" value={startPage} onChange={(e) => setStartPage(e.target.value)} className={styles.authorInput} placeholder="1602" />
+                  <input type="number" value={startPage} onChange={(e) => setStartPage(e.target.value)} className={styles.authorInput} placeholder="Leave blank for auto" />
                </div>
             </div>
 
             <div style={{ marginBottom: "30px" }}>
                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
-                  <div style={{ flex: 1, marginRight: "20px" }}>
-                     <label className={styles.label}>Corresponding Email</label>
-                     <input type="email" value={correspondingEmail} onChange={(e) => setCorrespondingEmail(e.target.value)} className={styles.authorInput} placeholder="info@pjps.pk" />
-                  </div>
                   <label className={styles.label} style={{ alignSelf: "flex-end", marginBottom: "8px" }}>Authors & Affiliations</label>
                   <button onClick={addAuthor} style={{ display: "flex", alignItems: "center", gap: "6px", color: "#0061ff", fontWeight: 800, fontSize: "11px", textTransform: "uppercase", background: "none", border: "none", cursor: "pointer" }}>
                      <PlusCircle size={14} /> Add Author
@@ -696,56 +729,60 @@ export default function ArticleDesignTool() {
                {/* Section 1: Metadata Area (Single Column) */}
                <div className="print-header-section">
                   {/* Scholarly Header */}
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9pt", borderBottom: "0.5pt solid black", paddingBottom: "4pt", marginBottom: "25pt" }}>
-                     <span style={{ fontStyle: "italic" }}>Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610</span>
-                     <span style={{ fontWeight: "bold" }}>{doi || "10.36721/PJPS..."}</span>
+                  <div style={{ display: "flex", justifyContent: "flex-end", fontSize: "10pt", marginBottom: "0pt" }}>
+                     <span>{doi || "doi.org/10.36721/PJPS..."}</span>
+                  </div>
+                  
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10pt", marginBottom: "20pt" }}>
+                     <span>{startPage}</span>
+                     <span>Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610</span>
                   </div>
 
                   {/* Article Title */}
-                  <h1 style={{ fontFamily: "Arial, sans-serif", fontSize: "18pt", fontWeight: "bold", textAlign: "left", marginBottom: "12pt", textTransform: "uppercase", lineHeight: "1.2" }}>{title || "UNTITLED MANUSCRIPT"}</h1>
+                  <h1 style={{ fontFamily: "Times New Roman, serif", fontSize: "18pt", fontWeight: "bold", textAlign: "left", marginBottom: "12pt", textTransform: "uppercase", lineHeight: "1.2" }}>{title || "UNTITLED MANUSCRIPT"}</h1>
                   
                   {/* Authors */}
-                  <p style={{ textAlign: "left", fontSize: "11pt", fontWeight: "bold", marginBottom: "6pt" }}>
+                  <p style={{ textAlign: "left", fontSize: "12pt", fontWeight: "bold", marginBottom: "6pt", fontFamily: "Times New Roman, serif" }}>
                      {authors.filter(a => a.name).map((a, i) => (
                        <span key={i}>{a.name}<sup>{i+1}</sup>{i < authors.length-1 ? ", " : ""}</span>
                      ))}
                   </p>
 
                   {/* Affiliations */}
-                  <div style={{ textAlign: "left", fontSize: "8.5pt", fontStyle: "italic", marginBottom: "15pt", lineHeight: 1.4, color: "#4a5568" }}>
+                  <div style={{ textAlign: "left", fontSize: "9pt", fontStyle: "italic", marginBottom: "15pt", lineHeight: 1.4, color: "#4a5568", fontFamily: "Times New Roman, serif" }}>
                      {authors.filter(a => a.affiliation).map((a, i) => (
                        <div key={i}><sup>{i+1}</sup>{a.affiliation}</div>
                      ))}
                   </div>
 
                   {/* Abstract & Meta */}
-                  <div style={{ fontSize: "10pt", marginBottom: "12pt", textAlign: "justify" }}>
-                     <div dangerouslySetInnerHTML={{ __html: editor?.getHTML().split('<hr>')[0] || "" }} />
-                  </div>
+                  {printAbstractHtml.trim() && (
+                    <div style={{ fontSize: "10pt", marginBottom: "12pt", textAlign: "justify", fontFamily: "Times New Roman, serif" }}>
+                       <strong>Abstract: </strong><span dangerouslySetInnerHTML={{ __html: printAbstractHtml }} />
+                    </div>
+                  )}
 
-                  <div style={{ fontSize: "10pt", marginBottom: "12pt", textAlign: "justify" }}>
+                  <div style={{ fontSize: "10pt", marginBottom: "12pt", textAlign: "justify", fontFamily: "Times New Roman, serif" }}>
                      <b>Keywords:</b> {keywords || "---"}
                   </div>
 
-                  <div style={{ fontSize: "8.5pt", fontStyle: "italic", borderBottom: "0.75pt solid black", paddingBottom: "8pt", marginBottom: "20pt" }}>
+                  <div style={{ fontSize: "8.5pt", fontStyle: "italic", borderBottom: "0.75pt solid black", paddingBottom: "8pt", marginBottom: "20pt", fontFamily: "Times New Roman, serif" }}>
                      Submitted on {dates.submitted || "---"} – Revised on {dates.revised || "---"} – Accepted on {dates.accepted || "---"}
                   </div>
                </div>
 
                {/* Section 2: Body Area (Two Column) */}
-               <div className="print-body-section" style={{ columnCount: 2, columnGap: "18pt", textAlign: "justify" }}>
+               <div className="print-body-section" style={{ columnCount: 2, columnGap: "18pt", textAlign: "justify", fontFamily: "Times New Roman, serif" }}>
                   <style>{`
-                    .print-body-section h2, .print-body-section h1 { font-family: Arial, sans-serif; text-transform: uppercase; font-size: 11pt; margin-top: 15pt; }
-                    .print-body-section h3 { font-family: Arial, sans-serif; font-style: italic; font-size: 10.5pt; }
+                    .print-body-section h2, .print-body-section h1 { font-family: 'Times New Roman', serif; text-transform: uppercase; font-size: 11pt; margin-top: 15pt; }
+                    .print-body-section h3 { font-family: 'Times New Roman', serif; font-style: italic; font-size: 10.5pt; }
                     .print-body-section p { margin-bottom: 8pt; line-height: 1.25; }
                   `}</style>
-                  <div dangerouslySetInnerHTML={{ __html: editor?.getHTML().split('<hr>').slice(1).join('<hr>') || "" }} />
+                  <div dangerouslySetInnerHTML={{ __html: printBodyHtml }} />
                </div>
                
-               {/* Footnote for first page */}
-               <div style={{ position: "absolute", bottom: "2cm", left: "1.5cm", right: "1.5cm", fontSize: "8pt", borderTop: "0.5pt solid black", paddingTop: "5pt", display: "flex", justifyContent: "space-between" }}>
-                  <span>*Corresponding author: e-mail: {correspondingEmail || "info@pjps.pk"}</span>
-                  <span>{startPage}</span>
+               {/* Footnote for first page - Currently Empty as per request */}
+               <div style={{ position: "absolute", bottom: "2cm", left: "1.5cm", right: "1.5cm", fontSize: "10pt", borderTop: "none", paddingTop: "0" }}>
                </div>
             </div>
           </div>
