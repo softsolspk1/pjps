@@ -242,7 +242,7 @@ export default function ArticleDesignTool() {
   const [title, setTitle] = useState("");
   const [doi, setDoi] = useState("");
   const [keywords, setKeywords] = useState("");
-  const [startPage, setStartPage] = useState("1602");
+  const [startPage, setStartPage] = useState("");
   const [correspondingEmail, setCorrespondingEmail] = useState("");
   const [dates, setDates] = useState({ submitted: "", revised: "", accepted: "" });
   const [authors, setAuthors] = useState<Author[]>([{ name: "", affiliation: "" }]);
