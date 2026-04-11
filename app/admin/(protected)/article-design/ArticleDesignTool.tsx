@@ -242,6 +242,8 @@ export default function ArticleDesignTool() {
   const [title, setTitle] = useState("");
   const [doi, setDoi] = useState("");
   const [keywords, setKeywords] = useState("");
+  const [startPage, setStartPage] = useState("1602");
+  const [correspondingEmail, setCorrespondingEmail] = useState("");
   const [dates, setDates] = useState({ submitted: "", revised: "", accepted: "" });
   const [authors, setAuthors] = useState<Author[]>([{ name: "", affiliation: "" }]);
   
@@ -328,161 +330,193 @@ export default function ArticleDesignTool() {
     });
   };
 
-  const exportToWord = async () => {
-    if (!editor) return;
+    const exportToWord = async () => {
+      if (!editor) return;
 
-    const parseHtmlToDocx = async (html: string): Promise<any[]> => {
-      const doc = new DOMParser().parseFromString(html, "text/html");
-      const children: any[] = [];
+      const parseHtmlToDocx = async (html: string, isTwoColumn: boolean = false): Promise<any[]> => {
+        const doc = new DOMParser().parseFromString(html, "text/html");
+        const children: any[] = [];
 
-      const parseInline = (node: Node | ChildNode, styles: any = {}): any[] => {
-        const runs: any[] = [];
-        node.childNodes.forEach((child: any) => {
-          const tag = child.nodeName;
-          const text = child.textContent || "";
-          
-          const newStyles = { ...styles, font: "Times New Roman", size: 20 };
-          
-          if (tag === "#text") {
-            if (text.trim() || text === " ") {
-              runs.push(new TextRun({ text, ...newStyles }));
+        const parseInline = (node: Node | ChildNode, styles: any = {}): any[] => {
+          const runs: any[] = [];
+          node.childNodes.forEach((child: any) => {
+            const tag = child.nodeName;
+            const text = child.textContent || "";
+            const newStyles = { ...styles, font: "Times New Roman", size: 20 };
+            
+            if (tag === "#text") {
+              if (text.trim() || text === " ") runs.push(new TextRun({ text, ...newStyles }));
+            } else if (tag === "STRONG" || tag === "B") {
+              runs.push(...parseInline(child, { ...newStyles, bold: true }));
+            } else if (tag === "EM" || tag === "I") {
+              runs.push(...parseInline(child, { ...newStyles, italics: true }));
+            } else if (tag === "U") {
+              runs.push(...parseInline(child, { ...newStyles, underline: { type: UnderlineType.SINGLE } }));
+            } else if (tag === "SUB") {
+              runs.push(...parseInline(child, { ...newStyles, subScript: true }));
+            } else if (tag === "SUP") {
+              runs.push(...parseInline(child, { ...newStyles, superScript: true }));
+            } else if (tag === "A") {
+              runs.push(new ExternalHyperlink({ children: parseInline(child, newStyles), link: child.getAttribute("href") || "#" }));
+            } else if (tag === "BR") {
+              runs.push(new TextRun({ break: 1, ...newStyles }));
             }
-          } else if (tag === "STRONG" || tag === "B") {
-            runs.push(...parseInline(child, { ...newStyles, bold: true }));
-          } else if (tag === "EM" || tag === "I") {
-            runs.push(...parseInline(child, { ...newStyles, italics: true }));
-          } else if (tag === "U") {
-            runs.push(...parseInline(child, { ...newStyles, underline: { type: UnderlineType.SINGLE } }));
-          } else if (tag === "SUB") {
-            runs.push(...parseInline(child, { ...newStyles, subScript: true }));
-          } else if (tag === "SUP") {
-            runs.push(...parseInline(child, { ...newStyles, superScript: true }));
-          } else if (tag === "A") {
-             const href = child.getAttribute("href");
-             runs.push(new ExternalHyperlink({
-                children: parseInline(child, newStyles),
-                link: href || "#"
-             }));
-          } else if (tag === "BR") {
-             runs.push(new TextRun({ break: 1, ...newStyles }));
-          } else if (tag === "SPAN" && child.classList.contains('manuscript-link')) {
-             runs.push(...parseInline(child, newStyles));
-          }
-        });
-        return runs;
-      };
+          });
+          return runs;
+        };
 
-      const processNode = async (node: any) => {
-        const tag = node.nodeName;
-        if (tag === "P") {
-          children.push(new DocxParagraph({ children: parseInline(node), alignment: AlignmentType.JUSTIFIED, spacing: { after: 120, line: 276 } }));
-        } else if (tag === "H1") {
-          children.push(new DocxParagraph({ children: [new TextRun({ text: (node.textContent?.toUpperCase() || ""), bold: true, font: "Times New Roman", size: 28 })], spacing: { before: 300, after: 150 } }));
-        } else if (tag === "H2") {
-          children.push(new DocxParagraph({ children: [new TextRun({ text: (node.textContent?.toUpperCase() || ""), bold: true, font: "Times New Roman", size: 22 })], spacing: { before: 240, after: 120 } }));
-        } else if (tag === "H3") {
-          children.push(new DocxParagraph({ children: [new TextRun({ text: (node.textContent || ""), bold: true, italics: true, font: "Times New Roman", size: 21 })], spacing: { before: 200, after: 100 } }));
-        } else if (tag === "BLOCKQUOTE") {
-          children.push(new DocxParagraph({ children: parseInline(node), indent: { left: 720 }, spacing: { before: 200, after: 200 } }));
-        } else if (tag === "HR") {
-          children.push(new DocxParagraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6 } }, spacing: { after: 200 } }));
-        } else if (tag === "IMG") {
-          const src = node.getAttribute("src");
-          if (src) {
-            const b64 = await getBase64Image(src);
-            children.push(new DocxParagraph({ children: [new ImageRun({ data: b64.split(',')[1], transformation: { width: 450, height: 300 } })], alignment: AlignmentType.CENTER }));
-          }
-        } else if (tag === "TABLE") {
-          const rows: DocxTableRow[] = [];
-          const trs = Array.from(node.querySelectorAll("tr"));
-          for (const tr of trs) {
-            const cells: DocxTableCell[] = [];
-            const tds = Array.from((tr as any).children);
-            for (const td of tds) {
-              cells.push(new DocxTableCell({
-                children: [new DocxParagraph({ children: parseInline(td as any), spacing: { after: 0 } })],
-                verticalAlign: VerticalAlign.CENTER,
-                shading: (td as any).nodeName === "TH" ? { fill: "F7FAFC", type: "clear" as any } : undefined
-              }));
+        const processNode = async (node: any) => {
+          const tag = node.nodeName;
+          const isHeading = ["H1", "H2", "H3"].includes(tag);
+          const headingStyles = { font: "Arial", bold: true };
+          
+          if (tag === "P") {
+            children.push(new DocxParagraph({ children: parseInline(node), alignment: AlignmentType.JUSTIFIED, spacing: { line: 276 } }));
+          } else if (tag === "H1") {
+            children.push(new DocxParagraph({ children: [new TextRun({ text: node.textContent?.toUpperCase() || "", ...headingStyles, size: 22 })], spacing: { before: 240, after: 120 } }));
+          } else if (tag === "H2") {
+            children.push(new DocxParagraph({ children: [new TextRun({ text: node.textContent?.toUpperCase() || "", ...headingStyles, size: 18 })], spacing: { before: 200, after: 100 } }));
+          } else if (tag === "H3") {
+            children.push(new DocxParagraph({ children: [new TextRun({ text: node.textContent || "", ...headingStyles, italics: true, size: 17 })], spacing: { before: 180, after: 90 } }));
+          } else if (tag === "BLOCKQUOTE") {
+            children.push(new DocxParagraph({ children: parseInline(node), indent: { left: 720 }, spacing: { before: 150, after: 150 } }));
+          } else if (tag === "TABLE") {
+            const rows: DocxTableRow[] = [];
+            for (const tr of Array.from(node.querySelectorAll("tr"))) {
+              const cells: DocxTableCell[] = [];
+              for (const td of Array.from((tr as any).children)) {
+                 cells.push(new DocxTableCell({ 
+                   children: [new DocxParagraph({ children: parseInline(td as any), spacing: { after: 0 } })],
+                   shading: (td as any).nodeName === "TH" ? { fill: "F7FAFC", type: "clear" as any } : undefined
+                 }));
+              }
+              rows.push(new DocxTableRow({ children: cells }));
             }
-            rows.push(new DocxTableRow({ children: cells }));
+            children.push(new DocxTable({ rows, width: { size: 100, type: WidthType.PERCENTAGE } }));
+          } else if (tag === "IMG") {
+            const src = node.getAttribute("src");
+            if (src) {
+              const b64 = await getBase64Image(src);
+              children.push(new DocxParagraph({ children: [new ImageRun({ data: b64.split(',')[1], transformation: { width: isTwoColumn ? 300 : 450, height: isTwoColumn ? 200 : 300 } })], alignment: AlignmentType.CENTER }));
+            }
           }
-          children.push(new DocxTable({ rows, width: { size: 100, type: WidthType.PERCENTAGE } }));
-        } else {
-           // Handle other elements or skip
+        };
+
+        for (const node of Array.from(doc.body.childNodes)) {
+          await processNode(node);
         }
+        return children;
       };
 
-      for (const node of Array.from(doc.body.childNodes)) {
-        await processNode(node);
-      }
-      return children;
-    };
+      const fullHtml = editor.getHTML();
+      const parts = fullHtml.split('<hr>');
+      const abstractHtml = parts[0] || "";
+      const bodyHtml = parts.slice(1).join('<hr>') || "";
 
-    const contentHtml = editor.getHTML();
-    // PJPS logic: Abstract is 1-column, Body is 2-column. 
-    // We'll approximate this by splitting the editor content at the first <hr /> or manually if needed.
-    // For now, let's keep it simple: everything from editor is currently in the 1-column section.
-    // To support 2 columns in Word, we need to create a new Section.
-    
-    const doc = new Document({
-      creator: "PJPS Manuscript Architect",
-      sections: [
-        {
-          properties: { type: SectionType.CONTINUOUS },
-          headers: {
-            default: new Header({
-              children: [
-                new DocxParagraph({
-                  children: [
-                    new TextRun({ text: "Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610", italics: true, size: 18 }),
-                    new TextRun({ text: `\t${doi || "10.36721/PJPS..."}`, bold: true, size: 18 }),
-                  ],
-                  tabStops: [{ type: "right" as any, position: 9350 }],
-                  border: { bottom: { style: BorderStyle.SINGLE, size: 6 } }
-                })
-              ]
-            })
+      const firstAuthor = authors[0]?.name || "Author";
+      const shortTitle = (title.length > 50 ? title.substring(0, 50) + "..." : title) || "Short Title";
+
+      const doc = new Document({
+        creator: "PJPS Manuscript Architect",
+        sections: [
+          // Section 1: 1 Column (Title, Authors, Abstract)
+          {
+            properties: { type: SectionType.CONTINUOUS },
+            headers: {
+              default: new Header({
+                children: [
+                   new DocxParagraph({
+                      children: [
+                        new TextRun({ text: "Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610", italics: true, size: 18 }),
+                        new TextRun({ text: `\t${doi || "10.36721/PJPS..."}`, bold: true, size: 18 }),
+                      ],
+                      tabStops: [{ type: "right" as any, position: 9350 }],
+                      border: { bottom: { style: BorderStyle.SINGLE, size: 6 } }
+                   })
+                ]
+              })
+            },
+            footers: {
+              default: new Footer({
+                children: [
+                  new DocxParagraph({
+                    children: [
+                      new TextRun({ text: `*Corresponding author: e-mail: ${correspondingEmail || "info@pjps.pk"}`, size: 16 }),
+                      new TextRun({ text: `\t${startPage}`, size: 18 }),
+                    ],
+                    tabStops: [{ type: "right" as any, position: 9350 }],
+                    border: { top: { style: BorderStyle.SINGLE, size: 4 } }
+                  })
+                ]
+              })
+            },
+            children: [
+              new DocxParagraph({
+                children: [new TextRun({ text: (title || "UNTITLED MANUSCRIPT").toUpperCase(), bold: true, size: 36, font: "Arial" })],
+                spacing: { before: 0, after: 400 }
+              }),
+              new DocxParagraph({
+                children: authors.map((a, i) => new TextRun({ text: `${a.name}${i+1}${i < authors.length-1 ? ", " : ""}`, bold: true, size: 24, font: "Arial" })),
+                spacing: { after: 120 }
+              }),
+              ...authors.map((a, i) => new DocxParagraph({
+                children: [new TextRun({ text: `${i+1} ${a.affiliation}`, italics: true, size: 18, font: "Times New Roman" })],
+              })),
+              new DocxParagraph({ text: "", spacing: { after: 400 } }),
+              new DocxParagraph({ 
+                 children: [new TextRun({ text: "Abstract: ", bold: true, size: 20 }), ...await parseHtmlToDocx(abstractHtml)],
+                 alignment: AlignmentType.JUSTIFIED,
+              }),
+              new DocxParagraph({ 
+                 children: [new TextRun({ text: `Keywords: ${keywords}`, bold: true, size: 18 })],
+                 spacing: { before: 100, after: 100 }
+              }),
+              new DocxParagraph({
+                 children: [new TextRun({ text: `Submitted on ${dates.submitted} - Revised on ${dates.revised} - Accepted on ${dates.accepted}`, italics: true, size: 18 })],
+                 border: { bottom: { style: BorderStyle.SINGLE, size: 6, space: 10 } },
+                 spacing: { after: 400 }
+              }),
+            ]
           },
-          children: [
-            new DocxParagraph({
-              children: [new TextRun({ text: (title || "Untitled Manuscript").toUpperCase(), bold: true, size: 32, font: "Times New Roman" })],
-              alignment: AlignmentType.CENTER,
-              spacing: { before: 200, after: 400 }
-            }),
-            new DocxParagraph({
-              children: authors.map((a, i) => new TextRun({ text: `${a.name}${i+1}${i < authors.length-1 ? ", " : ""}`, bold: true, size: 24, font: "Times New Roman" })),
-              alignment: AlignmentType.CENTER,
-              spacing: { after: 120 }
-            }),
-            ...authors.map((a, i) => new DocxParagraph({
-              children: [new TextRun({ text: `${i+1} ${a.affiliation}`, italics: true, size: 20, font: "Times New Roman" })],
-              alignment: AlignmentType.CENTER,
-            })),
-            new DocxParagraph({ text: "", spacing: { after: 400 } }),
-            new DocxParagraph({ 
-               children: [new TextRun({ text: "Abstract: ", bold: true, size: 20 }), new TextRun({ text: "Drafted manuscript abstract follows...", size: 20 })],
-               alignment: AlignmentType.JUSTIFIED,
-               spacing: { after: 100 }
-            }),
-            new DocxParagraph({ 
-               children: [new TextRun({ text: `Keywords: ${keywords}`, bold: true, size: 18 })],
-               spacing: { before: 100, after: 100 }
-            }),
-            new DocxParagraph({
-               children: [new TextRun({ text: `Submitted on ${dates.submitted} - Revised on ${dates.revised} - Accepted on ${dates.accepted}`, italics: true, size: 18 })],
-               border: { bottom: { style: BorderStyle.SINGLE, size: 6, space: 10 } },
-               spacing: { after: 400 }
-            }),
-            ...(await parseHtmlToDocx(contentHtml))
-          ]
-        }
-      ]
-    });
+          // Section 2: 2 Columns (Main Body)
+          {
+            properties: { 
+              type: SectionType.CONTINUOUS,
+              column: { count: 2, space: 720 }, // ~0.5 inch gap
+            },
+            headers: {
+              default: new Header({
+                children: [
+                  new DocxParagraph({
+                    children: [new TextRun({ text: `${firstAuthor} et al`, italics: true, size: 18 })],
+                    alignment: AlignmentType.CENTER,
+                    border: { bottom: { style: BorderStyle.SINGLE, size: 4 } }
+                  })
+                ]
+              })
+            },
+            footers: {
+              default: new Footer({
+                children: [
+                  new DocxParagraph({
+                    children: [
+                      new TextRun({ text: `Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610`, italics: true, size: 16 }),
+                      new TextRun({ text: `\t{PAGE_NUMBER}`, size: 18 }),
+                    ],
+                    tabStops: [{ type: "right" as any, position: 9350 }],
+                    border: { top: { style: BorderStyle.SINGLE, size: 4 } }
+                  })
+                ]
+              })
+            },
+            children: await parseHtmlToDocx(bodyHtml, true)
+          }
+        ]
+      });
 
-    const blob = await Packer.toBlob(doc);
-    saveAs(blob, `${(title || "PJPS_Article").replace(/\s+/g, "_")}.docx`);
-  };
+      const blob = await Packer.toBlob(doc);
+      saveAs(blob, `${(title || "PJPS_Article").replace(/\s+/g, "_")}.docx`);
+    };
 
   if (!isMounted) return null;
 
@@ -504,7 +538,7 @@ export default function ArticleDesignTool() {
                />
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "30px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "24px", marginBottom: "30px" }}>
                <div>
                   <label className={styles.label}>Keywords</label>
                   <input type="text" value={keywords} onChange={(e) => setKeywords(e.target.value)} className={styles.authorInput} placeholder="e.g. Pharmacology; Clinical Trails" />
@@ -513,11 +547,19 @@ export default function ArticleDesignTool() {
                   <label className={styles.label}>DOI Reference</label>
                   <input type="text" value={doi} onChange={(e) => setDoi(e.target.value)} className={styles.authorInput} placeholder="e.g. 10.36721/PJPS.2026..." />
                </div>
+               <div>
+                  <label className={styles.label}>Starting Page</label>
+                  <input type="number" value={startPage} onChange={(e) => setStartPage(e.target.value)} className={styles.authorInput} placeholder="1602" />
+               </div>
             </div>
 
             <div style={{ marginBottom: "30px" }}>
                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
-                  <label className={styles.label}>Authors & Affiliations</label>
+                  <div style={{ flex: 1, marginRight: "20px" }}>
+                     <label className={styles.label}>Corresponding Email</label>
+                     <input type="email" value={correspondingEmail} onChange={(e) => setCorrespondingEmail(e.target.value)} className={styles.authorInput} placeholder="info@pjps.pk" />
+                  </div>
+                  <label className={styles.label} style={{ alignSelf: "flex-end", marginBottom: "8px" }}>Authors & Affiliations</label>
                   <button onClick={addAuthor} style={{ display: "flex", alignItems: "center", gap: "6px", color: "#0061ff", fontWeight: 800, fontSize: "11px", textTransform: "uppercase", background: "none", border: "none", cursor: "pointer" }}>
                      <PlusCircle size={14} /> Add Author
                   </button>
@@ -648,47 +690,62 @@ export default function ArticleDesignTool() {
 
           {/* PRINT VIEW */}
           <div style={{ display: "none" }}>
-            <div ref={printRef} className="print-container" style={{ padding: "2.5cm 2cm", fontFamily: "'Times New Roman', Times, serif", fontSize: "10pt", backgroundColor: "white", color: "black", width: "210mm", minHeight: "297mm" }}>
+            <div ref={printRef} className="print-container" style={{ padding: "2.5cm 1.5cm", fontFamily: "'Times New Roman', Times, serif", fontSize: "10pt", backgroundColor: "white", color: "black", width: "210mm", minHeight: "297mm" }}>
                <style>{editorStyles}</style>
                
-               {/* Scholarly Header */}
-               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9pt", borderBottom: "0.5pt solid black", paddingBottom: "4pt", marginBottom: "25pt" }}>
-                  <span style={{ fontStyle: "italic" }}>Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610</span>
-                  <span style={{ fontWeight: "bold" }}>{doi || "10.36721/PJPS..."}</span>
+               {/* Section 1: Metadata Area (Single Column) */}
+               <div className="print-header-section">
+                  {/* Scholarly Header */}
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9pt", borderBottom: "0.5pt solid black", paddingBottom: "4pt", marginBottom: "25pt" }}>
+                     <span style={{ fontStyle: "italic" }}>Pak. J. Pharm. Sci., Vol.39, No.6, June 2026, pp.1602-1610</span>
+                     <span style={{ fontWeight: "bold" }}>{doi || "10.36721/PJPS..."}</span>
+                  </div>
+
+                  {/* Article Title */}
+                  <h1 style={{ fontFamily: "Arial, sans-serif", fontSize: "18pt", fontWeight: "bold", textAlign: "left", marginBottom: "12pt", textTransform: "uppercase", lineHeight: "1.2" }}>{title || "UNTITLED MANUSCRIPT"}</h1>
+                  
+                  {/* Authors */}
+                  <p style={{ textAlign: "left", fontSize: "11pt", fontWeight: "bold", marginBottom: "6pt" }}>
+                     {authors.filter(a => a.name).map((a, i) => (
+                       <span key={i}>{a.name}<sup>{i+1}</sup>{i < authors.length-1 ? ", " : ""}</span>
+                     ))}
+                  </p>
+
+                  {/* Affiliations */}
+                  <div style={{ textAlign: "left", fontSize: "8.5pt", fontStyle: "italic", marginBottom: "15pt", lineHeight: 1.4, color: "#4a5568" }}>
+                     {authors.filter(a => a.affiliation).map((a, i) => (
+                       <div key={i}><sup>{i+1}</sup>{a.affiliation}</div>
+                     ))}
+                  </div>
+
+                  {/* Abstract & Meta */}
+                  <div style={{ fontSize: "10pt", marginBottom: "12pt", textAlign: "justify" }}>
+                     <div dangerouslySetInnerHTML={{ __html: editor?.getHTML().split('<hr>')[0] || "" }} />
+                  </div>
+
+                  <div style={{ fontSize: "10pt", marginBottom: "12pt", textAlign: "justify" }}>
+                     <b>Keywords:</b> {keywords || "---"}
+                  </div>
+
+                  <div style={{ fontSize: "8.5pt", fontStyle: "italic", borderBottom: "0.75pt solid black", paddingBottom: "8pt", marginBottom: "20pt" }}>
+                     Submitted on {dates.submitted || "---"} – Revised on {dates.revised || "---"} – Accepted on {dates.accepted || "---"}
+                  </div>
                </div>
 
-               {/* Article Title */}
-               <h1 style={{ fontSize: "16pt", fontWeight: "bold", textAlign: "center", marginBottom: "18pt", textTransform: "uppercase", lineHeight: "1.3" }}>{title || "UNTITLED MANUSCRIPT"}</h1>
-               
-               {/* Authors */}
-               <p style={{ textAlign: "center", fontSize: "12pt", fontWeight: "bold", marginBottom: "6pt" }}>
-                  {authors.filter(a => a.name).map((a, i) => (
-                    <span key={i}>{a.name}<sup>{i+1}</sup>{i < authors.length-1 ? ", " : ""}</span>
-                  ))}
-               </p>
-
-               {/* Affiliations */}
-               <div style={{ textAlign: "center", fontSize: "10pt", fontStyle: "italic", marginBottom: "25pt", lineHeight: 1.4 }}>
-                  {authors.filter(a => a.affiliation).map((a, i) => (
-                    <div key={i}><sup>{i+1}</sup>{a.affiliation}</div>
-                  ))}
+               {/* Section 2: Body Area (Two Column) */}
+               <div className="print-body-section" style={{ columnCount: 2, columnGap: "18pt", textAlign: "justify" }}>
+                  <style>{`
+                    .print-body-section h2, .print-body-section h1 { font-family: Arial, sans-serif; text-transform: uppercase; font-size: 11pt; margin-top: 15pt; }
+                    .print-body-section h3 { font-family: Arial, sans-serif; font-style: italic; font-size: 10.5pt; }
+                    .print-body-section p { margin-bottom: 8pt; line-height: 1.25; }
+                  `}</style>
+                  <div dangerouslySetInnerHTML={{ __html: editor?.getHTML().split('<hr>').slice(1).join('<hr>') || "" }} />
                </div>
-
-               {/* Keywords & Dates */}
-               <div style={{ fontSize: "10pt", marginBottom: "12pt", textAlign: "justify" }}>
-                  <b>Keywords:</b> {keywords || "---"}
-               </div>
-
-               <div style={{ fontSize: "9pt", fontStyle: "italic", borderBottom: "0.75pt solid black", paddingBottom: "8pt", marginBottom: "25pt" }}>
-                  Submitted on {dates.submitted || "---"} – Revised on {dates.revised || "---"} – Accepted on {dates.accepted || "---"}
-               </div>
-
-               {/* Scientific Body */}
-               <div className="tiptap-manuscript" style={{ padding: 0 }} dangerouslySetInnerHTML={{ __html: editor?.getHTML() || "" }} />
                
                {/* Footnote for first page */}
-               <div style={{ position: "absolute", bottom: "2cm", left: "2cm", right: "2cm", fontSize: "8pt", borderTop: "0.5pt solid black", paddingTop: "5pt" }}>
-                  *Corresponding author: e-mail: info@pjps.pk
+               <div style={{ position: "absolute", bottom: "2cm", left: "1.5cm", right: "1.5cm", fontSize: "8pt", borderTop: "0.5pt solid black", paddingTop: "5pt", display: "flex", justifyContent: "space-between" }}>
+                  <span>*Corresponding author: e-mail: {correspondingEmail || "info@pjps.pk"}</span>
+                  <span>{startPage}</span>
                </div>
             </div>
           </div>
