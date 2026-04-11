@@ -9,6 +9,8 @@ import {
   Layers
 } from "lucide-react";
 import RoleLayout from "@/components/RoleLayout";
+import HeaderWrapper from "@/components/HeaderWrapper";
+import FooterWrapper from "@/components/FooterWrapper";
 import styles from "./Tracking.module.css";
 
 const STEPS = [
@@ -211,10 +213,12 @@ export default function TrackingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12">
-       <div className="max-w-[1400px] mx-auto px-6">
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+       <HeaderWrapper />
+       <div className="flex-1 w-full max-w-[1400px] mx-auto px-6 py-12" style={{ paddingTop: '100px' }}>
           {TrackingContent}
        </div>
+       <FooterWrapper />
     </div>
   );
 }

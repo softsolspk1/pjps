@@ -264,65 +264,70 @@ function SubmissionForm() {
 
         {step === 1 && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
-            <div className={styles.formGroup}>
-              <label className="text-sm font-medium text-slate-800 mb-4 block">Select Submission Track</label>
-              <div className="flex flex-row gap-10 items-center">
-                {[
-                  { id: "REGULAR", label: "Regular" },
-                  { id: "FAST", label: "Fast Track" },
-                  { id: "ULTRAFAST", label: "Ultra Fast" },
-                ].map((track) => (
-                  <label 
-                    key={track.id}
-                    className="flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-700 hover:text-blue-600 transition-colors"
-                  >
-                    <input 
-                      type="radio" 
-                      name="submissionTrack"
-                      checked={submissionType === track.id}
-                      onChange={() => setSubmissionType(track.id)}
-                      className="w-4 h-4 cursor-pointer"
-                    />
-                    <span>{track.label}</span>
-                  </label>
-                ))}
-              </div>
-              {!parentId && (
-                <div className="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-between">
-                  <div className="flex items-center gap-3 text-blue-900">
-                    <CreditCard size={18} />
-                    <span className="text-sm font-bold">Estimated Submission Fee</span>
-                  </div>
-                  <div className="text-xl font-serif font-black text-blue-600">
-                    {userOrigin === "PAKISTANI" ? "Rs. " : "$ "}{getCurrentFee().toLocaleString()}
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className={styles.formGroup}>
+                <label className="text-sm font-medium text-slate-800 mb-4 block">Select Submission Track</label>
+                <div className="flex flex-row gap-8 items-center cursor-pointer">
+                  {[
+                    { id: "REGULAR", label: "Regular" },
+                    { id: "FAST", label: "Fast Track" },
+                    { id: "ULTRAFAST", label: "Ultra Fast" },
+                  ].map((track) => (
+                    <label 
+                      key={track.id}
+                      className="flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-700 hover:text-blue-600 transition-colors"
+                    >
+                      <input 
+                        type="radio" 
+                        name="submissionTrack"
+                        checked={submissionType === track.id}
+                        onChange={() => setSubmissionType(track.id)}
+                        className="w-4 h-4 cursor-pointer"
+                      />
+                      <span>{track.label}</span>
+                    </label>
+                  ))}
                 </div>
-              )}
-            </div>
-            <div className={styles.formGroup}>
-              <label className={styles.label}>Full Manuscript Title</label>
-              <input 
-                type="text" required value={title} onChange={(e) => setTitle(e.target.value)}
-                className={styles.input}
-                placeholder="Scientific title of your research..."
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label className={styles.label}>Abstract (Scoping Summary)</label>
-              <textarea 
-                required value={abstract} onChange={(e) => setAbstract(e.target.value)}
-                className={styles.textarea}
-                rows={6}
-                placeholder="Comprehensive summary of research objectives, methodology, and key findings..."
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label className={styles.label}>Index Keywords</label>
-              <input 
-                type="text" required value={keywords} onChange={(e) => setKeywords(e.target.value)}
-                className={styles.input}
-                placeholder="e.g. Pharmacology, Pharmaceutics, Clinical Trials (comma-separated)"
-              />
+                {!parentId && (
+                  <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-between">
+                    <div className="flex items-center gap-3 text-blue-900">
+                      <CreditCard size={18} />
+                      <span className="text-sm font-bold">Estimated Submission Fee</span>
+                    </div>
+                    <div className="text-xl font-serif font-black text-blue-600">
+                      {userOrigin === "PAKISTANI" ? "Rs. " : "$ "}{getCurrentFee().toLocaleString()}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Index Keywords</label>
+                <input 
+                  type="text" required value={keywords} onChange={(e) => setKeywords(e.target.value)}
+                  className={styles.input}
+                  placeholder="Pharmacology, Pharmaceutics..."
+                />
+              </div>
+              
+              <div className={`col-span-1 md:col-span-2 ${styles.formGroup}`}>
+                <label className={styles.label}>Full Manuscript Title</label>
+                <input 
+                  type="text" required value={title} onChange={(e) => setTitle(e.target.value)}
+                  className={styles.input}
+                  placeholder="Scientific title of your research..."
+                />
+              </div>
+              
+              <div className={`col-span-1 md:col-span-2 ${styles.formGroup}`}>
+                <label className={styles.label}>Abstract (Scoping Summary)</label>
+                <textarea 
+                  required value={abstract} onChange={(e) => setAbstract(e.target.value)}
+                  className={styles.textarea}
+                  rows={6}
+                  placeholder="Comprehensive summary of research objectives, methodology, and key findings..."
+                />
+              </div>
             </div>
           </div>
         )}
