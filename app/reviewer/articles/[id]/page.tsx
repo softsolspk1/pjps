@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { 
   FileText, Download, Star, CheckCircle2, 
   AlertCircle, ArrowLeft, MessageSquare, ShieldCheck,
-  Award, BookOpen, Clock, Layers, Globe
+  Award, BookOpen, Clock, Layers, Globe, Loader2
 } from "lucide-react";
 
 export default function ReviewPage({ params }: { params: Promise<{ id: string }> }) {
