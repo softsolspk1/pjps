@@ -11,11 +11,25 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { subject, message, recipientFilter, specificEmail } = await req.json();
+    const formData = await req.formData();
+    const subject = formData.get("subject") as string;
+    const message = formData.get("message") as string;
+    const recipientFilter = formData.get("recipientFilter") as string;
+    const specificEmail = formData.get("specificEmail") as string;
+    const files = formData.getAll("files") as File[];
 
     if (!subject || !message) {
       return NextResponse.json({ error: "Missing scholarly subject or message content" }, { status: 400 });
     }
+
+    // Prepare attachments
+    const attachments = await Promise.all(files.map(async (file) => {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      return {
+        filename: file.name,
+        content: buffer
+      };
+    }));
 
     let users: any[] = [];
 
@@ -48,7 +62,8 @@ export async function POST(req: Request) {
                 Pakistan Journal of Pharmaceutical Sciences
               </p>
             </div>
-          `
+          `,
+          attachments: attachments
         })
       )
     );

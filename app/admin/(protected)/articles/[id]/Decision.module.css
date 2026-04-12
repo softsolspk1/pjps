@@ -333,3 +333,21 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+.downloadGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.emptyMedia {
+  padding: 40px;
+  text-align: center;
+  border: 2px dashed #edf2f7;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}

@@ -193,3 +193,56 @@
   position: absolute;
   left: 0;
 }
+
+.activityFeed {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.activityItem {
+  display: flex;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f7fafc;
+}
+
+.activityItem:last-child {
+  border-bottom: none;
+}
+
+.activityIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: #f7fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #718096;
+  flex-shrink: 0;
+}
+
+.activityContent {
+  flex: 1;
+}
+
+.activityTitle {
+  font-size: 13px;
+  color: #1a202c;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.activityTitle strong {
+  font-weight: 800;
+  color: #0061ff;
+}
+
+.activityMeta {
+  font-size: 10px;
+  font-weight: 700;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

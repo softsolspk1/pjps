@@ -14,10 +14,22 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { message } = await req.json();
-    if (!message) {
-      return NextResponse.json({ error: "Scholarly message content is required" }, { status: 400 });
+    const formData = await req.formData();
+    const message = formData.get("message") as string;
+    const files = formData.getAll("files") as File[];
+    
+    if (!message && files.length === 0) {
+      return NextResponse.json({ error: "Communication content or attachment is required" }, { status: 400 });
     }
+
+    // Prepare attachments for nodemailer
+    const attachments = await Promise.all(files.map(async (file) => {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      return {
+        filename: file.name,
+        content: buffer
+      };
+    }));
 
     // 1. Fetch Article & Author Details
     const article = await prisma.article.findUnique({
@@ -62,7 +74,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
           <a href="${process.env.NEXTAUTH_URL}/author/dashboard" style="background-color: #002d5e; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; text-transform: uppercase;">Access Author Dashboard</a>
         </div>
         <p style="font-size: 13px; color: #64748b;">Respectfully,<br/><strong>The PJPS Editorial Board</strong></p>
-      `
+      `,
+      attachments: attachments
     });
 
     if (!success) {

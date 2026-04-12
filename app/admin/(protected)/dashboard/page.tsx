@@ -17,7 +17,8 @@ export default async function DashboardPage() {
     unassignedManuscripts,
     publishedIssues,
     totalVolumes,
-    totalReviews
+    totalReviews,
+    recentActivity
   ] = await Promise.all([
      prisma.article.count(),
      prisma.user.count(),
@@ -25,7 +26,12 @@ export default async function DashboardPage() {
      prisma.article.count({ where: { status: "SUBMITTED" } }),
      prisma.issue.count({ where: { isPublished: true } }),
      prisma.volume.count(),
-     prisma.review.count({ where: { status: "COMPLETED" } })
+     prisma.review.count({ where: { status: "COMPLETED" } }),
+     prisma.auditLog.findMany({
+       take: 5,
+       orderBy: { createdAt: "desc" },
+       include: { user: true }
+     })
   ]);
 
   // @ts-ignore
@@ -75,15 +81,35 @@ export default async function DashboardPage() {
 
       {/* Attachment 3: Main Sections */}
       <div className={styles.mainSection}>
-         <div className={styles.wideCard}>
+          <div className={styles.wideCard}>
             <div className={styles.wideCardTitle}>
                Recent Editorial Activity
-               <span className={styles.historyLink} style={{ marginLeft: 'auto' }}>HISTORICAL LOGS</span>
+               <Link href="/admin/audit-logs" className={styles.historyLink} style={{ marginLeft: 'auto', textDecoration: 'none' }}>HISTORICAL LOGS</Link>
             </div>
-            <div className={styles.emptyContent}>
-               NO SESSIONS CURRENTLY ACTIVE
+            <div className={styles.activityFeed}>
+               {recentActivity.length > 0 ? (
+                 recentActivity.map((log: any) => (
+                   <div key={log.id} className={styles.activityItem}>
+                      <div className={styles.activityIcon}>
+                         <Activity size={12} />
+                      </div>
+                      <div className={styles.activityContent}>
+                         <div className={styles.activityTitle}>
+                            <strong>{log.user?.name || "System"}</strong> {log.action.replace(/_/g, ' ').toLowerCase()}
+                         </div>
+                         <div className={styles.activityMeta}>
+                            {new Date(log.createdAt).toLocaleString()} • {log.entityType}
+                         </div>
+                      </div>
+                   </div>
+                 ))
+               ) : (
+                 <div className={styles.emptyContent}>
+                    NO RECENT LOGS RECORDED IN REGISTRY
+                 </div>
+               )}
             </div>
-         </div>
+          </div>
 
          <div className={styles.toolSection}>
             <div className={styles.wideCardTitle}>System Tools</div>

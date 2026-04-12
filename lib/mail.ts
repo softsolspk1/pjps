@@ -31,7 +31,19 @@ export const renderEmail = (title: string, content: string) => `
   </div>
 `;
 
-export const sendEmail = async ({ to, subject, html, title }: { to: string; subject: string; html: string; title?: string }) => {
+export const sendEmail = async ({ 
+  to, 
+  subject, 
+  html, 
+  title,
+  attachments
+}: { 
+  to: string; 
+  subject: string; 
+  html: string; 
+  title?: string;
+  attachments?: any[];
+}) => {
   try {
     const finalHtml = title ? renderEmail(title, html) : html;
     const info = await transporter.sendMail({
@@ -39,6 +51,7 @@ export const sendEmail = async ({ to, subject, html, title }: { to: string; subj
       to,
       subject,
       html: finalHtml,
+      attachments
     });
     console.log('Message sent: %s', info.messageId);
     return { success: true, messageId: info.messageId };

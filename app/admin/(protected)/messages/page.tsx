@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Send, Users, Mail, UserCheck, Search, Filter, Sparkles, AlertCircle, ShieldCheck } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Send, Users, Mail, UserCheck, Search, Filter, Sparkles, AlertCircle, ShieldCheck, Plus, X, Loader2 } from "lucide-react";
 import styles from "./Messages.module.css";
 
 type FilterType = "ALL" | "AUTHORS" | "REVIEWERS" | "SPECIFIC";
@@ -14,6 +14,24 @@ export default function MessagesPage() {
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState("");
   const [error, setError] = useState("");
+  const [files, setFiles] = useState<FileList | null>(null);
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [userSearchText, setUserSearchText] = useState("");
+  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
+
+  useEffect(() => {
+    if (filter === "SPECIFIC") {
+      fetch("/api/admin/users")
+        .then(res => res.json())
+        .then(data => setAllUsers(Array.isArray(data) ? data : []))
+        .catch(() => setAllUsers([]));
+    }
+  }, [filter]);
+
+  const filteredUsers = allUsers.filter(u => 
+    u.name?.toLowerCase().includes(userSearchText.toLowerCase()) || 
+    u.email?.toLowerCase().includes(userSearchText.toLowerCase())
+  );
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,10 +40,21 @@ export default function MessagesPage() {
     setError("");
 
     try {
+      const formData = new FormData();
+      formData.append("subject", subject);
+      formData.append("message", message);
+      formData.append("recipientFilter", filter);
+      formData.append("specificEmail", specificEmail);
+      
+      if (files) {
+        for (let i = 0; i < files.length; i++) {
+          formData.append("files", files[i]);
+        }
+      }
+
       const res = await fetch("/api/admin/messages", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subject, message, recipientFilter: filter, specificEmail }),
+        body: formData,
       });
 
       const data = await res.json();
@@ -33,6 +62,8 @@ export default function MessagesPage() {
         setResult(data.message);
         setSubject("");
         setMessage("");
+        setFiles(null);
+        setSpecificEmail("");
       } else {
         setError(data.error);
       }
@@ -74,16 +105,32 @@ export default function MessagesPage() {
                 />
               </div>
 
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Scholarly Body Content</label>
-                <textarea 
-                  value={message} 
-                  onChange={(e) => setMessage(e.target.value)} 
-                  required
-                  placeholder="Compose your editorial message here. Official salutations and institutional footers will be appended automatically."
-                  className={styles.textarea}
-                />
-              </div>
+               <div className={styles.formGroup}>
+                 <label className={styles.label}>Scholarly Body Content</label>
+                 <textarea 
+                   value={message} 
+                   onChange={(e) => setMessage(e.target.value)} 
+                   required
+                   placeholder="Compose your editorial message here. Official salutations and institutional footers will be appended automatically."
+                   className={styles.textarea}
+                 />
+               </div>
+
+               <div className={styles.formGroup}>
+                  <label className={styles.label}>Institutional Attachments</label>
+                  <div className="flex items-center gap-3 p-4 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl transition-all hover:bg-white hover:border-blue-300 group">
+                     <Plus size={20} className="text-slate-400 group-hover:text-blue-500" />
+                     <div className="flex-1">
+                        <input 
+                          type="file" 
+                          multiple 
+                          onChange={(e) => setFiles(e.target.files)}
+                          className="w-full text-[11px] font-bold text-slate-500 file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-slate-900 file:text-white hover:file:bg-black cursor-pointer"
+                        />
+                        <p className="text-[9px] font-bold text-slate-400 uppercase mt-2 tracking-widest">PDF, DOCX, PNG or JPG (Max 10MB per file)</p>
+                     </div>
+                  </div>
+               </div>
 
               <button 
                 type="submit" 
@@ -134,15 +181,45 @@ export default function MessagesPage() {
 
              {filter === "SPECIFIC" && (
                <div className={styles.specificGroup}>
-                 <label className={styles.label}>Participant Email</label>
-                 <input 
-                   type="email" 
-                   value={specificEmail} 
-                   onChange={(e) => setSpecificEmail(e.target.value)}
-                   placeholder="scholar@organization.edu"
-                   className={styles.input}
-                   style={{ fontSize: '13px', padding: '12px 16px' }}
-                 />
+                 <label className={styles.label}>Search Participant</label>
+                 <div className="relative">
+                    <input 
+                      type="text" 
+                      value={userSearchText || specificEmail} 
+                      onChange={(e) => setUserSearchText(e.target.value)}
+                      placeholder="Search by name or email..."
+                      className={styles.input}
+                      style={{ fontSize: '13px', padding: '12px 16px' }}
+                    />
+                    {userSearchText && (
+                       <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto">
+                          {filteredUsers.length > 0 ? (
+                             filteredUsers.map(u => (
+                                <button 
+                                  key={u.id}
+                                  type="button"
+                                  onClick={() => {
+                                     setSpecificEmail(u.email);
+                                     setUserSearchText("");
+                                  }}
+                                  className="w-full text-left px-4 py-3 hover:bg-slate-50 flex flex-col gap-0.5 border-bottom border-slate-100 last:border-0"
+                                >
+                                   <span className="text-xs font-black text-slate-800">{u.name}</span>
+                                   <span className="text-[10px] font-bold text-slate-400">{u.email}</span>
+                                </button>
+                             ))
+                          ) : (
+                             <div className="p-4 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">No scholars found</div>
+                          )}
+                       </div>
+                    )}
+                 </div>
+                 {specificEmail && !userSearchText && (
+                    <div className="mt-3 p-3 bg-blue-600 text-white rounded-xl flex items-center justify-between">
+                       <span className="text-[10px] font-black uppercase tracking-widest truncate">{specificEmail}</span>
+                       <button onClick={() => setSpecificEmail("")}><X size={14} /></button>
+                    </div>
+                 )}
                </div>
              )}
 

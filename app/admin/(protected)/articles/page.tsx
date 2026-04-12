@@ -1,15 +1,53 @@
-export const dynamic = 'force-dynamic';
-import { prisma } from "@/lib/prisma";
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import styles from "@/components/AdminTable.module.css";
-import { Edit2, UserCheck, Plus, FileText, Search, Filter } from "lucide-react";
+import { Edit2, UserCheck, Plus, FileText, Search, Filter, Loader2 } from "lucide-react";
 
-export default async function AdminArticlesList() {
-  const articles = await prisma.article.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { authors: true }
-  });
+export default function AdminArticlesList() {
+  const [articles, setArticles] = useState<any[]>([]);
+  const [filteredArticles, setFilteredArticles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+
+  useEffect(() => {
+    async function fetchArticles() {
+      try {
+        const res = await fetch("/api/articles"); // Using public API for list
+        const data = await res.json();
+        setArticles(data);
+        setFilteredArticles(data);
+      } catch (err) {
+        console.error("Fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchArticles();
+  }, []);
+
+  useEffect(() => {
+    let results = articles;
+    
+    if (search) {
+      const q = search.toLowerCase();
+      results = results.filter(a => 
+        a.title?.toLowerCase().includes(q) || 
+        a.authors?.some((author: any) => author.name?.toLowerCase().includes(q))
+      );
+    }
+    
+    if (statusFilter !== "ALL") {
+      results = results.filter(a => a.status === statusFilter);
+    }
+    
+    setFilteredArticles(results);
+  }, [search, statusFilter, articles]);
+
+  if (loading) return <div className="p-20 text-center"><Loader2 className="animate-spin mx-auto text-blue-600" size={40} /></div>;
 
   return (
     <div className={styles.container}>
@@ -29,11 +67,31 @@ export default async function AdminArticlesList() {
       <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
          <div style={{ flex: 1, backgroundColor: 'white', border: '1px solid #edf2f7', borderRadius: '12px', padding: '0 20px', display: 'flex', alignItems: 'center', gap: '12px', height: '54px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
             <Search size={18} color="#a0aec0" />
-            <input type="text" placeholder="Filter registry by title or author identifier..." style={{ flex: 1, background: 'none', border: 'none', outline: 'none', fontSize: '14px', fontWeight: 500, color: '#1a202c' }} />
+            <input 
+              type="text" 
+              placeholder="Filter registry by title or author identifier..." 
+              style={{ flex: 1, background: 'none', border: 'none', outline: 'none', fontSize: '14px', fontWeight: 500, color: '#1a202c' }}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
          </div>
-         <button style={{ backgroundColor: 'white', border: '1px solid #edf2f7', borderRadius: '12px', padding: '0 20px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '11px', textTransform: 'uppercase', color: '#718096', cursor: 'pointer' }}>
-            <Filter size={16} /> Filters
-         </button>
+         <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <select 
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              style={{ backgroundColor: 'white', border: '1px solid #edf2f7', borderRadius: '12px', padding: '0 40px 0 20px', appearance: 'none', height: '54px', fontWeight: 800, fontSize: '11px', textTransform: 'uppercase', color: '#718096', cursor: 'pointer', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}
+            >
+               <option value="ALL">All Statuses</option>
+               <option value="SUBMITTED">Submitted</option>
+               <option value="SCREENING">Screening</option>
+               <option value="UNDER_REVIEW">Under Review</option>
+               <option value="REVISION">Revision</option>
+               <option value="ACCEPTED">Accepted</option>
+               <option value="REJECTED">Rejected</option>
+               <option value="PUBLISHED">Published</option>
+            </select>
+            <Filter size={14} style={{ position: 'absolute', right: '15px', pointerEvents: 'none', color: '#a0aec0' }} />
+         </div>
       </div>
 
       <div className={styles.tableWrapper}>
@@ -47,14 +105,14 @@ export default async function AdminArticlesList() {
             </tr>
           </thead>
           <tbody>
-            {articles.length === 0 && (
+            {filteredArticles.length === 0 && (
               <tr>
                 <td colSpan={4} style={{ padding: '60px', textAlign: 'center', color: '#a0aec0', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                  No scholarly entries found in the current registry sequence.
+                  No scholarly entries matches your criteria.
                 </td>
               </tr>
             )}
-            {articles.map((article) => (
+            {filteredArticles.map((article) => (
               <tr key={article.id}>
                 <td>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -64,7 +122,7 @@ export default async function AdminArticlesList() {
                     <div style={{ overflow: 'hidden' }}>
                       <div style={{ fontWeight: 800, color: '#1a202c', fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '400px' }}>{article.title}</div>
                       <div style={{ fontSize: '11px', fontWeight: 600, color: '#718096', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
-                        {article.authors.map(a => a.name).join(", ") || "Institutional Participant Unassigned"}
+                        {article.authors?.map((a: any) => a.name).join(", ") || "Institutional Participant Unassigned"}
                       </div>
                     </div>
                   </div>
@@ -92,7 +150,7 @@ export default async function AdminArticlesList() {
                      <Link href={`/admin/articles/${article.id}`} className={styles.actionBtn} title="Editorial Decision Hub">
                         <Edit2 size={16} />
                      </Link>
-                     {article.status === "SUBMITTED" && (
+                     {(article.status === "SUBMITTED" || article.status === "SCREENING") && (
                        <Link href={`/admin/articles/${article.id}/assign`} className={styles.actionBtn} style={{ color: '#f59e0b', borderColor: '#ffedd5' }} title="Assign Peer Reviewer">
                           <UserCheck size={16} />
                        </Link>
@@ -104,9 +162,9 @@ export default async function AdminArticlesList() {
           </tbody>
         </table>
 
-        {articles.length > 0 && (
+        {filteredArticles.length > 0 && (
           <div className={styles.pagination}>
-            <div className={styles.paginationInfo}>Showing {articles.length} institutional entries</div>
+            <div className={styles.paginationInfo}>Showing {filteredArticles.length} matching entries</div>
             <div className={styles.paginationBtns}>
                <button disabled className={styles.actionBtn} style={{ opacity: 0.5 }}>Previous Phase</button>
                <button className={styles.actionBtn}>Next Phase</button>

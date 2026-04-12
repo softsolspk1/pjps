@@ -25,21 +25,31 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
   const [messageContent, setMessageContent] = useState("");
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [doi, setDoi] = useState("");
+  const [files, setFiles] = useState<FileList | null>(null);
 
   const handleSendMessage = async () => {
-    if (!messageContent.trim()) return;
+    if (!messageContent.trim() && (!files || files.length === 0)) return;
     setMessaging(true);
     try {
+      const formData = new FormData();
+      formData.append("message", messageContent);
+      if (files) {
+        for (let i = 0; i < files.length; i++) {
+          formData.append("files", files[i]);
+        }
+      }
+
       const res = await fetch(`/api/admin/articles/${id}/message`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: messageContent })
+        body: formData
       });
       if (res.ok) {
         setMessage({ type: 'success', text: "Manuscript correspondence dispatched to the lead author." });
         setMessageContent("");
+        setFiles(null);
       } else {
-        throw new Error("Failed to dispatch correspondence.");
+        const data = await res.json();
+        throw new Error(data.error || "Failed to dispatch correspondence.");
       }
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message });
@@ -163,20 +173,24 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
             {article.abstract || "The author has not provided a summary abstract for this entry."}
           </div>
           
-          <div className={styles.downloadCard}>
-             <div className={styles.downloadIcon}>
-                <FileText size={24} />
-             </div>
-             <div className={styles.downloadText}>
-                <h4>
-                   {manuscriptMedia?.secureUrl?.endsWith('.zip') || manuscriptMedia?.secureUrl?.endsWith('.tex') ? 'Source (LaTeX/Archive)' : 'Scholarly Manuscript'}
-                </h4>
-                <p>Version {article.version || 1} • {new Date(manuscriptMedia?.createdAt || article.createdAt).toLocaleDateString()}</p>
-             </div>
-             {manuscriptMedia && (
-               <a href={manuscriptMedia.secureUrl} target="_blank" className={styles.downloadBtn}>Download Registry File</a>
-             )}
-          </div>
+              <div className={styles.downloadGrid}>
+                {article.media && article.media.length > 0 ? (
+                  article.media.map((media: any) => (
+                    <div key={media.id} className={styles.downloadCard}>
+                       <div className={styles.downloadIcon}>
+                          <FileText size={24} />
+                       </div>
+                       <div className={styles.downloadText}>
+                          <h4>{media.section?.replace(/_/g, ' ') || 'Associated File'}</h4>
+                          <p>Added {new Date(media.createdAt).toLocaleDateString()}</p>
+                       </div>
+                       <a href={media.secureUrl} target="_blank" className={styles.downloadBtn}>Download</a>
+                    </div>
+                  ))
+                ) : (
+                  <div className={styles.emptyMedia}>No supplementary files registered for this manuscript.</div>
+                )}
+              </div>
 
           <div style={{ marginTop: '30px', padding: '30px', backgroundColor: '#fcfdfe', borderRadius: '16px', border: '1px solid #edf2f7' }}>
              <h3 style={{ fontSize: '11px', fontWeight: 900, color: '#1a202c', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -287,25 +301,39 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
           <div className="mt-10 p-8 bg-white border border-slate-100 rounded-3xl shadow-sm">
              <h3 className={styles.subTitle}><MessageSquare size={18} /> Editorial Correspondence</h3>
              <div className="mt-6 space-y-6">
-                <textarea 
-                  className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500 min-h-[120px] transition-all"
-                  placeholder="Draft a scholarly communication to the lead author about this manuscript..."
-                  value={messageContent}
-                  onChange={(e) => setMessageContent(e.target.value)}
-                  disabled={messaging}
-                />
-                <div className="flex justify-between items-center">
-                   <div className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                      <ShieldCheck size={14} className="text-emerald-500" /> Secure Encryption Active
-                   </div>
-                   <button 
-                     onClick={handleSendMessage}
-                     disabled={messaging || !messageContent.trim()}
-                     className="bg-slate-900 hover:bg-black text-white px-6 py-2.5 rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 disabled:opacity-50 transition-all flex items-center gap-2"
-                   >
-                      {messaging ? <Loader2 className="animate-spin" size={14} /> : "Dispatch to Author"}
-                   </button>
-                </div>
+                 <div className="flex flex-col gap-4">
+                    <textarea 
+                      className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500 min-h-[120px] transition-all"
+                      placeholder="Draft a scholarly communication to the lead author about this manuscript..."
+                      value={messageContent}
+                      onChange={(e) => setMessageContent(e.target.value)}
+                      disabled={messaging}
+                    />
+                    <div className="flex items-center gap-3 p-4 bg-blue-50/30 border border-blue-100/50 rounded-2xl">
+                       <PlusCircle size={16} className="text-blue-500" />
+                       <div className="flex-1">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Add Attachments</label>
+                          <input 
+                            type="file" 
+                            multiple 
+                            onChange={(e) => setFiles(e.target.files)}
+                            className="text-[10px] font-bold text-slate-500 file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
+                          />
+                       </div>
+                    </div>
+                 </div>
+                 <div className="flex justify-between items-center mt-6">
+                    <div className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                       <ShieldCheck size={14} className="text-emerald-500" /> Secure Encryption Active
+                    </div>
+                    <button 
+                      onClick={handleSendMessage}
+                      disabled={messaging || (!messageContent.trim() && (!files || files.length === 0))}
+                      className="bg-slate-900 hover:bg-black text-white px-6 py-2.5 rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 disabled:opacity-50 transition-all flex items-center gap-2"
+                    >
+                       {messaging ? <Loader2 className="animate-spin" size={14} /> : "Dispatch to Author"}
+                    </button>
+                 </div>
              </div>
           </div>
 
