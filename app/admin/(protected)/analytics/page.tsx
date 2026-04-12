@@ -37,9 +37,9 @@ export default function AnalyticsPage() {
       csvContent += `${m.name},${m.count}\n`;
     });
     
-    csvContent += "\nTop Traffic Paths,Page Views\n";
-    data.topViews?.forEach((v: any) => {
-      csvContent += `${v.path},${v.count}\n`;
+    csvContent += "\nManuscript Status Distribution,Count\n";
+    data.statusDistribution?.forEach((s: any) => {
+      csvContent += `${s.status},${s._count.id}\n`;
     });
 
     const encodedUri = encodeURI(csvContent);
@@ -183,25 +183,25 @@ export default function AnalyticsPage() {
             </div>
          </div>
 
-         {/* Enhanced Traffic Hub */}
-         <div className="bg-slate-900 rounded-[32px] p-8 text-white shadow-2xl relative overflow-hidden">
+         {/* New Status Distribution Hub (Replacing Traffic Hub) */}
+         <div className="bg-slate-900 rounded-[32px] p-8 text-white shadow-2xl relative overflow-hidden flex flex-col">
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl"></div>
             
-            <div className="relative z-10">
+            <div className="relative z-10 flex flex-col h-full">
                <div className="flex justify-between items-center mb-10">
-                  <h3 className="text-sm font-black uppercase tracking-widest">Traffic Intel</h3>
-                  <Globe size={18} className="text-blue-400" />
+                  <h3 className="text-sm font-black uppercase tracking-widest">Status Registry</h3>
+                  <BarChart3 size={18} className="text-blue-400" />
                </div>
 
-               <div className="space-y-6">
-                  {data.topViews?.map((v: any, i: number) => {
-                    const maxCount = Math.max(...data.topViews.map((tv: any) => tv.count), 1);
-                    const percentage = (v.count / maxCount) * 100;
+               <div className="flex-1 space-y-6">
+                  {data.statusDistribution?.map((s: any, i: number) => {
+                    const totalArticles = data.articleCount || 1;
+                    const percentage = (s._count.id / totalArticles) * 100;
                     return (
                       <div key={i} className="space-y-3 group">
                          <div className="flex justify-between items-center">
-                            <code className="text-[10px] font-bold text-slate-400 tracking-tight group-hover:text-white transition-colors uppercase">{v.path}</code>
-                            <span className="text-[10px] font-black text-blue-400">{v.count} PV</span>
+                            <span className="text-[10px] font-bold text-slate-400 tracking-tight group-hover:text-white transition-colors uppercase">{s.status}</span>
+                            <span className="text-[10px] font-black text-blue-400">{s._count.id} ITEMS</span>
                          </div>
                          <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                             <div 
@@ -216,7 +216,7 @@ export default function AnalyticsPage() {
 
                <div className="mt-12 pt-8 border-t border-white/5">
                   <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] leading-relaxed">
-                     DATA SOVEREIGNTY SECURED VIA INSTITUTIONAL TRAFFIC REGISTRY. METRICS REFRESH ON GLOBAL PUBLICATION EVENTS.
+                     SYSTEMS SYNCED WITH SCHOLARLY LIFECYCLE EVENTS. UPDATES PERSIST TO THE GLOBAL REPOSITORY.
                   </p>
                </div>
             </div>

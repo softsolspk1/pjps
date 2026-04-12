@@ -122,6 +122,13 @@ export default function ReviewerInvitationsPage() {
                   </div>
 
                   <div className={styles.btnGroup}>
+                     <Link 
+                        href={`/reviewer/articles/${inv.articleId}`}
+                        className={styles.declineBtn}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'white', color: '#64748b', border: '1px solid #e2e8f0' }}
+                     >
+                        View Details
+                     </Link>
                      <button 
                         onClick={() => handleResponse(inv.id, 'ACCEPTED')}
                         className={styles.acceptBtn}

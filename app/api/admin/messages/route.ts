@@ -6,8 +6,9 @@ import { sendEmail } from "@/lib/mail";
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || (session.user as any).role !== "ADMIN") {
+    const session = await getServerSession(authOptions) as any;
+    const allowedRoles = ["ADMIN", "EDITOR", "EDITOR_IN_CHIEF", "ASSOCIATE_EDITOR"];
+    if (!session || !allowedRoles.includes(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

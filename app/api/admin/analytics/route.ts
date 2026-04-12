@@ -16,6 +16,7 @@ export async function GET() {
       acceptanceRate,
       reviewVelocity,
       submissionTrend,
+      statusDistribution,
       topViews
     ] = await Promise.all([
        prisma.article.count(),
@@ -25,6 +26,10 @@ export async function GET() {
        getAcceptanceRate(),
        getReviewVelocity(),
        getMonthlySubmissionTrend(),
+       prisma.article.groupBy({
+         by: ['status'],
+         _count: { id: true }
+       }),
        prisma.pageView.groupBy({
          by: ['path'],
          _count: { id: true },

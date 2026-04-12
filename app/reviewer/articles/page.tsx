@@ -123,12 +123,12 @@ export default function ReviewerArticlesPage() {
                   </div>
 
                   <div className={styles.actionArea}>
-                    {review.status === 'ACCEPTED' ? (
+                    {review.status !== 'COMPLETED' ? (
                        <Link 
                          href={`/reviewer/articles/${review.articleId}`}
                          className={styles.fillBtn}
                        >
-                         Fill Scorecard <ChevronRight size={18} />
+                         View & Evaluate <ChevronRight size={18} />
                        </Link>
                     ) : (
                        <div className={styles.completedBox}>
