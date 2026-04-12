@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Send, Users, Mail, UserCheck, Search, Filter, Sparkles, AlertCircle, ShieldCheck, Plus, X, Loader2 } from "lucide-react";
-import styles from "./MessagesUpgrade.module.css";
 import { Send, Mail, UserCheck, Search, Filter, Sparkles, AlertCircle, ShieldCheck, Plus, X, Loader2 } from "lucide-react";
+import styles from "./MessagesUpgrade.module.css";
 
 type FilterType = "ALL" | "AUTHORS" | "REVIEWERS" | "SPECIFIC";
 
