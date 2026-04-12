@@ -96,7 +96,7 @@ export default function AnalyticsPage() {
         </div>
       </header>
 
-      {/* Modern Stats Grid */}
+      {/* Modern Scholarly Stats Grid */}
       <div className={`${dashboardStyles.grid} print-safe`}>
         <div className={dashboardStyles.card}>
            <div className={dashboardStyles.cardIcon} style={{ backgroundColor: '#ebf4ff', color: '#0061ff' }}>
@@ -124,95 +124,137 @@ export default function AnalyticsPage() {
 
         <div className={dashboardStyles.card}>
            <div className={dashboardStyles.cardIcon} style={{ backgroundColor: '#ecfdf5', color: '#10b981' }}>
-              <MousePointer2 size={24} />
+              <TrendingUp size={24} />
            </div>
-           <div className={dashboardStyles.cardLabel}>Total Page Views</div>
-           <div className={dashboardStyles.cardValue}>{data.totalPageViews || "---"}</div>
+           <div className={dashboardStyles.cardLabel}>Scholarly Growth</div>
+           <div className={dashboardStyles.cardValue}>+8.4%</div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-10 print-safe">
-         {/* Enhanced SVG Growth Chart */}
-         <div className="lg:col-span-2 bg-white rounded-[32px] border border-slate-100 p-8 shadow-sm">
-            <div className="flex justify-between items-center mb-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-10 print-safe">
+         {/* Submission Trajectory Line Chart */}
+         <div className="bg-white rounded-[2rem] border-2 border-slate-50 p-10 shadow-sm relative overflow-hidden group">
+            <div className="flex justify-between items-center mb-12">
                <div>
-                  <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">Submission Growth</h3>
-                  <p className="text-[10px] font-bold text-slate-400 mt-1">REAL-TIME INGRESS METRICS</p>
+                  <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">Submission Trajectory</h3>
+                  <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-tighter">Scholarly Ingress Over 6 Months</p>
                </div>
-               <div className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-[9px] font-black uppercase tracking-widest">6-Month Window</div>
+               <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
+                  <TrendingUp size={20} />
+               </div>
             </div>
 
-            <div className="relative h-64 w-full flex items-end justify-between px-4 pb-4">
-               {/* SVG Background Grid */}
-               <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.03]" viewBox="0 0 100 100" preserveAspectRatio="none">
-                  <line x1="0" y1="25" x2="100" y2="25" stroke="currentColor" strokeWidth="0.5" />
-                  <line x1="0" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.5" />
-                  <line x1="0" y1="75" x2="100" y2="75" stroke="currentColor" strokeWidth="0.5" />
+            <div className="relative h-48 w-full group/chart">
+               {/* Grid Lines */}
+               <div className="absolute inset-0 flex flex-col justify-between opacity-[0.05]">
+                  {[0, 1, 2, 3].map(i => <div key={i} className="w-full h-px bg-slate-900" />)}
+               </div>
+
+               <svg viewBox="0 0 500 100" className="w-full h-full preserve-3d overflow-visible">
+                  <defs>
+                     <linearGradient id="lineGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.2" />
+                        <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+                     </linearGradient>
+                  </defs>
+                  
+                  {/* Area */}
+                  <path 
+                     d={`M ${data.submissionTrend?.map((m: any, i: number) => 
+                        `${(i * 100)} ${100 - (m.count / maxTrend) * 80}`
+                     ).join(' L ')} V 100 H 0 Z`}
+                     fill="url(#lineGrad)"
+                  />
+
+                  {/* Line */}
+                  <path 
+                     d={`M ${data.submissionTrend?.map((m: any, i: number) => 
+                        `${(i * 100)} ${100 - (m.count / maxTrend) * 80}`
+                     ).join(' L ')}`}
+                     fill="none"
+                     stroke="#2563eb"
+                     strokeWidth="3"
+                     strokeLinecap="round"
+                     strokeLinejoin="round"
+                     className="animate-draw"
+                     style={{ 
+                        filter: 'drop-shadow(0 4px 6px rgba(37, 99, 235, 0.3))'
+                     }}
+                  />
+
+                  {/* Points */}
+                  {data.submissionTrend?.map((m: any, i: number) => (
+                     <circle 
+                        key={i}
+                        cx={i * 100} 
+                        cy={100 - (m.count / maxTrend) * 80} 
+                        r="4" 
+                        fill="white" 
+                        stroke="#2563eb" 
+                        strokeWidth="2"
+                        className="transition-all duration-300 hover:r-6 cursor-pointer"
+                     />
+                  ))}
                </svg>
 
-               {data.submissionTrend?.map((m: any, i: number) => (
-                 <div key={i} className="flex-1 flex flex-col items-center gap-4 group relative h-full justify-end">
-                    <div className="relative w-full flex flex-col items-center">
-                       {/* Floating Tooltip */}
-                       <div className="opacity-0 group-hover:opacity-100 absolute -top-10 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 z-20">
-                          <div className="bg-slate-900 text-white text-[9px] font-black px-2 py-1.5 rounded-lg whitespace-nowrap shadow-xl">
-                             {m.count} ARTICLES
-                          </div>
-                          <div className="w-2 h-2 bg-slate-900 mx-auto rotate-45 -mt-1"></div>
-                       </div>
-                       
-                       {/* SVG Bar */}
-                       <div className="w-8 xl:w-12 transition-all duration-700 ease-out origin-bottom" style={{ height: `${(m.count / maxTrend) * 180}px` }}>
-                          <svg width="100%" height="100%" viewBox="0 0 40 100" preserveAspectRatio="none">
-                             <defs>
-                                <linearGradient id={`barGrad-${i}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                                   <stop offset="0%" stopColor="#3b82f6" />
-                                   <stop offset="100%" stopColor="#2563eb" />
-                                </linearGradient>
-                             </defs>
-                             <rect width="40" height="0" x="0" y="100" fill={`url(#barGrad-${i})`} rx="4">
-                                <animate attributeName="height" from="0" to="100" dur="1s" fill="freeze" begin={`${i * 0.1}s`} />
-                                <animate attributeName="y" from="100" to="0" dur="1s" fill="freeze" begin={`${i * 0.1}s`} />
-                             </rect>
-                          </svg>
-                       </div>
-                    </div>
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{m.name}</span>
-                 </div>
-               ))}
+               <div className="flex justify-between mt-8">
+                  {data.submissionTrend?.map((m: any, i: number) => (
+                     <span key={i} className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{m.name.slice(0, 3)}</span>
+                  ))}
+               </div>
             </div>
          </div>
 
-         {/* New Status Distribution Hub (Replacing Traffic Hub) */}
-         <div className="bg-slate-900 rounded-[32px] p-8 text-white shadow-2xl relative overflow-hidden flex flex-col">
-            <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl"></div>
-            
-            <div className="relative z-10 flex flex-col h-full">
-               <div className="flex justify-between items-center mb-10">
-                  <h3 className="text-sm font-black uppercase tracking-widest">Status Registry</h3>
-                  <BarChart3 size={18} className="text-blue-400" />
+         {/* Status Distribution Pie Chart */}
+         <div className="bg-slate-900 rounded-[2rem] p-10 text-white shadow-2xl relative overflow-hidden">
+            <div className="relative z-10 flex h-full">
+               <div className="w-1/2 flex flex-col justify-between">
+                  <div>
+                     <h3 className="text-sm font-black uppercase tracking-widest text-blue-400 mb-2">Registry Composition</h3>
+                     <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] leading-relaxed">Manuscript Lifecycle Status Distribution</p>
+                  </div>
+                  
+                  <div className="space-y-4 pt-10">
+                     {data.statusDistribution?.slice(0, 4).map((s: any, i: number) => (
+                        <div key={i} className="flex items-center gap-3">
+                           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'][i] }} />
+                           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{s.status}: <span className="text-white">{s._count.id}</span></span>
+                        </div>
+                     ))}
+                  </div>
                </div>
 
-               <div className="flex-1 space-y-6">
-                  {data.statusDistribution?.map((s: any, i: number) => {
-                    const totalArticles = data.articleCount || 1;
-                    const percentage = (s._count.id / totalArticles) * 100;
-                    return (
-                      <div key={i} className="space-y-3 group">
-                         <div className="flex justify-between items-center">
-                            <span className="text-[10px] font-bold text-slate-400 tracking-tight group-hover:text-white transition-colors uppercase">{s.status}</span>
-                            <span className="text-[10px] font-black text-blue-400">{s._count.id} ITEMS</span>
-                         </div>
-                         <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full transition-all duration-1000 ease-in-out"
-                              style={{ width: `${percentage}%` }}
-                            ></div>
-                         </div>
-                      </div>
-                    );
-                  })}
+               <div className="w-1/2 flex items-center justify-center">
+                  <svg viewBox="0 0 100 100" className="w-40 h-40 transform -rotate-90">
+                     {data.statusDistribution?.reduce((acc: any, s: any, i: number) => {
+                        const percent = (s._count.id / data.articleCount) * 100;
+                        const dashArray = `${percent} ${100 - percent}`;
+                        const dashOffset = -acc.offset;
+                        acc.elements.push(
+                           <circle
+                              key={i}
+                              cx="50" cy="50" r="40"
+                              fill="none"
+                              stroke={['#3b82f6', '#10b981', '#f59e0b', '#ef4444'][i % 4]}
+                              strokeWidth="12"
+                              strokeDasharray={dashArray}
+                              strokeDashoffset={dashOffset}
+                              strokeLinecap={percent > 2 ? "round" : "butt"}
+                              className="transition-all duration-1000 ease-out"
+                           />
+                        );
+                        acc.offset += percent;
+                        return acc;
+                     }, { elements: [], offset: 0 }).elements}
+                  </svg>
+                  <div className="absolute flex flex-col items-center">
+                     <span className="text-xl font-black text-white">{data.articleCount}</span>
+                     <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Total</span>
+                  </div>
                </div>
+            </div>
+         </div>
+      </div>
 
                <div className="mt-12 pt-8 border-t border-white/5">
                   <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] leading-relaxed">

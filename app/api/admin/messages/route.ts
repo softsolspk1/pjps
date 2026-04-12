@@ -45,9 +45,11 @@ export async function POST(req: Request) {
     }
 
     // Send emails (In a real app, this should be a background task)
+    console.log(`[Messaging] Dispatching scholarly communications to ${users.length} recipients...`);
+    
     const results = await Promise.all(
-      users.map((u) => 
-        sendEmail({
+      users.map(async (u) => {
+        const result = await sendEmail({
           to: u.email,
           subject,
           html: `
@@ -65,12 +67,22 @@ export async function POST(req: Request) {
             </div>
           `,
           attachments: attachments
-        })
-      )
+        });
+        
+        if (!result.success) {
+           console.error(`[Messaging] Failed to reach ${u.email}:`, result.error);
+        } else {
+           console.log(`[Messaging] Success: ${u.email} [ID: ${result.messageId}]`);
+        }
+        
+        return result;
+      })
     );
 
+    const successCount = results.filter(r => r.success).length;
+
     return NextResponse.json({ 
-      message: `Successfully dispatched ${results.filter(r => r.success).length} scholarly messages out of ${users.length}.`
+      message: `Successfully dispatched ${successCount} scholarly messages out of ${users.length}.`
     });
   } catch (err) {
     console.error("Messaging error:", err);

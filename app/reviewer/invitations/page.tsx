@@ -22,7 +22,7 @@ export default function ReviewerInvitationsPage() {
         const res = await fetch("/api/reviewer/assignments");
         const data = await res.json();
         const assignments = data.reviews || [];
-        setInvitations(assignments.filter((r: any) => r.status === 'INVITED'));
+        setInvitations(assignments.filter((r: any) => r.status === 'PENDING'));
       } catch (err) {
         console.error("Fetch error:", err);
       } finally {

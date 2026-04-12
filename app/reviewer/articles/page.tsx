@@ -23,7 +23,7 @@ export default function ReviewerArticlesPage() {
         const res = await fetch("/api/reviewer/assignments");
         const data = await res.json();
         const assignments = data.reviews || [];
-        setReviews(assignments.filter((r: any) => r.status !== 'INVITED'));
+        setReviews(assignments.filter((r: any) => r.status !== 'PENDING'));
       } catch (err) {
         console.error("Fetch error:", err);
       } finally {
