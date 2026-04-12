@@ -6,7 +6,7 @@ import {
   Search, FileText, CheckCircle, Clock, 
   AlertCircle, Loader2, ShieldCheck, 
   Info, ChevronRight, Globe,
-  Layers
+  Layers, MessageSquare
 } from "lucide-react";
 import RoleLayout from "@/components/RoleLayout";
 import HeaderWrapper from "@/components/HeaderWrapper";
