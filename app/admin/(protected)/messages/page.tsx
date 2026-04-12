@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Send, Users, Mail, UserCheck, Search, Filter, Sparkles, AlertCircle, ShieldCheck, Plus, X, Loader2 } from "lucide-react";
-import styles from "./Messages.module.css";
+import styles from "./MessagesUpgrade.module.css";
+import { Send, Mail, UserCheck, Search, Filter, Sparkles, AlertCircle, ShieldCheck, Plus, X, Loader2 } from "lucide-react";
 
 type FilterType = "ALL" | "AUTHORS" | "REVIEWERS" | "SPECIFIC";
 
@@ -17,7 +18,6 @@ export default function MessagesPage() {
   const [files, setFiles] = useState<FileList | null>(null);
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [userSearchText, setUserSearchText] = useState("");
-  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
 
   useEffect(() => {
     if (filter === "SPECIFIC") {
@@ -86,8 +86,8 @@ export default function MessagesPage() {
           <div className={styles.card}>
             <div className={styles.cardHeader}>
               <div className={styles.headerTitle}>
-                <Mail size={18} color="#60a5fa" />
-                <h2 style={{ fontWeight: 800, fontSize: '14px', letterSpacing: '0.02em' }}>Scholarly Draft Transmission</h2>
+                <Mail size={24} />
+                <h2 style={{ fontWeight: 800, fontSize: '1.25rem' }}>Scholarly Draft Transmission</h2>
               </div>
               <span className={styles.headerLabel}>Institutional Official</span>
             </div>
@@ -118,16 +118,16 @@ export default function MessagesPage() {
 
                <div className={styles.formGroup}>
                   <label className={styles.label}>Institutional Attachments</label>
-                  <div className="flex items-center gap-3 p-4 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl transition-all hover:bg-white hover:border-blue-300 group">
-                     <Plus size={20} className="text-slate-400 group-hover:text-blue-500" />
-                     <div className="flex-1">
+                  <div className={styles.uploadZone}>
+                     <Plus size={24} />
+                     <div style={{ flex: 1 }}>
                         <input 
                           type="file" 
                           multiple 
                           onChange={(e) => setFiles(e.target.files)}
-                          className="w-full text-[11px] font-bold text-slate-500 file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-slate-900 file:text-white hover:file:bg-black cursor-pointer"
+                          className={styles.fileInput}
                         />
-                        <p className="text-[9px] font-bold text-slate-400 uppercase mt-2 tracking-widest">PDF, DOCX, PNG or JPG (Max 10MB per file)</p>
+                        <p style={{ fontSize: '0.6rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', marginTop: '0.5rem', letterSpacing: '0.1em' }}>PDF, DOCX, PNG or JPG (Max 10MB per file)</p>
                      </div>
                   </div>
                </div>
@@ -138,15 +138,10 @@ export default function MessagesPage() {
                 className={styles.submitBtn}
               >
                 {sending ? (
-                   <div className={styles.loader}>
-                      <div className={styles.dot}></div>
-                      <div className={styles.dot}></div>
-                      <div className={styles.dot}></div>
-                      Finalizing Dispatch...
-                   </div>
+                  <Loader2 className="animate-spin" size={24} />
                 ) : (
                   <>
-                    <Send size={16} /> Finalize and Dispatch
+                    <Send size={20} /> Finalize and Dispatch
                   </>
                 )}
               </button>
@@ -157,14 +152,14 @@ export default function MessagesPage() {
         <div className={styles.sidebar}>
           <div className={styles.filterCard}>
              <h3 className={styles.filterHeader}>
-               <Filter size={14} color="#0061ff" /> Dispatch Target
+               <Filter size={18} /> Dispatch Target
              </h3>
 
              <div className={styles.filterList}>
                {[
-                 { id: "ALL", label: "Global Presence (All)", icon: Users },
-                 { id: "AUTHORS", label: "Scholarly Authors", icon: Search },
-                 { id: "REVIEWERS", label: "Reviewer Network", icon: UserCheck },
+                 { id: "ALL", label: "Global Presence (All)", icon: UserCheck },
+                 { id: "AUTHORS", label: "Scholarly Authors", icon: Send },
+                 { id: "REVIEWERS", label: "Reviewer Network", icon: ShieldCheck },
                  { id: "SPECIFIC", label: "Targeted Individual", icon: Mail },
                ].map((item) => (
                  <button 
@@ -173,8 +168,8 @@ export default function MessagesPage() {
                    onClick={() => setFilter(item.id as FilterType)}
                    className={`${styles.filterBtn} ${filter === item.id ? styles.filterBtnActive : ''}`}
                  >
-                   <item.icon size={16} className={styles.btnIcon} />
-                   <span className={styles.btnText}>{item.label}</span>
+                   <item.icon size={20} className={styles.btnIcon} />
+                   <span>{item.label}</span>
                  </button>
                ))}
              </div>
@@ -182,17 +177,17 @@ export default function MessagesPage() {
              {filter === "SPECIFIC" && (
                <div className={styles.specificGroup}>
                  <label className={styles.label}>Search Participant</label>
-                 <div className="relative">
+                 <div style={{ position: 'relative' }}>
                     <input 
                       type="text" 
                       value={userSearchText || specificEmail} 
                       onChange={(e) => setUserSearchText(e.target.value)}
                       placeholder="Search by name or email..."
                       className={styles.input}
-                      style={{ fontSize: '13px', padding: '12px 16px' }}
+                      style={{ fontSize: '0.9rem', padding: '1.25rem' }}
                     />
                     {userSearchText && (
-                       <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto">
+                       <div className={styles.resultsList}>
                           {filteredUsers.length > 0 ? (
                              filteredUsers.map(u => (
                                 <button 
@@ -202,22 +197,22 @@ export default function MessagesPage() {
                                      setSpecificEmail(u.email);
                                      setUserSearchText("");
                                   }}
-                                  className="w-full text-left px-4 py-3 hover:bg-slate-50 flex flex-col gap-0.5 border-bottom border-slate-100 last:border-0"
+                                  className={styles.resultItem}
                                 >
-                                   <span className="text-xs font-black text-slate-800">{u.name}</span>
-                                   <span className="text-[10px] font-bold text-slate-400">{u.email}</span>
+                                   <div style={{ fontSize: '0.8rem', fontWeight: 900, color: '#0f172a' }}>{u.name}</div>
+                                   <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b' }}>{u.email}</div>
                                 </button>
                              ))
                           ) : (
-                             <div className="p-4 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">No scholars found</div>
+                             <div style={{ padding: '2rem', textAlign: 'center', fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>No scholars found</div>
                           )}
                        </div>
                     )}
                  </div>
                  {specificEmail && !userSearchText && (
-                    <div className="mt-3 p-3 bg-blue-600 text-white rounded-xl flex items-center justify-between">
-                       <span className="text-[10px] font-black uppercase tracking-widest truncate">{specificEmail}</span>
-                       <button onClick={() => setSpecificEmail("")}><X size={14} /></button>
+                    <div className={styles.userBadge}>
+                       <span style={{ fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{specificEmail}</span>
+                       <button onClick={() => setSpecificEmail("")} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X size={16} /></button>
                     </div>
                  )}
                </div>
@@ -229,29 +224,20 @@ export default function MessagesPage() {
                </p>
              </div>
           </div>
-
-          <div className={styles.filterCard} style={{ backgroundColor: '#fcfdfe', border: '1px solid #edf2f7' }}>
-             <h4 style={{ fontSize: '11px', fontWeight: 900, color: '#1a202c', textTransform: 'uppercase', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ShieldCheck size={14} color="#0061ff" /> Data Sovereignty
-             </h4>
-             <p style={{ fontSize: '11px', color: '#718096', lineHeight: 1.6, fontWeight: 500 }}>
-                This channel utilizes the secure Softsols SMTP registry. Tracking is enabled for all institutional official correspondences.
-             </p>
-          </div>
         </div>
       </div>
 
       {result && (
         <div className={`${styles.toast} ${styles.toastSuccess}`}>
-          <Sparkles size={24} color="#34d399" />
-          <p style={{ fontWeight: 800, fontSize: '14px' }}>{result}</p>
+          <Sparkles size={24} />
+          <p>{result}</p>
         </div>
       )}
 
       {error && (
         <div className={`${styles.toast} ${styles.toastError}`}>
-          <AlertCircle size={24} color="#f87171" />
-          <p style={{ fontWeight: 800, fontSize: '14px' }}>{error}</p>
+          <AlertCircle size={24} />
+          <p>{error}</p>
         </div>
       )}
     </div>

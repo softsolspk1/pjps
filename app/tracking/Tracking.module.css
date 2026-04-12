@@ -404,3 +404,120 @@
   .searchForm { flex-direction: column; }
   .inputWrapper { min-width: 100%; }
 }
+
+/* Feedback Registry Styles */
+.feedbackSection {
+  background: white;
+  border-radius: 3rem;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-premium);
+  padding: 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  margin-top: 2rem;
+}
+
+.feedbackHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--bg-soft);
+  padding-bottom: 2rem;
+}
+
+.feedbackTitle {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--primary-navy);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.feedbackBadge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #1d4ed8;
+  background: #eff6ff;
+  padding: 0.5rem 1rem;
+  border-radius: 99px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.reviewGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+.reviewCard {
+  background: var(--bg-soft);
+  border-radius: 2rem;
+  padding: 2.5rem;
+  border: 2px solid transparent;
+  transition: var(--transition);
+}
+
+.reviewCard:hover {
+  background: white;
+  border-color: var(--accent-gold-soft);
+  box-shadow: var(--shadow-standard);
+  transform: translateY(-5px);
+}
+
+.reviewHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.refereeLabel {
+  font-size: 0.75rem;
+  font-weight: 900;
+  color: var(--primary-navy);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.recLabel {
+  font-size: 0.7rem;
+  font-weight: 900;
+  color: #059669;
+  background: #ecfdf5;
+  padding: 0.4rem 1.25rem;
+  border-radius: 2rem;
+  text-transform: uppercase;
+}
+
+.reviewContent {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--text-main);
+  font-style: italic;
+  padding: 2rem;
+  background: white;
+  border-radius: 1.5rem;
+  border-left: 5px solid var(--accent-gold);
+}
+
+.confidentialNotice {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #f8fafc;
+  border-radius: 1.5rem;
+  margin-top: 1rem;
+  border: 1px dashed var(--border-medium);
+}
+
+.noticeText {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  line-height: 1.5;
+}

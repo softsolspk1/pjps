@@ -12,7 +12,7 @@ import {
   ShieldCheck, Eye, Search,
   ChevronRight, ExternalLink, PlusCircle
 } from "lucide-react";
-import styles from "./Decision.module.css";
+import styles from "./DecisionUpgrade.module.css";
 
 export default function ArticleDecisionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -130,268 +130,215 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
     ? (article.reviews.reduce((acc: number, r: any) => acc + (r.originality + r.quality + r.importance + (r.rating || 0)) / 4, 0) / article.reviews.length).toFixed(1)
     : "N/A";
 
-  const manuscriptMedia = article.media?.find((m: any) => m.section === "MANUSCRIPT");
-
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <button onClick={() => router.back()} className={styles.backBtn}>
-          <ArrowLeft size={16} /> Registry View
-        </button>
-        <div className={styles.headerContent}>
+        <div className={styles.headerTop}>
+          <button onClick={() => router.back()} className={styles.backBtn}>
+            <ArrowLeft size={16} /> Registry View
+          </button>
           <div className={styles.titleBadge}>Scholarly Decision Hub</div>
-          <h1 className={styles.title}>{article.title}</h1>
-          <div className={styles.meta}>
-            <div className={styles.metaItem}><User size={14} /> {article.authors?.[0]?.name || "Lead Author"}</div>
-            <div className={styles.metaItem}><Calendar size={14} /> Registered {new Date(article.createdAt).toLocaleDateString()}</div>
-            <div className={`${styles.statusBadge} ${styles[article.status.toLowerCase()] || styles.pending}`}>
-               {article.status.replace('_', ' ')}
-            </div>
-            {article.version > 1 && (
-               <div className="flex items-center gap-2 bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
-                  Version {article.version}
-               </div>
-            )}
+        </div>
+        <h1 className={styles.title}>{article.title}</h1>
+        <div className={styles.meta}>
+          <div className={styles.metaItem}><User size={14} /> {article.submitter?.name || "Lead Author"}</div>
+          <div className={styles.metaItem}><Calendar size={14} /> Registered {new Date(article.createdAt).toLocaleDateString()}</div>
+          <div className={`${styles.statusBadge} ${styles[article.status.toLowerCase()] || styles.screening}`}>
+             {article.status.replace('_', ' ')}
           </div>
+          {article.version > 1 && (
+             <div style={{ background: '#2563eb', color: 'white', padding: '0.4rem 1rem', borderRadius: '2rem', fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                Version {article.version}
+             </div>
+          )}
         </div>
       </header>
 
       {message && (
-        <div className={`${styles.alert} ${styles[message.type]}`}>
-          {message.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
-          {message.text}
+        <div className={styles.messageRow}>
+           <div className={`${styles.alert} ${article.status === 'REJECTED' ? styles.reject : styles.accept}`} style={{ padding: '1.5rem', borderRadius: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+             {message.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
+             {message.text}
+           </div>
         </div>
       )}
 
       <div className={styles.workspace}>
         {/* Left Side: Manuscript Abstract & Content */}
-        <section className={styles.manuscriptSection}>
-          <div className={styles.sectionHeader}>
-            <FileText size={20} /> Manuscript Abstract
-          </div>
-          <div className={styles.abstractContent}>
-            {article.abstract || "The author has not provided a summary abstract for this entry."}
-          </div>
-          
-              <div className={styles.downloadGrid}>
-                {article.media && article.media.length > 0 ? (
-                  article.media.map((media: any) => (
-                    <div key={media.id} className={styles.downloadCard}>
-                       <div className={styles.downloadIcon}>
-                          <FileText size={24} />
-                       </div>
-                       <div className={styles.downloadText}>
-                          <h4>{media.section?.replace(/_/g, ' ') || 'Associated File'}</h4>
-                          <p>Added {new Date(media.createdAt).toLocaleDateString()}</p>
-                       </div>
-                       <a href={media.secureUrl} target="_blank" className={styles.downloadBtn}>Download</a>
-                    </div>
-                  ))
-                ) : (
-                  <div className={styles.emptyMedia}>No supplementary files registered for this manuscript.</div>
-                )}
-              </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+          <section className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <FileText size={20} /> Manuscript Abstract
+            </div>
+            <div className={styles.abstractContent}>
+              {article.abstract || "The author has not provided a summary abstract for this entry."}
+            </div>
+            
+            <div className={styles.downloadGrid}>
+              {article.media && article.media.length > 0 ? (
+                article.media.map((media: any) => (
+                  <div key={media.id} className={styles.downloadCard}>
+                     <div className={styles.downloadIcon}>
+                        <FileText size={24} />
+                     </div>
+                     <div className={styles.downloadText}>
+                        <h4>{media.section?.replace(/_/g, ' ') || 'Associated File'}</h4>
+                        <p>Added {new Date(media.createdAt).toLocaleDateString()}</p>
+                     </div>
+                     <a href={media.secureUrl} target="_blank" rel="noopener noreferrer" className={styles.downloadBtn}>View</a>
+                  </div>
+                ))
+              ) : (
+                <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase' }}>No supplementary files registered.</div>
+              )}
+            </div>
+          </section>
 
-          <div style={{ marginTop: '30px', padding: '30px', backgroundColor: '#fcfdfe', borderRadius: '16px', border: '1px solid #edf2f7' }}>
-             <h3 style={{ fontSize: '11px', fontWeight: 900, color: '#1a202c', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Award size={18} color="#0061ff" /> Academic Integrations
-             </h3>
-             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <section className={styles.section}>
+             <div className={styles.sectionHeader}>
+                <Award size={20} /> Academic Integration Metadata
+             </div>
+             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                 <div>
-                   <label style={{ fontSize: '10px', fontWeight: 800, color: '#a0aec0', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: '8px' }}>CrossRef DOI Identifier</label>
-                   <div style={{ display: 'flex', gap: '10px' }}>
+                   <label style={{ fontSize: '0.7rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem', display: 'block' }}>CrossRef DOI Identifier</label>
+                   <div style={{ display: 'flex', gap: '1rem' }}>
                       <input 
                         type="text" 
                         value={doi} 
                         onChange={(e) => setDoi(e.target.value)}
                         placeholder="10.36721/PJPS..."
-                        style={{ flex: 1, padding: '12px', backgroundColor: 'white', border: '1px solid #edf2f7', borderRadius: '10px', fontSize: '13px', fontWeight: 600 }}
+                        style={{ flex: 1, padding: '1.25rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '1.25rem', outline: 'none', fontWeight: 700 }}
                       />
-                      <button onClick={handleUpdateDoi} disabled={submitting} style={{ padding: '0 20px', backgroundColor: '#1a202c', color: 'white', border: 'none', borderRadius: '10px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', cursor: 'pointer' }}>Assign</button>
+                      <button onClick={handleUpdateDoi} disabled={submitting} style={{ background: '#0f172a', color: 'white', border: 'none', padding: '0 2rem', borderRadius: '1.25rem', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem', cursor: 'pointer' }}>Register</button>
                    </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                   <a href={`/api/admin/articles/${id}/export?format=xml`} download className={styles.exportBtn} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f7fafc', border: '1px solid #edf2f7', borderRadius: '10px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', color: '#4a5568', textDecoration: 'none' }}>
-                      Export JATS XML
-                   </a>
-                   <a href={`/api/admin/articles/${id}/export?format=json`} download className={styles.exportBtn} style={{ padding: '12px', textAlign: 'center', backgroundColor: '#f7fafc', border: '1px solid #edf2f7', borderRadius: '10px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', color: '#4a5568', textDecoration: 'none' }}>
-                      Export JSON
-                   </a>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                   <a href={`/api/admin/articles/${id}/export?format=xml`} download style={{ padding: '1.25rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '1.25rem', textDecoration: 'none', textAlign: 'center', fontSize: '0.7rem', fontWeight: 900, color: '#475569', textTransform: 'uppercase' }}>Export JATS XML</a>
+                   <a href={`/api/admin/articles/${id}/export?format=json`} download style={{ padding: '1.25rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '1.25rem', textDecoration: 'none', textAlign: 'center', fontSize: '0.7rem', fontWeight: 900, color: '#475569', textTransform: 'uppercase' }}>Export JSON Archive</a>
                 </div>
              </div>
-          </div>
-        </section>
+          </section>
+        </div>
 
         {/* Right Side: Peer Review Summary & Decision */}
-        <aside className={styles.decisionSection}>
-          <div className={styles.statsGrid}>
-             <div className={styles.statCard}>
-                <div className={styles.statLabel}>Expert Consistency</div>
-                <div className={styles.statValue}>{averageScore} / 10</div>
-                <TrendingUp size={16} className={styles.statIcon} />
-             </div>
-             <div className={styles.statCard}>
-                <div className={styles.statLabel}>Review Pool</div>
-                <div className={styles.statValue}>{article.reviews?.length || 0}</div>
-                <Award size={16} className={styles.statIcon} />
-             </div>
+        <aside style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+          <div>
+            <div className={styles.statsGrid}>
+               <div className={styles.statCard}>
+                  <div className={styles.statLabel}>Expert Consistency</div>
+                  <div className={styles.statValue}>{averageScore}</div>
+                  <TrendingUp size={20} className={styles.statIcon} />
+               </div>
+               <div className={styles.statCard}>
+                  <div className={styles.statLabel}>Review Pool</div>
+                  <div className={styles.statValue}>{article.reviews?.length || 0}</div>
+                  <Award size={20} className={styles.statIcon} />
+               </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+               <h3 className={styles.sectionHeader} style={{ fontSize: '1.1rem' }}><MessageSquare size={18} /> Review Scorecards</h3>
+               <Link 
+                 href={`/admin/articles/${id}/assign`}
+                 style={{ background: '#2563eb', color: 'white', padding: '0.75rem 1.25rem', borderRadius: '1.25rem', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', textDecoration: 'none', transition: '0.3s' }}
+               >
+                  Assign Expert
+               </Link>
+            </div>
+
+            {article.reviews?.length === 0 ? (
+              <div style={{ padding: '3rem', textAlign: 'center', background: '#f8fafc', borderRadius: '2rem', border: '1px dashed #cbd5e1', color: '#94a3b8', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase' }}>No expert reviews localized.</div>
+            ) : (
+              article.reviews.map((review: any) => (
+                <div key={review.id} className={styles.reviewItem}>
+                   <div className={styles.reviewHeader}>
+                      <span className={styles.reviewerName}>Expert Referee MS-#{review.id.slice(-4)}</span>
+                      <span className={styles.reviewRec}>{review.recommendation}</span>
+                   </div>
+                   
+                   <div className={styles.scoreBox}>
+                      <div className={styles.scoreItem}>
+                         <div className={styles.scoreItemLabel}>Orig</div>
+                         <div className={styles.scoreItemVal}>{review.originality}</div>
+                      </div>
+                      <div className={styles.scoreItem}>
+                         <div className={styles.scoreItemLabel}>Qual</div>
+                         <div className={styles.scoreItemVal}>{review.quality}</div>
+                      </div>
+                      <div className={styles.scoreItem}>
+                         <div className={styles.scoreItemLabel}>Impact</div>
+                         <div className={styles.scoreItemVal}>{review.importance}</div>
+                      </div>
+                      <div className={styles.scoreItem} style={{ background: '#eff6ff' }}>
+                         <div className={styles.scoreItemLabel} style={{ color: '#3b82f6' }}>Rating</div>
+                         <div className={styles.scoreItemVal} style={{ color: '#2563eb' }}>{review.rating || 0}</div>
+                      </div>
+                   </div>
+                   
+                   <div className={`${styles.feedbackPanel} ${styles.confidential}`}>
+                      <div className={styles.panelHeader}><ShieldCheck size={14} color="#ef4444" /> Executive Disclosure (Editorial Only)</div>
+                      <p className={styles.panelContent}>"{review.commentsToEditor || "No private remarks provided."}"</p>
+                   </div>
+
+                   <div className={`${styles.feedbackPanel} ${styles.public}`}>
+                      <div className={styles.panelHeader}><MessageSquare size={14} color="#2563eb" /> Public Recommendation (Author)</div>
+                      <p className={styles.panelContent}>"{review.commentsToAuthor || review.comments || "No author feedback provided."}"</p>
+                   </div>
+                </div>
+              ))
+            )}
           </div>
 
-          <div className={styles.reviewList}>
-             <div className="flex items-center justify-between mb-6">
-                <h3 className={styles.subTitle} style={{ marginBottom: 0 }}><MessageSquare size={18} /> Reviewer Scorecards</h3>
-                <Link 
-                  href={`/admin/articles/${id}/assign`}
-                  className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 transition-all shadow-lg active:scale-95"
+          <section className={styles.section} style={{ padding: '2.5rem' }}>
+             <h3 className={styles.sectionHeader} style={{ fontSize: '1.1rem' }}><MessageSquare size={18} /> Editorial Dispatch</h3>
+             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '1rem' }}>
+                <textarea 
+                  style={{ width: '100%', padding: '1.5rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '1.5rem', fontSize: '0.85rem', fontWeight: 700, minHeight: '120px', outline: 'none' }}
+                  placeholder="Draft a scholarly communication to the lead author..."
+                  value={messageContent}
+                  onChange={(e) => setMessageContent(e.target.value)}
+                  disabled={messaging}
+                />
+                <div style={{ padding: '1.5rem', background: '#eff6ff', borderRadius: '1.5rem', border: '1px solid #dbeafe' }}>
+                   <label style={{ fontSize: '0.6rem', fontWeight: 900, color: '#3b82f6', textTransform: 'uppercase', marginBottom: '0.75rem', display: 'block' }}>Manuscript Attachments</label>
+                   <input 
+                     type="file" 
+                     multiple 
+                     onChange={(e) => setFiles(e.target.files)}
+                     style={{ fontSize: '0.7rem', fontWeight: 700, color: '#1e40af' }}
+                   />
+                </div>
+                <button 
+                  onClick={handleSendMessage}
+                  disabled={messaging || (!messageContent.trim() && (!files || files.length === 0))}
+                  className={styles.actionBtn}
+                  style={{ background: '#0f172a', padding: '1.25rem' }}
                 >
-                   <PlusCircle size={14} /> Assign Expert
-                </Link>
+                   {messaging ? <Loader2 className="animate-spin" size={16} /> : "Dispatch Correspondence"}
+                </button>
              </div>
-             {article.reviews?.length === 0 ? (
-               <div className={styles.emptyReviews}>No expert reviews have been submitted for this stage.</div>
-             ) : (
-               article.reviews.map((review: any) => (
-                 <div key={review.id} className={styles.reviewItem}>
-                    <div className={styles.reviewHeader}>
-                       <span className={styles.reviewerName}>Expert Referee</span>
-                       <span className={styles.reviewRec}>{review.recommendation}</span>
-                    </div>
-                    <div className="mt-4 mb-4 grid grid-cols-4 gap-2">
-                       <div className="text-center p-2 bg-slate-50 rounded-lg">
-                          <p className="text-[8px] font-black text-slate-400 uppercase">Orig</p>
-                          <p className="text-xs font-bold text-slate-700">{review.originality}</p>
-                       </div>
-                       <div className="text-center p-2 bg-slate-50 rounded-lg">
-                          <p className="text-[8px] font-black text-slate-400 uppercase">Qual</p>
-                          <p className="text-xs font-bold text-slate-700">{review.quality}</p>
-                       </div>
-                       <div className="text-center p-2 bg-slate-50 rounded-lg">
-                          <p className="text-[8px] font-black text-slate-400 uppercase">Sign</p>
-                          <p className="text-xs font-bold text-slate-700">{review.importance}</p>
-                       </div>
-                       <div className="text-center p-2 bg-blue-50 rounded-lg">
-                          <p className="text-[8px] font-black text-blue-400 uppercase">Rate</p>
-                          <p className="text-xs font-bold text-blue-700">{review.rating || 0}</p>
-                       </div>
-                    </div>
-                    
-                    {/* Private Comments for Editors */}
-                    <div className="bg-slate-900/5 p-4 rounded-xl mb-4 border border-slate-200/50">
-                       <div className="flex items-center gap-2 mb-2 text-slate-500">
-                          <ShieldCheck size={12} />
-                          <span className="text-[9px] font-black uppercase tracking-widest">Confidential (Editor Only)</span>
-                       </div>
-                       <p className="text-xs italic text-slate-600">"{review.commentsToEditor || "No private remarks provided."}"</p>
-                    </div>
+          </section>
 
-                    {/* Author Feedback */}
-                    <div className="p-4 bg-blue-50/20 rounded-xl border border-blue-100/50">
-                       <div className="flex items-center gap-2 mb-2 text-blue-500">
-                          <MessageSquare size={12} />
-                          <span className="text-[9px] font-black uppercase tracking-widest">Public Feedback</span>
-                       </div>
-                       <p className="text-xs text-slate-700">"{review.commentsToAuthor || review.comments || "No author feedback provided."}"</p>
-                    </div>
-                 </div>
-               ))
-             )}
-          </div>
-
-          {/* Editorial Correspondence */}
-          <div className="mt-10 p-8 bg-white border border-slate-100 rounded-3xl shadow-sm">
-             <h3 className={styles.subTitle}><MessageSquare size={18} /> Editorial Correspondence</h3>
-             <div className="mt-6 space-y-6">
-                 <div className="flex flex-col gap-4">
-                    <textarea 
-                      className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500 min-h-[120px] transition-all"
-                      placeholder="Draft a scholarly communication to the lead author about this manuscript..."
-                      value={messageContent}
-                      onChange={(e) => setMessageContent(e.target.value)}
-                      disabled={messaging}
-                    />
-                    <div className="flex items-center gap-3 p-4 bg-blue-50/30 border border-blue-100/50 rounded-2xl">
-                       <PlusCircle size={16} className="text-blue-500" />
-                       <div className="flex-1">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Add Attachments</label>
-                          <input 
-                            type="file" 
-                            multiple 
-                            onChange={(e) => setFiles(e.target.files)}
-                            className="text-[10px] font-bold text-slate-500 file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
-                          />
-                       </div>
-                    </div>
-                 </div>
-                 <div className="flex justify-between items-center mt-6">
-                    <div className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                       <ShieldCheck size={14} className="text-emerald-500" /> Secure Encryption Active
-                    </div>
-                    <button 
-                      onClick={handleSendMessage}
-                      disabled={messaging || (!messageContent.trim() && (!files || files.length === 0))}
-                      className="bg-slate-900 hover:bg-black text-white px-6 py-2.5 rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 disabled:opacity-50 transition-all flex items-center gap-2"
-                    >
-                       {messaging ? <Loader2 className="animate-spin" size={14} /> : "Dispatch to Author"}
-                    </button>
-                 </div>
-             </div>
-          </div>
-
-          <div className={styles.decisionActions}>
-             <h3 className={styles.subTitle}><CheckCircle size={18} /> Editorial Workflow Control</h3>
+          <section className={styles.section} style={{ padding: '2.5rem' }}>
+             <h3 className={styles.sectionHeader} style={{ fontSize: '1.1rem' }}><CheckCircle size={18} /> Workflow Control</h3>
              
-             {article.status === "SCREENING" && (
-                <div className="mb-6">
+             <div className={styles.actionGrid}>
+                {article.status === "SCREENING" && (
                    <button 
                      onClick={() => handleDecision("UNDER_REVIEW")}
                      disabled={submitting}
-                     className="w-full bg-blue-600 hover:bg-blue-700 text-white p-5 rounded-2xl font-black uppercase text-xs tracking-widest flex items-center justify-center gap-3 transition-all shadow-xl active:scale-95"
+                     className={styles.actionBtn}
+                     style={{ background: '#2563eb', marginBottom: '1rem' }}
                    >
-                     <Search size={18} /> Initiate Peer Review
+                     Initiate Peer Review
                    </button>
-                   <p className="text-[10px] text-center text-slate-400 font-bold uppercase mt-3 tracking-widest">Manuscript has passed criteria screening</p>
-                </div>
-             )}
+                )}
 
-             <div className={styles.actionGrid}>
-                <button 
-                  onClick={() => handleDecision("ACCEPTED")}
-                  disabled={submitting}
-                  className={`${styles.actionBtn} ${styles.accept}`}
-                >
-                  <CheckCircle size={18} /> Accept
-                </button>
-                <button 
-                  onClick={() => handleDecision("REVISION")}
-                  disabled={submitting}
-                  className={`${styles.actionBtn} ${styles.revision}`}
-                >
-                  <RotateCcw size={18} /> Request Revision
-                </button>
-                <button 
-                  onClick={() => handleDecision("REJECTED")}
-                  disabled={submitting}
-                  className={`${styles.actionBtn} ${styles.reject}`}
-                >
-                  <XCircle size={18} /> Reject
-                </button>
+                <button onClick={() => handleDecision("ACCEPTED")} disabled={submitting} className={`${styles.actionBtn} ${styles.accept}`}>Accept Manuscript</button>
+                <button onClick={() => handleDecision("REVISION")} disabled={submitting} className={`${styles.actionBtn} ${styles.revision}`}>Request Revision</button>
+                <button onClick={() => handleDecision("REJECTED")} disabled={submitting} className={`${styles.actionBtn} ${styles.reject}`}>Reject Manuscript</button>
              </div>
-             
-             {article.status === "REVISION" && (
-                <div className="mt-8 p-6 bg-slate-900 rounded-3xl text-white">
-                   <div className="flex items-center gap-3 mb-4">
-                      <RotateCcw size={18} className="text-blue-400" />
-                      <h4 className="text-xs font-black uppercase tracking-widest">Awaiting Author Revision</h4>
-                   </div>
-                   <p className="text-xs text-slate-400 mb-6 leading-relaxed">The author must upload a revised manuscript (v{article.version + 1}) through their dashboard to proceed.</p>
-                   {/* Simplified deep link to the submission portal for the author if they were here */}
-                   <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
-                      <Info size={14} className="text-blue-400" />
-                      <span className="text-[10px] font-bold text-slate-300">Revision link issued to ${article.submitter?.email || "Author"}</span>
-                   </div>
-                </div>
-             )}
-          </div>
+          </section>
         </aside>
       </div>
     </div>

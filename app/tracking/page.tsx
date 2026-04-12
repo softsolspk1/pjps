@@ -173,6 +173,47 @@ export default function TrackingPage() {
                  })}
               </div>
            </div>
+
+           {/* Review Feedback Registry (Visible once review cycle has started or completed) */}
+           {article.reviews && article.reviews.length > 0 && (
+              <div className={styles.feedbackSection}>
+                 <div className={styles.feedbackHeader}>
+                    <h3 className={styles.feedbackTitle}><MessageSquare size={24} color="#0061ff" /> Scholarly Feedback Registry</h3>
+                    <div className={styles.feedbackBadge}>Authenticated Peer Reports</div>
+                 </div>
+
+                 <div className={styles.reviewGrid}>
+                    {article.reviews
+                      .filter((r: any) => r.status === 'COMPLETED' || r.commentsToAuthor)
+                      .map((review: any, idx: number) => (
+                        <div key={review.id} className={styles.reviewCard}>
+                           <div className={styles.reviewHead}>
+                              <div className={styles.refereeLabel}>Expert Referee #0{idx + 1} Assessment</div>
+                              <div className={styles.recLabel}>{review.recommendation}</div>
+                           </div>
+                           <div className={styles.reviewContent}>
+                              "{review.commentsToAuthor || "No specific feedback provided by this referee."}"
+                           </div>
+                           <div className="mt-6 flex items-center justify-between">
+                              <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                                Date Logged: {new Date(review.createdAt).toLocaleDateString()}
+                              </div>
+                              <div className="flex items-center gap-2 text-[9px] font-black text-emerald-600 uppercase tracking-widest">
+                                 <ShieldCheck size={12} /> Verified Report
+                              </div>
+                           </div>
+                        </div>
+                      ))}
+                 </div>
+
+                 <div className={styles.confidentialNotice}>
+                    <Info size={20} className="text-blue-500" />
+                    <p className={styles.noticeText}>
+                       Referees provide these assessments to improve scholarly rigor. These remarks are de-identified to maintain peer-review integrity. Direct correspondence with referees is restricted by institutional protocol.
+                    </p>
+                 </div>
+              </div>
+           )}
         </div>
       ) : !loading && (
         <div className={styles.emptyState}>

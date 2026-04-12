@@ -22,7 +22,15 @@ export async function GET(req: Request) {
         createdAt: true,
         submissionType: true,
         abstract: true,
-        // We can add more fields if needed by the UI
+        reviews: {
+          select: {
+            id: true,
+            recommendation: true,
+            commentsToAuthor: true,
+            createdAt: true,
+            status: true
+          }
+        }
       }
     });
 
