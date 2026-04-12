@@ -21,9 +21,12 @@ export async function POST(req: Request) {
       recommendation 
     } = await req.json();
 
+    const userId = (session.user as any).id;
+    const userEmail = session.user.email;
+
     const user = await prisma.user.findUnique({
-      where: { id: (session.user as any).id! }
-    } as any);
+      where: userId ? { id: userId } : { email: userEmail! }
+    });
 
     if (!user || user.role !== "REVIEWER") {
       return NextResponse.json({ error: "Unauthorized role" }, { status: 403 });

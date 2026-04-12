@@ -22,6 +22,7 @@ export async function GET(
           select: { name: true, email: true }
         },
         authors: true,
+        media: true,
         reviews: {
           include: {
             reviewer: {
