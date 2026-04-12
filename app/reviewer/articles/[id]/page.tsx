@@ -195,16 +195,18 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
                      </div>
                   </div>
                   
-                  {manuscriptMedia && (
+                  {article?.media?.map((m: any, index: number) => (
                      <a 
-                        href={manuscriptMedia.secureUrl} 
+                        key={m.id || index}
+                        href={m.secureUrl} 
                         target="_blank" 
                         rel="noopener noreferrer" 
                         className={styles.downloadBtn}
+                        style={{ marginBottom: '0.5rem' }}
                      >
-                        <Download size={18} /> Download PDF
+                        <Download size={18} /> {m.section?.replace('_', ' ') || 'Document'} {index + 1}
                      </a>
-                  )}
+                  ))}
 
                   <div className={styles.deadlineBox}>
                      <div className={styles.deadlineHeader}>

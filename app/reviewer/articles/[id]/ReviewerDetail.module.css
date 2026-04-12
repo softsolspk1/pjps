@@ -411,9 +411,9 @@
 }
 
 .confidentialTextarea {
-  background: #0f172a;
-  color: #e2e8f0;
-  border-color: #1e293b;
+  background: white;
+  color: var(--text-main);
+  border-color: var(--border-medium);
 }
 
 /* Recommendation System */
