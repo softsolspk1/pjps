@@ -256,13 +256,10 @@ export default function AnalyticsPage() {
          </div>
       </div>
 
-               <div className="mt-12 pt-8 border-t border-white/5">
-                  <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] leading-relaxed">
-                     SYSTEMS SYNCED WITH SCHOLARLY LIFECYCLE EVENTS. UPDATES PERSIST TO THE GLOBAL REPOSITORY.
-                  </p>
-               </div>
-            </div>
-         </div>
+      <div className="mt-12 pt-8 border-t border-slate-100 no-print">
+         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] leading-relaxed text-center">
+            SYSTEMS SYNCED WITH SCHOLARLY LIFECYCLE EVENTS. UPDATES PERSIST TO THE GLOBAL REPOSITORY.
+         </p>
       </div>
     </div>
   );
