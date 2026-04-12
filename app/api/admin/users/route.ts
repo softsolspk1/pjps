@@ -8,7 +8,8 @@ import { sendEmail } from "@/lib/mail";
 export async function GET() {
   try {
     const session = await getServerSession(authOptions) as any;
-    if (!session || !["ADMIN", "EDITOR"].includes(session.user.role)) {
+    const allowedRoles = ["ADMIN", "EDITOR", "EDITOR_IN_CHIEF", "ASSOCIATE_EDITOR"];
+    if (!session || !allowedRoles.includes(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

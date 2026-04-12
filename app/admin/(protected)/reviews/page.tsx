@@ -9,6 +9,7 @@ import {
   AlertTriangle
 } from "lucide-react";
 import { format } from "date-fns";
+import Link from "next/link";
 import styles from "./Reviews.module.css";
 
 export default async function ReviewPoolPage() {
@@ -109,9 +110,9 @@ export default async function ReviewPoolPage() {
                 </td>
                 <td>
                   <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                     <button className={styles.actionBtn} title="View Scholarly Review Detail">
+                     <Link href={`/admin/articles/${review.articleId}`} className={styles.actionBtn} title="View Scholarly Review Detail">
                         <ClipboardCheck size={16} />
-                     </button>
+                     </Link>
                   </div>
                 </td>
               </tr>

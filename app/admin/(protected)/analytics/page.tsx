@@ -6,7 +6,7 @@ import dashboardStyles from "../dashboard/DashboardModern.module.css";
 import { 
   BarChart3, TrendingUp, Download, 
   Calendar, FileText, Users, Globe, 
-  Percent, Zap, MousePointer2 
+  Percent, Zap, MousePointer2, Loader2
 } from "lucide-react";
 
 export default function AnalyticsPage() {
@@ -22,40 +22,82 @@ export default function AnalyticsPage() {
       });
   }, []);
 
-  const handleExport = () => {
+  const handleExportCSV = () => {
     if (!data) return;
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `PJPS_Intelligence_Report_${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Metric,Value\n";
+    csvContent += `Manuscripts Registry,${data.articleCount}\n`;
+    csvContent += `Acceptance Rate,${data.acceptanceRate}\n`;
+    csvContent += `Avg. Review Velocity,${data.reviewVelocity}\n`;
+    csvContent += `Total Page Views,${data.totalPageViews || 0}\n\n`;
+    
+    csvContent += "Submission Trend (Month),Submissions\n";
+    data.submissionTrend?.forEach((m: any) => {
+      csvContent += `${m.name},${m.count}\n`;
+    });
+    
+    csvContent += "\nTop Traffic Paths,Page Views\n";
+    data.topViews?.forEach((v: any) => {
+      csvContent += `${v.path},${v.count}\n`;
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `PJPS_Analytics_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
-  if (loading) return <div className="p-10 text-center font-bold animate-pulse text-slate-400">ANALYTICS ENGINE INITIALIZING...</div>;
+  const handlePrintPDF = () => {
+    window.print();
+  };
+
+  if (loading) return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-6">
+       <Loader2 size={48} className="text-blue-600 animate-spin" />
+       <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] animate-pulse">Initializing Scholarly Intelligence Engine</p>
+    </div>
+  );
+
+  const maxTrend = Math.max(...(data.submissionTrend?.map((st: any) => st.count) || [1]), 1);
 
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
+    <div className={`${styles.container} print:p-0`}>
+      {/* Print Styles */}
+      <style jsx global>{`
+        @media print {
+          nav, aside, header, .no-print, .actions { display: none !important; }
+          body, html { background: white !important; }
+          .print-safe { width: 100% !important; margin: 0 !important; padding: 0 !important; }
+        }
+      `}</style>
+
+      <header className={`${styles.header} no-print`}>
         <div className={styles.titleGroup}>
-           <p>Performance & Impact Intelligence</p>
-           <h1>Platform Analytics</h1>
+           <p className="font-black text-blue-600 tracking-widest text-[10px] uppercase mb-1">Performance & Impact Intelligence</p>
+           <h1 className="text-3xl font-black text-slate-900 tracking-tight">Platform Analytics</h1>
         </div>
-        <div className={styles.actions}>
+        <div className="flex gap-3">
            <button 
-             onClick={handleExport}
-             className="bg-slate-900 hover:bg-black text-white px-6 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 transition-all active:scale-95 shadow-lg"
+             onClick={handleExportCSV}
+             className="bg-white border-2 border-slate-100 hover:border-blue-200 text-slate-800 px-5 py-2.5 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 transition-all active:scale-95 shadow-sm"
            >
-             <Download size={16} /> Export Intelligence Report
+             <TrendingUp size={14} className="text-blue-500" /> Excel Export
+           </button>
+           <button 
+             onClick={handlePrintPDF}
+             className="bg-slate-900 hover:bg-black text-white px-6 py-2.5 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 transition-all active:scale-95 shadow-lg"
+           >
+             <Download size={14} /> PDF Report
            </button>
         </div>
       </header>
 
       {/* Modern Stats Grid */}
-      <div className={dashboardStyles.grid}>
+      <div className={`${dashboardStyles.grid} print-safe`}>
         <div className={dashboardStyles.card}>
            <div className={dashboardStyles.cardIcon} style={{ backgroundColor: '#ebf4ff', color: '#0061ff' }}>
               <FileText size={24} />
@@ -76,7 +118,7 @@ export default function AnalyticsPage() {
            <div className={dashboardStyles.cardIcon} style={{ backgroundColor: '#fff7ed', color: '#f59e0b' }}>
               <Zap size={24} />
            </div>
-           <div className={dashboardStyles.cardLabel}>Avg. Review velocity</div>
+           <div className={dashboardStyles.cardLabel}>Avg. Review Velocity</div>
            <div className={dashboardStyles.cardValue}>{data.reviewVelocity}</div>
         </div>
 
@@ -89,59 +131,94 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '30px', marginTop: '40px' }}>
-         <div className={dashboardStyles.wideCard} style={{ background: 'linear-gradient(to bottom, white, #f8fafc)' }}>
-            <div className={dashboardStyles.wideCardTitle}>
-               Submission Growth & Trends
-               <span className={dashboardStyles.historyLink} style={{ marginLeft: 'auto' }}>6-MONTH WINDOW</span>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-10 print-safe">
+         {/* Enhanced SVG Growth Chart */}
+         <div className="lg:col-span-2 bg-white rounded-[32px] border border-slate-100 p-8 shadow-sm">
+            <div className="flex justify-between items-center mb-10">
+               <div>
+                  <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">Submission Growth</h3>
+                  <p className="text-[10px] font-bold text-slate-400 mt-1">REAL-TIME INGRESS METRICS</p>
+               </div>
+               <div className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-[9px] font-black uppercase tracking-widest">6-Month Window</div>
             </div>
-            <div className="flex items-end gap-3 h-56 mt-10 p-6 border-b border-slate-100">
+
+            <div className="relative h-64 w-full flex items-end justify-between px-4 pb-4">
+               {/* SVG Background Grid */}
+               <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.03]" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  <line x1="0" y1="25" x2="100" y2="25" stroke="currentColor" strokeWidth="0.5" />
+                  <line x1="0" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.5" />
+                  <line x1="0" y1="75" x2="100" y2="75" stroke="currentColor" strokeWidth="0.5" />
+               </svg>
+
                {data.submissionTrend?.map((m: any, i: number) => (
-                 <div key={i} className="flex-1 flex flex-col items-center gap-3 group">
+                 <div key={i} className="flex-1 flex flex-col items-center gap-4 group relative h-full justify-end">
                     <div className="relative w-full flex flex-col items-center">
-                       <span className="opacity-0 group-hover:opacity-100 absolute -top-8 bg-slate-900 text-white text-[10px] font-black px-2 py-1 rounded shadow-xl transition-all">
-                          {m.count}
-                       </span>
-                       <div 
-                         className="w-full bg-gradient-to-t from-blue-600 to-blue-400 rounded-lg transition-all group-hover:from-blue-700 group-hover:to-blue-500 shadow-sm" 
-                         style={{ height: `${(m.count / Math.max(...data.submissionTrend.map((st: any) => st.count), 1)) * 140}px`, minHeight: '4px' }}
-                       ></div>
+                       {/* Floating Tooltip */}
+                       <div className="opacity-0 group-hover:opacity-100 absolute -top-10 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 z-20">
+                          <div className="bg-slate-900 text-white text-[9px] font-black px-2 py-1.5 rounded-lg whitespace-nowrap shadow-xl">
+                             {m.count} ARTICLES
+                          </div>
+                          <div className="w-2 h-2 bg-slate-900 mx-auto rotate-45 -mt-1"></div>
+                       </div>
+                       
+                       {/* SVG Bar */}
+                       <div className="w-8 xl:w-12 transition-all duration-700 ease-out origin-bottom" style={{ height: `${(m.count / maxTrend) * 180}px` }}>
+                          <svg width="100%" height="100%" viewBox="0 0 40 100" preserveAspectRatio="none">
+                             <defs>
+                                <linearGradient id={`barGrad-${i}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                                   <stop offset="0%" stopColor="#3b82f6" />
+                                   <stop offset="100%" stopColor="#2563eb" />
+                                </linearGradient>
+                             </defs>
+                             <rect width="40" height="0" x="0" y="100" fill={`url(#barGrad-${i})`} rx="4">
+                                <animate attributeName="height" from="0" to="100" dur="1s" fill="freeze" begin={`${i * 0.1}s`} />
+                                <animate attributeName="y" from="100" to="0" dur="1s" fill="freeze" begin={`${i * 0.1}s`} />
+                             </rect>
+                          </svg>
+                       </div>
                     </div>
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{m.name}</span>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{m.name}</span>
                  </div>
                ))}
-               {(!data.submissionTrend || data.submissionTrend.length === 0) && (
-                 <div className="w-full text-center text-slate-300 font-bold italic py-20">NO TREND DATA AVAILABLE YET</div>
-               )}
             </div>
          </div>
 
-         <div className={dashboardStyles.wideCard}>
-            <div className={dashboardStyles.wideCardTitle}>
-               Traffic Analytics
-               <span className={dashboardStyles.historyLink} style={{ marginLeft: 'auto' }}>TOP ENTRIES</span>
-            </div>
-            <div className="mt-8 space-y-5">
-               {data.topViews?.map((v: any, i: number) => {
-                 const maxCount = Math.max(...data.topViews.map((tv: any) => tv.count), 1);
-                 return (
-                   <div key={i} className="space-y-2">
-                      <div className="flex justify-between items-center px-1">
-                         <code className="text-[10px] font-black text-slate-500 tracking-tight">{v.path}</code>
-                         <span className="text-[10px] font-black text-blue-600 uppercase">{v.count} PV</span>
+         {/* Enhanced Traffic Hub */}
+         <div className="bg-slate-900 rounded-[32px] p-8 text-white shadow-2xl relative overflow-hidden">
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl"></div>
+            
+            <div className="relative z-10">
+               <div className="flex justify-between items-center mb-10">
+                  <h3 className="text-sm font-black uppercase tracking-widest">Traffic Intel</h3>
+                  <Globe size={18} className="text-blue-400" />
+               </div>
+
+               <div className="space-y-6">
+                  {data.topViews?.map((v: any, i: number) => {
+                    const maxCount = Math.max(...data.topViews.map((tv: any) => tv.count), 1);
+                    const percentage = (v.count / maxCount) * 100;
+                    return (
+                      <div key={i} className="space-y-3 group">
+                         <div className="flex justify-between items-center">
+                            <code className="text-[10px] font-bold text-slate-400 tracking-tight group-hover:text-white transition-colors uppercase">{v.path}</code>
+                            <span className="text-[10px] font-black text-blue-400">{v.count} PV</span>
+                         </div>
+                         <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full transition-all duration-1000 ease-in-out"
+                              style={{ width: `${percentage}%` }}
+                            ></div>
+                         </div>
                       </div>
-                      <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                         <div 
-                           className="h-full bg-blue-500 rounded-full transition-all duration-1000"
-                           style={{ width: `${(v.count / maxCount) * 100}%` }}
-                         ></div>
-                      </div>
-                   </div>
-                 );
-               })}
-               {(!data.topViews || data.topViews.length === 0) && (
-                 <div className="text-center text-slate-300 font-bold italic py-10">INITIALIZING TRAFFIC AGGREGATOR...</div>
-               )}
+                    );
+                  })}
+               </div>
+
+               <div className="mt-12 pt-8 border-t border-white/5">
+                  <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] leading-relaxed">
+                     DATA SOVEREIGNTY SECURED VIA INSTITUTIONAL TRAFFIC REGISTRY. METRICS REFRESH ON GLOBAL PUBLICATION EVENTS.
+                  </p>
+               </div>
             </div>
          </div>
       </div>
