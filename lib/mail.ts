@@ -26,9 +26,10 @@ export const renderEmail = (title: string, content: string) => `
       </div>
     </div>
     <div style="background-color: #f8fafc; padding: 30px; text-align: center; border-top: 1px solid #e2e8f0;">
-      <p style="margin: 0; font-size: 12px; color: #64748b; font-weight: bold;">OFFICIAL SCHOLARLY COMMUNICATION</p>
-      <p style="margin: 5px 0 0 0; font-size: 11px; color: #94a3b8;">
-        &copy; ${new Date().getFullYear()} Pakistan Journal of Pharmaceutical Sciences. All rights reserved.
+      <p style="margin: 0; font-size: 12px; color: #64748b; font-weight: bold;">OFFICIAL PJPS COMMUNICATION</p>
+      <p style="margin: 5px 0; font-size: 11px; color: #94a3b8;">
+        &copy; ${new Date().getFullYear()} Pakistan Journal of Pharmaceutical Sciences. All rights reserved.<br/>
+        Developed by <a href="https://softsols.pk/" style="color: #002d5e; text-decoration: none; font-weight: bold;">Softsols Pakistan</a>
       </p>
     </div>
   </div>

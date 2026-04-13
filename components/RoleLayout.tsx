@@ -86,7 +86,7 @@ export default function RoleLayout({ children, role }: { children: ReactNode, ro
             {/* Footer */}
             <footer style={{ padding: '40px', borderTop: '1px solid #edf2f7', textAlign: 'center' }}>
                 <p style={{ fontSize: '11px', fontWeight: 600, color: '#a0aec0', letterSpacing: '0.05em' }}>
-                    © 2026 Pakistan Journal of Pharmaceutical Sciences. Institutional Scholarly Portal.
+                    © 2026 Pakistan Journal of Pharmaceutical Sciences. Developed by <a href="https://softsols.pk/" target="_blank" rel="noopener noreferrer" style={{ color: '#0061ff', textDecoration: 'none' }}>Softsols Pakistan</a>
                 </p>
             </footer>
         </div>
