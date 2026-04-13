@@ -9,7 +9,8 @@ export type AuditAction =
   | "USER_ROLE_CHANGE"
   | "ISSUE_PUBLISHED"
   | "REVIEW_ASSIGNED"
-  | "REVIEW_COMPLETED";
+  | "REVIEW_COMPLETED"
+  | "TRACK_CHANGED";
 
 export async function logAction(
   action: AuditAction,
