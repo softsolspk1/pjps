@@ -20,6 +20,7 @@ import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 (pdfMake as any).vfs = pdfFonts.vfs;
 import { BookOpen, Download } from "lucide-react";
+import SectionEditor from "../admin/(protected)/article-design/SectionEditor";
 
 type Author = {
   name: string;
@@ -49,6 +50,14 @@ function SubmissionForm() {
   const [supplementaryFiles, setSupplementaryFiles] = useState<File[]>([]);
   const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null);
   const [guidelinesConfirmed, setGuidelinesConfirmed] = useState(false);
+  const [sections, setSections] = useState([
+    { id: 'introduction', title: 'INTRODUCTION', html: '' },
+    { id: 'methods', title: 'MATERIALS AND METHODS', html: '' },
+    { id: 'results', title: 'RESULTS', html: '' },
+    { id: 'discussion', title: 'DISCUSSION', html: '' },
+    { id: 'conclusion', title: 'CONCLUSION', html: '' },
+    { id: 'references', title: 'REFERENCES', html: '' }
+  ]);
 
   const [pricing, setPricing] = useState<any[]>([]);
   const [userOrigin, setUserOrigin] = useState("PAKISTANI");
@@ -135,12 +144,36 @@ function SubmissionForm() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const uploadImageNative = async (files: File[], editorInstance: any, position?: number | null) => {
+    try {
+      await Promise.all(
+        files.map(async (file) => {
+          const formData = new FormData();
+          formData.append("file", file);
+          const res = await fetch("/api/upload", { method: "POST", body: formData });
+          const data = await res.json();
+          if (data.success && editorInstance) {
+            if (position !== undefined && position !== null) {
+               editorInstance.chain().focus().insertContentAt(position, { type: 'image', attrs: { src: data.url } }).run();
+            } else {
+               editorInstance.chain().focus().setImage({ src: data.url }).run();
+            }
+          }
+        })
+      );
+    } catch (error) {
+      console.error("Image upload failed", error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (step < 3) return handleNextStep();
+    if (step < 6) return handleNextStep();
 
-    if (!paymentProofFile && !parentId) return setError("Proof of payment is mandatory for scholarly review.");
-    if (!manuscriptFile) return setError("Principal manuscript file (v" + (parentId ? currentVersion + 1 : 1) + ") is required.");
+    // Validation for final submission
+    // Since payment proof was removed from UI, we bypass its validation
+    // Manuscript is optional if they formatted online? We'll make it not strictly mandatory if formatted, 
+    // but the prompt says 4) Attach documents (if required). 
     if (!guidelinesConfirmed) return setError("You must confirm adherence to PJPS formatting guidelines.");
     
     setLoading(true);
@@ -155,15 +188,20 @@ function SubmissionForm() {
       formData.append("trackingType", submissionType);
       formData.append("origin", userOrigin);
       formData.append("authors", JSON.stringify(authors));
-      formData.append("file", manuscriptFile);
       
+      if (manuscriptFile) formData.append("file", manuscriptFile);
+      
+      formData.append("sections", JSON.stringify(sections));
+
       if (paymentProofFile) {
          formData.append("paymentProof", paymentProofFile);
       } else if (parentId) {
-         // Use a dummy empty file or signal it's a revision 
-         // For now, API expects paymentProof, so I'll handle it there or require it.
-         // Usually, revisions don't pay again.
+         // Dummy file since it's a revision and might bypass payment logic
          const dummy = new File(["dummy"], "payment_memo.txt", { type: "text/plain" });
+         formData.append("paymentProof", dummy);
+      } else {
+         // If regular submission but payment proof is skipped
+         const dummy = new File(["waived"], "payment_waived.txt", { type: "text/plain" });
          formData.append("paymentProof", dummy);
       }
 
@@ -191,7 +229,8 @@ function SubmissionForm() {
       if (!res.ok) throw new Error(data.error || "Failed to catalog manuscript");
 
       setSuccess(true);
-      setStep(5);
+      // Wait to scroll
+      window.scrollTo(0,0);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -264,17 +303,17 @@ function SubmissionForm() {
 
   const renderStepIndicator = () => (
     <div className={styles.stepper}>
-      {[1, 2, 3, 4].map((s) => (
+      {[1, 2, 3, 4, 5, 6].map((s) => (
         <div key={s} className={`${styles.step} ${step === s ? styles.activeStep : ""} ${step > s ? styles.completedStep : ""}`}>
           <div className={styles.stepCircle}>
              {step > s ? <CheckCircle size={18} /> : (
                <span className="text-xs font-black">{s}</span>
              )}
           </div>
-          <p className="text-[10px] font-black uppercase tracking-widest mt-2">
-            {s === 1 ? "Metadata" : s === 2 ? "Authors" : s === 3 ? "Manuscript" : "Preview"}
+          <p className="text-[10px] font-black uppercase tracking-widest mt-2 text-center" style={{ width: '80px', marginLeft: '-25px' }}>
+            {s === 1 ? "Meta Data" : s === 2 ? "Authors" : s === 3 ? "Formatting" : s === 4 ? "Attach" : s === 5 ? "Review" : "Submit"}
           </p>
-          {s < 4 && <div className={styles.stepLine} />}
+          {s < 6 && <div className={styles.stepLine} />}
         </div>
       ))}
     </div>
@@ -440,18 +479,48 @@ function SubmissionForm() {
         )}
 
         {step === 3 && (
+           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-serif font-black text-slate-800">Manuscript Formatting</h3>
+                <p className="text-sm text-slate-500 mt-2">Draft and format your manuscript content using the structural editor below. This content will be attached to your submission online.</p>
+              </div>
+              
+              <div className="bg-slate-50 p-4 rounded-3xl border border-slate-200 shadow-inner">
+                {sections.map((sec, idx) => (
+                  <SectionEditor 
+                    key={sec.id}
+                    title={sec.title}
+                    html={sec.html}
+                    onChange={(newHtml) => {
+                      const newSecs = [...sections];
+                      newSecs[idx].html = newHtml;
+                      setSections(newSecs);
+                    }}
+                    onImageUpload={uploadImageNative}
+                  />
+                ))}
+              </div>
+           </div>
+        )}
+
+        {step === 4 && (
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-serif font-black text-slate-800">Attach Documents</h3>
+              <p className="text-sm text-slate-500 mt-2">Upload any required supplementary or original files to accompany your submission.</p>
+            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Primary Manuscript */}
               <div className={`${styles.fileVaultCard} ${manuscriptFile ? styles.hasFile : ""}`}>
-                <div className="absolute top-4 right-4 bg-red-50 text-red-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-red-100">Mandatory</div>
+                <div className="absolute top-4 right-4 bg-slate-100 text-slate-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-slate-200">Optional</div>
                 <div className={styles.fileCardHeader}>
                   <div className={styles.fileIconBox}>
                      {manuscriptFile ? <CheckCircle size={24} className="text-emerald-500" /> : <Upload size={24} />}
                   </div>
                   <div>
-                    <h4 className={styles.fileTitle}>Principal Manuscript</h4>
-                    <p className={styles.fileSubtitle}>PDF, DOCX, or LaTeX (ZIP)</p>
+                    <h4 className={styles.fileTitle}>Full Manuscript Text</h4>
+                    <p className={styles.fileSubtitle}>PDF, DOCX (If not formatted in Step 3)</p>
                   </div>
                 </div>
                 
@@ -472,8 +541,6 @@ function SubmissionForm() {
                   </div>
                 </div>
               </div>
-
-              {/* Payment Proof Removed as per request */}
             </div>
 
             {/* Figures Upload */}
@@ -529,44 +596,14 @@ function SubmissionForm() {
                   </label>
                </div>
             </div>
-
-            {/* Guidelines Checkbox */}
-            <div className={styles.ethicsContainer}>
-               <div className="flex gap-6 items-start">
-                  <div className="pt-1.5">
-                    <div className="w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-emerald-400">
-                       <ShieldCheck size={24} />
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <label className="flex gap-4 items-start cursor-pointer group">
-                      <div className="pt-2 relative">
-                        <input 
-                          type="checkbox" 
-                          id="guidelines" 
-                          checked={guidelinesConfirmed}
-                          onChange={(e) => setGuidelinesConfirmed(e.target.checked)}
-                          className="w-5 h-5 rounded border-2 border-slate-600 bg-transparent text-emerald-500 focus:ring-emerald-500 transition-all cursor-pointer"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-white font-bold tracking-tight text-base group-hover:text-emerald-400 transition-colors">Ethics & Formatting Adherence</p>
-                        <p className="text-slate-200 text-sm leading-relaxed max-w-[600px]">
-                           I hereby confirm that this manuscript is our original work, has not been published elsewhere, and strictly adheres to the <span className="text-emerald-400 font-bold italic underline">PJPS Editorial Guidelines</span> and Ethical Standards.
-                        </p>
-                      </div>
-                    </label>
-                  </div>
-               </div>
-            </div>
           </div>
         )}
 
-        {step === 4 && (
+        {step === 5 && (
           <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4">
             <div className="p-8 bg-slate-50 border border-slate-100 rounded-[2rem]">
                <h3 className="text-xl font-serif font-black mb-6 flex items-center gap-3">
-                  <FileText size={24} className="text-blue-600" /> Final Manuscript Review
+                  <FileText size={24} className="text-blue-600" /> Online Manuscript Review
                </h3>
                
                <div className="space-y-6">
@@ -599,29 +636,49 @@ function SubmissionForm() {
 
                   <div className="bg-white p-6 rounded-2xl border border-slate-200">
                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Abstract Preview</p>
-                     <p className="text-sm text-slate-600 leading-relaxed italic line-clamp-6">{abstract}</p>
+                     <p className="text-sm text-slate-600 leading-relaxed italic">{abstract}</p>
                   </div>
 
-                  <div className="flex items-center gap-4 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl mt-4">
-                     <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-emerald-600 shadow-sm">
-                        <FileText size={20} />
-                     </div>
-                     <div className="flex-1">
-                        <p className="text-[10px] font-black text-emerald-800 uppercase tracking-widest">Selected Manuscript</p>
-                        <p className="text-sm font-bold text-emerald-900">{manuscriptFile?.name}</p>
-                     </div>
-                     <div className="flex gap-2">
-                        <button type="button" onClick={handleDownloadPreviewPdf} className="p-2 bg-white text-rose-600 rounded-lg hover:bg-rose-50 transition-colors border border-rose-100" title="Preview PDF">
-                           <Download size={16} />
-                        </button>
-                        <button type="button" onClick={handleDownloadPreviewDocx} className="p-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors border border-blue-100" title="Preview Word">
-                           <FileArchive size={16} />
-                        </button>
-                     </div>
+                  <div className="bg-white p-6 rounded-2xl border border-slate-200 mt-4 max-h-[400px] overflow-y-auto print-body-section" style={{ fontFamily: "'Times New Roman', serif" }}>
+                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 sticky top-0 bg-white pt-2 pb-2">Formatted Body Preview</p>
+                     {sections.map((sec, i) => (
+                       <div key={i}>
+                         <h4 className="font-bold text-lg mb-2 uppercase">{sec.title}</h4>
+                         <div dangerouslySetInnerHTML={{ __html: sec.html || "<p class='italic text-slate-400'>No content formatted for this section.</p>" }} className="mb-6 tiptap-section" />
+                       </div>
+                     ))}
                   </div>
+                  
+                  <div className="text-center">
+                    <button type="button" onClick={() => setStep(3)} className="text-blue-600 text-xs font-black uppercase tracking-widest hover:underline">Needs correction? Go back to formatting</button>
+                  </div>
+
+                  {manuscriptFile && (
+                    <div className="flex items-center gap-4 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl mt-4">
+                       <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-emerald-600 shadow-sm">
+                          <FileText size={20} />
+                       </div>
+                       <div className="flex-1">
+                          <p className="text-[10px] font-black text-emerald-800 uppercase tracking-widest">Attached File</p>
+                          <p className="text-sm font-bold text-emerald-900">{manuscriptFile?.name}</p>
+                       </div>
+                       <div className="flex gap-2">
+                          <button type="button" onClick={handleDownloadPreviewPdf} className="p-2 bg-white text-rose-600 rounded-lg hover:bg-rose-50 transition-colors border border-rose-100" title="Preview PDF">
+                             <Download size={16} />
+                          </button>
+                          <button type="button" onClick={handleDownloadPreviewDocx} className="p-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors border border-blue-100" title="Preview Word">
+                             <FileArchive size={16} />
+                          </button>
+                       </div>
+                    </div>
+                  )}
                </div>
             </div>
+          </div>
+        )}
 
+        {step === 6 && (
+           <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4">
             <div className="p-8 bg-blue-900 rounded-[2rem] text-white">
                <div className="flex items-center gap-4 mb-4">
                   <ShieldCheck size={28} className="text-blue-400" />
@@ -640,7 +697,7 @@ function SubmissionForm() {
                   <span className="text-xs font-black uppercase tracking-widest group-hover:text-blue-400 transition-colors">I accept the terms of submission</span>
                </label>
             </div>
-          </div>
+           </div>
         )}
 
         <div className="flex justify-between items-center mt-12 pt-8 border-t border-slate-100">
@@ -650,13 +707,13 @@ function SubmissionForm() {
             </button>
           ) : <div />}
 
-          {step < 4 ? (
+          {step < 6 ? (
             <button 
               type="button" 
               onClick={handleNextStep}
               className="btn btn-primary px-10 flex items-center gap-2"
             >
-              Continue to {step === 1 ? "Authors" : step === 2 ? "Manuscript" : "Preview"} <ChevronRight size={16} />
+              Continue to {step === 1 ? "Authors" : step === 2 ? "Formatting" : step === 3 ? "Attach" : step === 4 ? "Review" : "Submit"} <ChevronRight size={16} />
             </button>
           ) : (
             <button type="submit" disabled={loading} className="btn btn-primary px-12 py-4 flex items-center gap-3 active:scale-95 transition-transform">

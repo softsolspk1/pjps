@@ -24,8 +24,11 @@ export async function POST(req: Request) {
     const trackingType = formData.get("trackingType") as string || "REGULAR";
     const origin = formData.get("origin") as string || "PAKISTANI";
     const authorsJson = formData.get("authors") as string;
-    const file = formData.get("file") as File;
+    const file = formData.get("file") as File | null;
     const paymentProof = formData.get("paymentProof") as File;
+    const sectionsJson = formData.get("sections") as string;
+    const sections = sectionsJson ? JSON.parse(sectionsJson) : [];
+    const getSec = (id: string) => sections.find((s: any) => s.id === id)?.html || null;
     const parentId = formData.get("parentId") as string | null;
 
     const authors = JSON.parse(authorsJson);
@@ -63,13 +66,16 @@ export async function POST(req: Request) {
     const trackingId = `ON-${month}-${sequence.toString().padStart(3, '0')}-${year}`;
 
     // 2. Upload manuscript (PDF/DOCX/LaTeX) to Cloudinary
-    const manuscriptBuffer = Buffer.from(await file.arrayBuffer());
-    const manuscriptUpload = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        { resource_type: "raw", folder: "pjps_submissions" },
-        (error, result) => error ? reject(error) : resolve(result)
-      ).end(manuscriptBuffer);
-    }) as any;
+    let manuscriptUpload: any = { secure_url: null, public_id: null };
+    if (file && file.size > 0) {
+      const manuscriptBuffer = Buffer.from(await file.arrayBuffer());
+      manuscriptUpload = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { resource_type: "raw", folder: "pjps_submissions" },
+          (error, result) => error ? reject(error) : resolve(result)
+        ).end(manuscriptBuffer);
+      });
+    }
 
     // 3. Upload Payment Proof to Cloudinary (Optional now)
     let paymentUpload = { secure_url: null };
@@ -86,14 +92,16 @@ export async function POST(req: Request) {
     // 4. Process Extra Files (Figures and Supplementary)
     const extraMedia: any[] = [];
     
-    // Add primary manuscript
-    extraMedia.push({
-      publicId: manuscriptUpload.public_id,
-      secureUrl: manuscriptUpload.secure_url,
-      resourceType: "raw",
-      section: "MANUSCRIPT",
-      version: parentId ? parseInt(formData.get("version") as string || "2") : 1,
-    });
+    // Add primary manuscript if uploaded
+    if (manuscriptUpload.secure_url) {
+      extraMedia.push({
+        publicId: manuscriptUpload.public_id,
+        secureUrl: manuscriptUpload.secure_url,
+        resourceType: "raw",
+        section: "MANUSCRIPT",
+        version: parentId ? parseInt(formData.get("version") as string || "2") : 1,
+      });
+    }
 
     // Handle Figures
     const figureKeys = Array.from(formData.keys()).filter(key => key.startsWith('figure_'));
@@ -140,6 +148,12 @@ export async function POST(req: Request) {
       data: {
         title,
         abstract,
+        introduction: getSec('introduction'),
+        materialsMethods: getSec('methods'),
+        results: getSec('results'),
+        discussion: getSec('discussion'),
+        conclusion: getSec('conclusion'),
+        references: getSec('references'),
         submissionType,
         trackingId,
         submissionTrack: submissionType,
