@@ -1,13 +1,16 @@
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
+  host: process.env.SMTP_HOST || 'softsols.pk',
   port: parseInt(process.env.SMTP_PORT || '465'),
-  secure: true, // Use SSL/TLS
+  secure: true, 
   auth: {
-    user: process.env.SMTP_USER,
+    user: process.env.SMTP_USER || 'noreply@softsols.pk',
     pass: process.env.SMTP_PASS,
   },
+  tls: {
+    rejectUnauthorized: false // Handle various server certificate formats
+  }
 });
 
 export const renderEmail = (title: string, content: string) => `

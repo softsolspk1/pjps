@@ -575,29 +575,46 @@ function SubmissionForm() {
     </div>
   );
 
-  if (success) {
-     return (
-       <div className="max-w-4xl mx-auto py-20 px-6 text-center animate-in fade-in zoom-in-95 duration-500">
-         <div className="w-24 h-24 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-8 mx-auto shadow-premium border border-emerald-100">
-           <CheckCircle size={48} />
-         </div>
-         <h2 className="text-4xl font-serif font-black text-slate-900 mb-6 tracking-tight">
-            {parentId ? "Revision Cataloged" : "Manuscript Cataloged"}
-         </h2>
-         <p className="text-slate-500 max-w-lg mb-12 mx-auto leading-relaxed font-medium">
-           Your research contribution has been successfully indexed in the PJPS scholarly registry and is now entering the editorial screening phase.
-         </p>
-         <div className="flex justify-center gap-4">
-            <button onClick={() => window.location.href = "/author/dashboard"} className="bg-slate-900 text-white px-10 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs shadow-2xl active:scale-95 transition-all">
-               Return to Dashboard
-            </button>
-         </div>
-       </div>
-     );
-  }
-
-  // Determine if we should wrap in RoleLayout
   const isAuthor = (session?.user as any)?.role === 'AUTHOR';
+
+  if (success) {
+    const SuccessContent = (
+      <div className="max-w-4xl mx-auto py-20 px-6 text-center animate-in fade-in zoom-in-95 duration-500">
+        <div className="w-24 h-24 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-8 mx-auto shadow-premium border border-emerald-100">
+          <CheckCircle size={48} />
+        </div>
+        <h2 className="text-4xl font-serif font-black text-slate-900 mb-6 tracking-tight">
+           {parentId ? "Revision Cataloged" : "Manuscript Cataloged"}
+        </h2>
+        <p className="text-slate-500 max-w-lg mb-12 mx-auto leading-relaxed font-medium">
+          Your research contribution has been successfully indexed in the PJPS scholarly registry and is now entering the editorial screening phase.
+        </p>
+        <div className="flex justify-center gap-4">
+           <button onClick={() => window.location.href = "/author/dashboard"} className="bg-slate-900 text-white px-10 py-4 rounded-2xl font-bold uppercase tracking-widest text-xs shadow-2xl active:scale-95 transition-all">
+              Return to Dashboard
+           </button>
+        </div>
+      </div>
+    );
+
+    if (isAuthor) {
+      return (
+        <RoleLayout role="AUTHOR">
+          {SuccessContent}
+        </RoleLayout>
+      );
+    }
+
+    return (
+      <div className="bg-slate-50 min-h-screen flex flex-col">
+        <HeaderWrapper />
+        <div className="flex-1" style={{ paddingTop: '100px' }}>
+           {SuccessContent}
+        </div>
+        <FooterWrapper />
+      </div>
+    );
+  }
 
   if (isAuthor) {
     return (

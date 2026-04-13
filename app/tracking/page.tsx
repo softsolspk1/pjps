@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { 
   Search, FileText, CheckCircle, Clock, 
   AlertCircle, Loader2, ShieldCheck, 
   Info, ChevronRight, Globe,
-  Layers, MessageSquare
+  Layers, MessageSquare, RotateCcw
 } from "lucide-react";
 import RoleLayout from "@/components/RoleLayout";
 import HeaderWrapper from "@/components/HeaderWrapper";
@@ -180,7 +181,7 @@ export default function TrackingPage() {
                  <div className={styles.feedbackHeader}>
                     <h3 className={styles.feedbackTitle}><MessageSquare size={24} color="#0061ff" /> Scholarly Feedback Registry</h3>
                     <div className={styles.feedbackBadge}>Authenticated Peer Reports</div>
-                 </div>
+                  </div>
 
                  <div className={styles.reviewGrid}>
                     {article.reviews
@@ -214,7 +215,26 @@ export default function TrackingPage() {
                  </div>
               </div>
            )}
-        </div>
+
+            {/* Scientific Revision Action Call */}
+            {article.status === "REVISION" && (
+              <div className={styles.revisionActionBox}>
+                 <div style={{ width: '80px', height: '80px', background: '#fef3c7', borderRadius: '50%', display: 'flex', alignItems: 'center', margin: '0 auto', justifyContent: 'center', color: '#d97706' }}>
+                    <RotateCcw size={40} />
+                 </div>
+                 <h2 className={styles.revisionTitle}>Scientific Revision Required</h2>
+                 <p className={styles.revisionDesc}>
+                    The editorial board has requested revisions for your manuscript. Please address the referee feedback provided above and submit your revised manuscript (v{article.version + 1}) to proceed.
+                 </p>
+                 <Link 
+                   href={`/submission?parentId=${article.id}&revisionOf=${article.id}&v=${article.version}`}
+                   className={styles.revisionBtn}
+                 >
+                    <FileText size={20} /> Submit Revised Manuscript
+                 </Link>
+              </div>
+            )}
+         </div>
       ) : !loading && (
         <div className={styles.emptyState}>
            <div className={styles.emptyIcon}>
