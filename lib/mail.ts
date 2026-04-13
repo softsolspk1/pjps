@@ -50,7 +50,7 @@ export const sendEmail = async ({
   try {
     const finalHtml = title ? renderEmail(title, html) : html;
     const info = await transporter.sendMail({
-      from: `"PJPS" <${process.env.SMTP_FROM}>`,
+      from: `"PJPS" <${process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@softsols.pk'}>`,
       to,
       subject,
       html: finalHtml,

@@ -288,6 +288,7 @@
   justify-content: center;
   gap: 1rem;
   cursor: pointer;
+  color: white;
   transition: var(--transition);
 }
 
