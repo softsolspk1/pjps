@@ -171,18 +171,20 @@ export async function POST(req: Request) {
       });
 
       // Notify Editor (SMTP_USER)
+      const isRevision = !!parentId;
       await sendEmail({
         to: process.env.SMTP_USER!,
-        subject: "New Manuscript Submission Alert - PJPS",
-        title: "New Submission in Registry",
+        subject: isRevision ? `[REVISION] Manuscript Revision Received - ${newArticle.id.slice(-6).toUpperCase()} - PJPS` : "New Manuscript Submission Alert - PJPS",
+        title: isRevision ? "Scientific Revision Logged" : "New Submission in Registry",
         html: `
-          <p>A new manuscript has been submitted to the PJPS portal and requires editorial attention.</p>
-          <div style="margin: 20px 0; padding: 20px; background-color: #fcfdfe; border-left: 4px solid #002d5e;">
+          <p>${isRevision ? "A revised manuscript (v" + newArticle.version + ") has been submitted to the PJPS portal." : "A new manuscript has been submitted to the PJPS portal and requires editorial attention."}</p>
+          <div style="margin: 20px 0; padding: 20px; background-color: #fcfdfe; border-left: 4px solid ${isRevision ? '#d97706' : '#002d5e'};">
             <p style="margin: 0; font-weight: bold; color: #1e293b;">${title}</p>
             <p style="margin: 5px 0; font-size: 12px; color: #64748b;">Submitted by: ${authors[0].name} (${authors[0].email})</p>
             <p style="margin: 5px 0; font-size: 12px; color: #64748b;">ID: ${newArticle.id}</p>
+            ${isRevision ? `<p style="margin: 5px 0; font-size: 12px; color: #d97706; font-weight: bold;">CYCLE: v${newArticle.version}</p>` : ''}
           </div>
-          <p>Please log in to the Administrative Dashboard to begin the screening process.</p>
+          <p>Please log in to the Administrative Dashboard to begin the ${isRevision ? 'reevaluation' : 'screening'} process.</p>
           <div style="text-align: center; margin: 25px 0;">
             <a href="${process.env.NEXTAUTH_URL}/admin/articles/${newArticle.id}" style="background-color: #0f172a; color: #ffffff; padding: 10px 25px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 12px; text-transform: uppercase;">Review Submission</a>
           </div>
