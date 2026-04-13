@@ -212,15 +212,21 @@ function SubmissionForm() {
           new Paragraph({
             children: authors.map((a, i) => new TextRun({ text: `${a.name}${i < authors.length - 1 ? ", " : ""}`, bold: true }))
           }),
-          ...authors.map(a => new Paragraph({ text: a.affiliation, style: "italic" })),
+          ...authors.map(a => new Paragraph({ 
+            children: [new TextRun({ text: a.affiliation, italics: true })] 
+          })),
           new Paragraph({ text: "" }),
           new Paragraph({ text: "ABSTRACT", heading: HeadingLevel.HEADING_2 }),
           new Paragraph({ text: abstract }),
           new Paragraph({ text: "" }),
-          new Paragraph({ text: "Keywords:", bold: true }),
+          new Paragraph({ 
+            children: [new TextRun({ text: "Keywords:", bold: true })] 
+          }),
           new Paragraph({ text: keywords }),
           new Paragraph({ text: "" }),
-          new Paragraph({ text: `Article Track: ${submissionType}`, italic: true }),
+          new Paragraph({ 
+            children: [new TextRun({ text: `Article Track: ${submissionType}`, italics: true })] 
+          }),
           new Paragraph({ text: `Generated Date: ${new Date().toLocaleDateString()}` }),
         ],
       }],
