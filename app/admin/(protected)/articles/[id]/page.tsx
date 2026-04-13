@@ -10,7 +10,7 @@ import {
   Calendar, MessageSquare, Info,
   TrendingUp, Award, Quote,
   ShieldCheck, Eye, Search,
-  ChevronRight, ExternalLink, PlusCircle
+  ChevronRight, ExternalLink, PlusCircle, BookOpen
 } from "lucide-react";
 import styles from "./DecisionUpgrade.module.css";
 
@@ -144,7 +144,12 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
           <div className={styles.metaItem}><User size={14} /> {article.submitter?.name || "Lead Author"}</div>
           <div className={styles.metaItem}><Calendar size={14} /> Registered {new Date(article.createdAt).toLocaleDateString()}</div>
           <div className={`${styles.statusBadge} ${styles[article.status.toLowerCase()] || styles.screening}`}>
-             {article.status.replace('_', ' ')}
+             {article.status === 'SCREENING' ? 'INTERNAL PEER REVIEW' : 
+              article.status === 'UNDER_REVIEW' ? 'SUBJECT EXPERT REVIEW' : 
+              article.status.replace('_', ' ')}
+          </div>
+          <div style={{ padding: '0.4rem 1rem', background: '#f1f5f9', borderRadius: '2rem', fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', color: '#475569' }}>
+            TRACK: {article.submissionTrack || article.submissionType || 'REGULAR'}
           </div>
           {article.version > 1 && (
              <div style={{ background: '#2563eb', color: 'white', padding: '0.4rem 1rem', borderRadius: '2rem', fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
@@ -192,6 +197,48 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
                 <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase' }}>No supplementary files registered.</div>
               )}
             </div>
+          </section>
+
+          {/* Formatted Article View (New) */}
+          <section className={styles.section} style={{ padding: '3rem', backgroundColor: 'white', border: '1px solid #e2e8f0' }}>
+             <div className={styles.sectionHeader} style={{ marginBottom: '2rem' }}>
+                <BookOpen size={24} className="text-blue-600" /> Formatted Manuscript Preview
+             </div>
+             
+             <div style={{ fontFamily: "'Times New Roman', serif", color: 'black', padding: '2rem', border: '1px solid #f1f5f9', borderRadius: '1rem' }}>
+                <p style={{ fontSize: '0.7rem', textAlign: 'right', marginBottom: '1rem' }}>{article.doi || 'doi.org/10.36721/PJPS...'}</p>
+                <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1.5rem', lineHeight: 1.2 }}>{article.title}</h1>
+                
+                <div style={{ marginBottom: '1.5rem' }}>
+                   <p style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                      {article.authors?.map((a: any, i: number) => (
+                        <span key={i}>{a.name}<sup>{i+1}</sup>{i < article.authors.length - 1 ? ', ' : ''}</span>
+                      ))}
+                   </p>
+                   {article.authors?.map((a: any, i: number) => (
+                      <p key={i} style={{ fontSize: '0.75rem', fontStyle: 'italic', color: '#4b5563' }}><sup>{i+1}</sup> {a.address}</p>
+                   ))}
+                </div>
+
+                <div style={{ marginBottom: '1.5rem', textAlign: 'justify' }}>
+                   <p style={{ fontSize: '0.9rem' }}><strong>Abstract: </strong>{article.abstract}</p>
+                </div>
+
+                <div style={{ fontSize: '0.8rem', borderTop: '1px solid #000', paddingTop: '1rem' }}>
+                   <p><strong>Keywords:</strong> {article.keywords || '---'}</p>
+                   <p style={{ fontStyle: 'italic', marginTop: '0.5rem' }}>Submitted: {new Date(article.createdAt).toLocaleDateString()}</p>
+                </div>
+             </div>
+
+             <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
+                <button 
+                  onClick={() => window.open(`/api/admin/articles/${id}/export?format=pdf`, '_blank')}
+                  className={styles.downloadBtn} 
+                  style={{ background: '#0f172a', color: 'white', width: 'auto', padding: '0 2rem' }}
+                >
+                   <Download size={16} /> Online View (PDF)
+                </button>
+             </div>
           </section>
 
           <section className={styles.section}>
@@ -323,21 +370,60 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
              <h3 className={styles.sectionHeader} style={{ fontSize: '1.1rem' }}><CheckCircle size={18} /> Workflow Control</h3>
              
              <div className={styles.actionGrid}>
-                {article.status === "SCREENING" && (
-                   <button 
-                     onClick={() => handleDecision("UNDER_REVIEW")}
-                     disabled={submitting}
-                     className={styles.actionBtn}
-                     style={{ background: '#2563eb', marginBottom: '1rem' }}
-                   >
-                     Initiate Peer Review
-                   </button>
-                )}
+                 {article.status === "SCREENING" && (
+                    <button 
+                      onClick={() => handleDecision("UNDER_REVIEW")}
+                      disabled={submitting}
+                      className={styles.actionBtn}
+                      style={{ background: '#2563eb', marginBottom: '1rem' }}
+                    >
+                      Initiate Subject Expert Review
+                    </button>
+                 )}
 
-                <button onClick={() => handleDecision("ACCEPTED")} disabled={submitting} className={`${styles.actionBtn} ${styles.accept}`}>Accept Manuscript</button>
-                <button onClick={() => handleDecision("REVISION")} disabled={submitting} className={`${styles.actionBtn} ${styles.revision}`}>Request Revision</button>
-                <button onClick={() => handleDecision("REJECTED")} disabled={submitting} className={`${styles.actionBtn} ${styles.reject}`}>Reject Manuscript</button>
-             </div>
+                 <div style={{ marginBottom: '2rem', padding: '1.5rem', background: '#f8fafc', borderRadius: '1.5rem', border: '1px solid #e2e8f0' }}>
+                    <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '1rem', display: 'block' }}>Change Article Track</label>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                       {['REGULAR', 'FAST', 'ULTRAFAST'].map(track => (
+                          <button 
+                             key={track}
+                             disabled={submitting}
+                             onClick={async () => {
+                                setSubmitting(true);
+                                try {
+                                   const res = await fetch(`/api/admin/articles/${id}/metadata`, {
+                                      method: 'PUT',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({ submissionTrack: track })
+                                   });
+                                   if (res.ok) {
+                                      setArticle({ ...article, submissionTrack: track });
+                                      setMessage({ type: 'success', text: `Track updated to ${track}.` });
+                                   }
+                                } finally { setSubmitting(false); }
+                             }}
+                             style={{ 
+                                flex: 1, 
+                                padding: '0.5rem', 
+                                fontSize: '0.6rem', 
+                                fontWeight: 800, 
+                                borderRadius: '0.5rem',
+                                border: '1px solid #e2e8f0',
+                                background: (article.submissionTrack || article.submissionType) === track ? '#0f172a' : 'white',
+                                color: (article.submissionTrack || article.submissionType) === track ? 'white' : '#475569',
+                                cursor: 'pointer'
+                             }}
+                          >
+                             {track}
+                          </button>
+                       ))}
+                    </div>
+                 </div>
+
+                 <button onClick={() => handleDecision("ACCEPTED")} disabled={submitting} className={`${styles.actionBtn} ${styles.accept}`}>Accept Manuscript</button>
+                 <button onClick={() => handleDecision("REVISION")} disabled={submitting} className={`${styles.actionBtn} ${styles.revision}`}>Request Revision</button>
+                 <button onClick={() => handleDecision("REJECTED")} disabled={submitting} className={`${styles.actionBtn} ${styles.reject}`}>Reject Manuscript</button>
+              </div>
           </section>
         </aside>
       </div>

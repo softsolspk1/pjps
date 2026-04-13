@@ -55,6 +55,8 @@ model Article {
   doi               String?         @unique
   indexingStatus    Json?
   downloadCount     Int             @default(0)
+  trackingId        String?         @unique
+  submissionTrack   String?         @default("REGULAR")
   parentId          String?
   version           Int             @default(1)
   issue             Issue?          @relation(fields: [issueId], references: [id])
@@ -65,6 +67,7 @@ model Article {
   media             Media[]
   reviews           Review[]
 }
+
 
 model Review {
   id               String    @id @default(cuid())

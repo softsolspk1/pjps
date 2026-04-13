@@ -14,6 +14,12 @@ import {
 } from "lucide-react";
 import HeaderWrapper from "@/components/HeaderWrapper";
 import FooterWrapper from "@/components/FooterWrapper";
+import { Document, Packer, Paragraph, TextRun, AlignmentType, HeadingLevel } from "docx";
+import { saveAs } from "file-saver";
+import pdfMake from "pdfmake/build/pdfmake";
+import pdfFonts from "pdfmake/build/vfs_fonts";
+(pdfMake as any).vfs = pdfFonts.vfs;
+import { BookOpen, Download } from "lucide-react";
 
 type Author = {
   name: string;
@@ -185,7 +191,7 @@ function SubmissionForm() {
       if (!res.ok) throw new Error(data.error || "Failed to catalog manuscript");
 
       setSuccess(true);
-      setStep(4);
+      setStep(5);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -193,17 +199,76 @@ function SubmissionForm() {
     }
   };
 
+  const handleDownloadPreviewDocx = () => {
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children: [
+          new Paragraph({ text: "Pakistan Journal of Pharmaceutical Sciences", heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
+          new Paragraph({ text: "MANUSCRIPT PREVIEW - UNPUBLISHED", alignment: AlignmentType.CENTER }),
+          new Paragraph({ text: "" }),
+          new Paragraph({ text: title, heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER }),
+          new Paragraph({ text: "" }),
+          new Paragraph({
+            children: authors.map((a, i) => new TextRun({ text: `${a.name}${i < authors.length - 1 ? ", " : ""}`, bold: true }))
+          }),
+          ...authors.map(a => new Paragraph({ text: a.affiliation, style: "italic" })),
+          new Paragraph({ text: "" }),
+          new Paragraph({ text: "ABSTRACT", heading: HeadingLevel.HEADING_2 }),
+          new Paragraph({ text: abstract }),
+          new Paragraph({ text: "" }),
+          new Paragraph({ text: "Keywords:", bold: true }),
+          new Paragraph({ text: keywords }),
+          new Paragraph({ text: "" }),
+          new Paragraph({ text: `Article Track: ${submissionType}`, italic: true }),
+          new Paragraph({ text: `Generated Date: ${new Date().toLocaleDateString()}` }),
+        ],
+      }],
+    });
+
+    Packer.toBlob(doc).then(blob => {
+      saveAs(blob, "article.docx");
+    });
+  };
+
+  const handleDownloadPreviewPdf = () => {
+    const docDefinition = {
+      content: [
+        { text: 'Pakistan Journal of Pharmaceutical Sciences', style: 'header', alignment: 'center' },
+        { text: 'MANUSCRIPT PREVIEW - FOR AUTHOR REVIEW ONLY', style: 'subheader', alignment: 'center', margin: [0, 0, 0, 20] },
+        { text: title, style: 'title', alignment: 'center' },
+        { text: authors.map(a => a.name).join(', '), alignment: 'center', bold: true, margin: [0, 10, 0, 5] },
+        { text: authors.map(a => a.affiliation).join('; '), alignment: 'center', fontSize: 9, italics: true, margin: [0, 0, 0, 20] },
+        { text: 'ABSTRACT', style: 'sectionHeader' },
+        { text: abstract, alignment: 'justify', margin: [0, 5, 0, 15] },
+        { text: 'Keywords', style: 'boldSmall' },
+        { text: keywords, margin: [0, 2, 0, 10] },
+        { text: `Track: ${submissionType}`, italics: true }
+      ],
+      styles: {
+        header: { fontSize: 18, bold: true, color: '#002d5e' },
+        subheader: { fontSize: 10, bold: true, color: '#64748b' },
+        title: { fontSize: 16, bold: true, margin: [0, 20, 0, 10] },
+        sectionHeader: { fontSize: 12, bold: true, decoration: 'underline', margin: [0, 10, 0, 5] },
+        boldSmall: { fontSize: 10, bold: true }
+      }
+    };
+    pdfMake.createPdf(docDefinition as any).download("article.pdf");
+  };
+
   const renderStepIndicator = () => (
     <div className={styles.stepper}>
-      {[1, 2, 3].map((s) => (
+      {[1, 2, 3, 4].map((s) => (
         <div key={s} className={`${styles.step} ${step === s ? styles.activeStep : ""} ${step > s ? styles.completedStep : ""}`}>
           <div className={styles.stepCircle}>
              {step > s ? <CheckCircle size={18} /> : (
                <span className="text-xs font-black">{s}</span>
              )}
           </div>
-          <p className="text-[10px] font-black uppercase tracking-widest mt-2">{s === 1 ? "Metadata" : s === 2 ? "Authors" : "Scholarly File"}</p>
-          {s < 3 && <div className={styles.stepLine} />}
+          <p className="text-[10px] font-black uppercase tracking-widest mt-2">
+            {s === 1 ? "Metadata" : s === 2 ? "Authors" : s === 3 ? "Manuscript" : "Preview"}
+          </p>
+          {s < 4 && <div className={styles.stepLine} />}
         </div>
       ))}
     </div>
@@ -288,18 +353,7 @@ function SubmissionForm() {
                     </label>
                   ))}
                 </div>
-                {!parentId && (
-                  <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-between">
-                    <div className="flex items-center gap-3 text-blue-900">
-                      <CreditCard size={18} />
-                      <span className="text-sm font-bold">Estimated Submission Fee</span>
-                    </div>
-                    <div className="text-xl font-serif font-black text-blue-600">
-                      {userOrigin === "PAKISTANI" ? "Rs. " : "$ "}{getCurrentFee().toLocaleString()}
-                    </div>
-                  </div>
-                )}
-              </div>
+                </div>
 
               <div className={styles.formGroup}>
                 <label className={styles.label}>Index Keywords</label>
@@ -413,44 +467,7 @@ function SubmissionForm() {
                 </div>
               </div>
 
-              {/* Proof of Payment / Revision Link */}
-              <div className={`${styles.fileVaultCard} ${paymentProofFile ? styles.hasFilePayment : ""} ${parentId ? "opacity-50 pointer-events-none" : ""}`}>
-                {!parentId && <div className="absolute top-4 right-4 bg-red-50 text-red-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-red-100">Mandatory</div>}
-                <div className={styles.fileCardHeader}>
-                  <div className={styles.paymentIconBox}>
-                     {parentId ? <RotateCcw size={24} className="text-blue-500" /> : (paymentProofFile ? <CheckCircle size={24} className="text-emerald-500" /> : <DollarSign size={24} />)}
-                  </div>
-                  <div>
-                    <h4 className={styles.fileTitle}>{parentId ? "Revision (No Fee)" : "Payment Proof"}</h4>
-                    <p className={styles.fileSubtitle}>{parentId ? "Cycle " + currentVersion : "Institution Bank Receipt"}</p>
-                  </div>
-                </div>
-                
-                {!parentId ? (
-                  <div className={styles.paymentDropZone}>
-                    <input 
-                      type="file" 
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      className={styles.fileInput}
-                      onChange={(e) => setPaymentProofFile(e.target.files ? e.target.files[0] : null)}
-                    />
-                    <div className="text-center">
-                      <p className="text-sm font-bold text-slate-900 mb-1 max-w-[200px] truncate mx-auto">
-                        {paymentProofFile ? paymentProofFile.name : "Upload Confirmation"}
-                      </p>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                        {paymentProofFile ? "Receipt Attached" : "PDF or High-res Image"}
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="h-32 flex flex-col justify-center items-center text-center px-6">
-                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest leading-loose">
-                        Submission fees are waived for manuscripts in their revision cycle.
-                     </p>
-                  </div>
-                )}
-              </div>
+              {/* Payment Proof Removed as per request */}
             </div>
 
             {/* Figures Upload */}
@@ -539,6 +556,87 @@ function SubmissionForm() {
           </div>
         )}
 
+        {step === 4 && (
+          <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4">
+            <div className="p-8 bg-slate-50 border border-slate-100 rounded-[2rem]">
+               <h3 className="text-xl font-serif font-black mb-6 flex items-center gap-3">
+                  <FileText size={24} className="text-blue-600" /> Final Manuscript Review
+               </h3>
+               
+               <div className="space-y-6">
+                  <div>
+                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Title</p>
+                     <p className="text-lg font-bold text-slate-900 font-serif leading-tight">{title}</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Keywords</p>
+                        <p className="text-sm font-medium text-slate-700">{keywords}</p>
+                     </div>
+                     <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Track</p>
+                        <p className="text-sm font-bold text-blue-600">{submissionType}</p>
+                     </div>
+                  </div>
+
+                  <div>
+                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Authors ({authors.length})</p>
+                     <div className="flex flex-wrap gap-2 mt-2">
+                        {authors.map((a, i) => (
+                           <div key={i} className="px-4 py-2 bg-white border border-slate-200 rounded-full text-[10px] font-bold text-slate-700">
+                              {a.name} ({a.affiliation})
+                           </div>
+                        ))}
+                     </div>
+                  </div>
+
+                  <div className="bg-white p-6 rounded-2xl border border-slate-200">
+                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Abstract Preview</p>
+                     <p className="text-sm text-slate-600 leading-relaxed italic line-clamp-6">{abstract}</p>
+                  </div>
+
+                  <div className="flex items-center gap-4 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl mt-4">
+                     <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-emerald-600 shadow-sm">
+                        <FileText size={20} />
+                     </div>
+                     <div className="flex-1">
+                        <p className="text-[10px] font-black text-emerald-800 uppercase tracking-widest">Selected Manuscript</p>
+                        <p className="text-sm font-bold text-emerald-900">{manuscriptFile?.name}</p>
+                     </div>
+                     <div className="flex gap-2">
+                        <button type="button" onClick={handleDownloadPreviewPdf} className="p-2 bg-white text-rose-600 rounded-lg hover:bg-rose-50 transition-colors border border-rose-100" title="Preview PDF">
+                           <Download size={16} />
+                        </button>
+                        <button type="button" onClick={handleDownloadPreviewDocx} className="p-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors border border-blue-100" title="Preview Word">
+                           <FileArchive size={16} />
+                        </button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <div className="p-8 bg-blue-900 rounded-[2rem] text-white">
+               <div className="flex items-center gap-4 mb-4">
+                  <ShieldCheck size={28} className="text-blue-400" />
+                  <h4 className="text-lg font-bold">Scientific Integrity Confirmation</h4>
+               </div>
+               <p className="text-blue-100 text-sm leading-relaxed mb-6">
+                  By clicking submit, you certify that this manuscript constitutes original scholarly research and adheres to the ethical standards of the Pakistan Journal of Pharmaceutical Sciences.
+               </p>
+               <label className="flex items-center gap-4 cursor-pointer group">
+                  <input 
+                    type="checkbox" 
+                    checked={guidelinesConfirmed}
+                    onChange={(e) => setGuidelinesConfirmed(e.target.checked)}
+                    className="w-6 h-6 rounded bg-white/10 border-white/20 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-xs font-black uppercase tracking-widest group-hover:text-blue-400 transition-colors">I accept the terms of submission</span>
+               </label>
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-between items-center mt-12 pt-8 border-t border-slate-100">
           {step > 1 ? (
             <button type="button" onClick={() => setStep(step - 1)} className="btn btn-outline px-10">
@@ -546,13 +644,13 @@ function SubmissionForm() {
             </button>
           ) : <div />}
 
-          {step < 3 ? (
+          {step < 4 ? (
             <button 
               type="button" 
               onClick={handleNextStep}
               className="btn btn-primary px-10 flex items-center gap-2"
             >
-              Continue to {step === 1 ? "Authors" : "Scholarly File"} <ChevronRight size={16} />
+              Continue to {step === 1 ? "Authors" : step === 2 ? "Manuscript" : "Preview"} <ChevronRight size={16} />
             </button>
           ) : (
             <button type="submit" disabled={loading} className="btn btn-primary px-12 py-4 flex items-center gap-3 active:scale-95 transition-transform">

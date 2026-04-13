@@ -10,6 +10,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const body = await req.json();
     const { 
       articleId, 
       originality, 
@@ -19,7 +20,19 @@ export async function POST(req: Request) {
       commentsToEditor, 
       commentsToAuthor, 
       recommendation 
-    } = await req.json();
+    } = body;
+
+    if (!articleId || !recommendation || !commentsToEditor) {
+      return NextResponse.json({ error: "Missing required review fields" }, { status: 400 });
+    }
+
+    // Word count validation for Internal Comments (Comments to Editor)
+    const wordCount = commentsToEditor.trim().split(/\s+/).length;
+    if (wordCount < 100) {
+      return NextResponse.json({ 
+        error: `Institutional policy requires at least 100 words for comments to the editor. Current count: ${wordCount} words.` 
+      }, { status: 400 });
+    }
 
     const userId = (session.user as any).id;
     const userEmail = session.user.email;

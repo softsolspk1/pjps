@@ -28,13 +28,41 @@ export async function POST(req: Request) {
     const paymentProof = formData.get("paymentProof") as File;
     const parentId = formData.get("parentId") as string | null;
 
-    if (!file || !title || !authorsJson || !paymentProof) {
-      return NextResponse.json({ error: "Missing required scholarly fields" }, { status: 400 });
-    }
-
     const authors = JSON.parse(authorsJson);
 
-    // 1. Upload manuscript (PDF/DOCX/LaTeX) to Cloudinary
+    // 1. Generate Custom Tracking ID: ON-Month-unique number-year
+    const now = new Date();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const year = now.getFullYear();
+    
+    // Find the current sequence for this month/year
+    const prefix = `ON-${month}`;
+    const yearSuffix = `-${year}`;
+    
+    const lastArticle = await prisma.article.findFirst({
+      where: {
+        trackingId: {
+          startsWith: prefix,
+          endsWith: yearSuffix
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    let sequence = 1;
+    if (lastArticle?.trackingId) {
+      // Extract the sequence number from ON-MM-XXX-YYYY
+      const parts = lastArticle.trackingId.split('-');
+      if (parts.length === 4) {
+        sequence = parseInt(parts[2]) + 1;
+      }
+    }
+    
+    const trackingId = `ON-${month}-${sequence.toString().padStart(3, '0')}-${year}`;
+
+    // 2. Upload manuscript (PDF/DOCX/LaTeX) to Cloudinary
     const manuscriptBuffer = Buffer.from(await file.arrayBuffer());
     const manuscriptUpload = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
@@ -43,16 +71,19 @@ export async function POST(req: Request) {
       ).end(manuscriptBuffer);
     }) as any;
 
-    // 2. Upload Payment Proof to Cloudinary
-    const paymentBuffer = Buffer.from(await paymentProof.arrayBuffer());
-    const paymentUpload = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        { resource_type: "auto", folder: "pjps_payments" },
-        (error, result) => error ? reject(error) : resolve(result)
-      ).end(paymentBuffer);
-    }) as any;
+    // 3. Upload Payment Proof to Cloudinary (Optional now)
+    let paymentUpload = { secure_url: null };
+    if (paymentProof && paymentProof.size > 10) { // Check if it's not a dummy
+      const paymentBuffer = Buffer.from(await paymentProof.arrayBuffer());
+      paymentUpload = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { resource_type: "auto", folder: "pjps_payments" },
+          (error, result) => error ? reject(error) : resolve(result)
+        ).end(paymentBuffer);
+      }) as any;
+    }
 
-    // 3. Process Extra Files (Figures and Supplementary)
+    // 4. Process Extra Files (Figures and Supplementary)
     const extraMedia: any[] = [];
     
     // Add primary manuscript
@@ -104,16 +135,18 @@ export async function POST(req: Request) {
        });
     }
 
-    // 4. Create Article with Versioning & Status
+    // 5. Create Article with Versioning & Status
     const newArticle = await prisma.article.create({
       data: {
         title,
         abstract,
         submissionType,
+        trackingId,
+        submissionTrack: submissionType,
         trackingType: trackingType as any,
         origin,
         paymentProofUrl: paymentUpload.secure_url,
-        paymentStatus: "PENDING",
+        paymentStatus: paymentUpload.secure_url ? "PENDING" : "WAIVED", // Assuming waived if not provided
         status: "SCREENING",
         userId,
         parentId: parentId || null,
@@ -135,13 +168,14 @@ export async function POST(req: Request) {
       },
     });
 
-    // 5. Audit Log the Submission
+    // 6. Audit Log the Submission
     await logAction(
       "ARTICLE_SUBMITTED",
       "ARTICLE",
       newArticle.id,
       userId
     );
+
 
     // 5. Send Professional Notifications
     try {
@@ -158,7 +192,7 @@ export async function POST(req: Request) {
           <p>Your manuscript has been successfully cataloged and is now entering the editorial screening phase.</p>
           <div style="margin: 30px 0; padding: 25px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
             <p style="margin: 0; font-weight: bold; color: #002d5e; border-bottom: 1px solid #edf2f7; padding-bottom: 10px; margin-bottom: 15px;">Submission Details:</p>
-             <p style="margin: 5px 0; font-size: 13px;"><strong>Reference ID:</strong> ${newArticle.id}</p>
+             <p style="margin: 5px 0; font-size: 13px;"><strong>Reference ID:</strong> ${newArticle.trackingId || newArticle.id}</p>
              <p style="margin: 5px 0; font-size: 13px;"><strong>Tracking Type:</strong> ${trackingType}</p>
              <p style="margin: 5px 0; font-size: 13px;"><strong>Current Status:</strong> SCREENING</p>
              <p style="margin: 5px 0; font-size: 13px;"><strong>Date Logged:</strong> ${new Date().toLocaleDateString()}</p>

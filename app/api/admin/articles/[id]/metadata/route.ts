@@ -15,21 +15,25 @@ export async function PUT(
     }
 
     const { id } = await params;
-    const { doi } = await req.json();
+    const { doi, submissionTrack } = await req.json();
+
+    const data: any = {};
+    if (doi !== undefined) data.doi = doi;
+    if (submissionTrack !== undefined) data.submissionTrack = submissionTrack;
 
     const article = await prisma.article.update({
       where: { id },
-      data: { doi }
+      data
     });
 
-    // Audit the DOI assignment
-    await logAction(
-      "DOI_ASSIGNED",
-      "ARTICLE",
-      id,
-      (session.user as any).id,
-      { doi }
-    );
+    // Audit the action
+    if (doi) {
+      await logAction("DOI_ASSIGNED", "ARTICLE", id, (session.user as any).id, { doi });
+    }
+    if (submissionTrack) {
+      await logAction("TRACK_CHANGED", "ARTICLE", id, (session.user as any).id, { submissionTrack });
+    }
+
 
     return NextResponse.json(article);
   } catch (err: any) {

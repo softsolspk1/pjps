@@ -152,7 +152,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
          <div className={styles.heroContent}>
             <div className={styles.badgeRow}>
                <div className={`${styles.badge} ${styles.badgeNavy}`}>
-                  <ShieldCheck size={12} style={{ marginRight: '6px', verticalAlign: 'middle' }} /> Referee Mandate
+                  <ShieldCheck size={12} style={{ marginRight: '6px', verticalAlign: 'middle' }} /> Subject Expert Review
                </div>
                <div className={styles.badge}>
                   Scientific Version v{article?.version || 1}
@@ -328,16 +328,22 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
                         </div>
 
                         <div className={styles.textareaGroup}>
-                           <label className={styles.labelRow} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                              <ShieldCheck size={14} style={{ color: '#ef4444' }} /> Executive Disclosure (Editorial)
+                           <label className={styles.labelRow} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                 <ShieldCheck size={14} style={{ color: '#ef4444' }} /> Internal Peer Review (Comments to Editor)
+                              </div>
+                              <span style={{ fontSize: '10px', fontWeight: 900, color: (commentsToEditor.trim().split(/\s+/).length >= 100 ? '#10b981' : '#f43f5e') }}>
+                                 {commentsToEditor.trim().split(/\s+/).filter(w => w.length > 0).length} / 100 Words
+                              </span>
                            </label>
                            <textarea 
+                              required
                               value={commentsToEditor} 
                               onChange={(e) => setCommentsToEditor(e.target.value)}
                               className={`${styles.feedbackTextarea} ${styles.confidentialTextarea}`}
-                              placeholder="Sensitive remarks for the Editorial Board..."
+                              placeholder="Mandatory 100-word scholarly critique for the Editorial Board..."
                            />
-                           <p style={{ fontSize: '9px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.2em', textAlign: 'right', padding: '0 1rem' }}>Confidentiality Protocol Active</p>
+                           <p style={{ fontSize: '9px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.2em', textAlign: 'right', padding: '0 1rem' }}>Strict Confidentiality Protocol</p>
                         </div>
                      </div>
                   </div>
