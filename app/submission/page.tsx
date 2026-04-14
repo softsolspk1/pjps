@@ -672,7 +672,7 @@ function SubmissionForm() {
               </div>
             )}
           </div>
-        )}}
+        )}
 
         {step === 6 && (
            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4">
