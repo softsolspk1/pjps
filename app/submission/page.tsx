@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import HeaderWrapper from "@/components/HeaderWrapper";
 import FooterWrapper from "@/components/FooterWrapper";
-import { Document, Packer, Paragraph, TextRun, AlignmentType, HeadingLevel } from "docx";
+import { Document, Packer, Paragraph, TextRun, AlignmentType, HeadingLevel, SectionType, ImageRun, Table as DocxTable, TableRow as DocxTableRow, TableCell as DocxTableCell, WidthType, ExternalHyperlink, UnderlineType } from "docx";
 import { saveAs } from "file-saver";
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
@@ -140,8 +140,140 @@ function SubmissionForm() {
       }
     }
 
+    if (step === 3) {
+      const missingSections = sections.filter(s => !s.html || s.html.trim().length < 50);
+      if (missingSections.length > 0) {
+        setError(`The following clinical sections are mandatory for scholarly indexing: ${missingSections.map(s => s.title).join(", ")}. Please ensure each section has adequate content.`);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+    }
+
     setStep(step + 1);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleExportWord = async () => {
+    // Generate a formal DOCX using the same logic as the Design Studio
+    const firstAuthor = authors[0]?.name || "Author";
+    
+    // Abstract HTML
+    const abstractHtml = abstract;
+    // Body HTML from sections
+    const bodyHtml = sections.map(s => `<h2>${s.title}</h2>${s.html}`).join('');
+
+    const parseHtmlToDocx = async (html: string, isTwoColumn: boolean = false): Promise<any[]> => {
+      const dom = new DOMParser().parseFromString(html, "text/html");
+      const children: any[] = [];
+
+      const parseInline = async (node: Node | ChildNode, styles: any = {}): Promise<any[]> => {
+        const runs: any[] = [];
+        for (const child of Array.from(node.childNodes)) {
+          const tag = child.nodeName;
+          const text = child.textContent || "";
+          const newStyles = { ...styles, font: "Times New Roman", size: 20 };
+          
+          if (tag === "#text") {
+            if (text.trim() || text === " ") runs.push(new TextRun({ text, ...newStyles }));
+          } else if (tag === "STRONG" || tag === "B") {
+            runs.push(...await parseInline(child, { ...newStyles, bold: true }));
+          } else if (tag === "EM" || tag === "I") {
+            runs.push(...await parseInline(child, { ...newStyles, italics: true }));
+          } else if (tag === "U") {
+            runs.push(...await parseInline(child, { ...newStyles, underline: { type: UnderlineType.SINGLE } }));
+          } else if (tag === "SUB") {
+            runs.push(...await parseInline(child, { ...newStyles, subScript: true }));
+          } else if (tag === "SUP") {
+            runs.push(...await parseInline(child, { ...newStyles, superScript: true }));
+          } else if (tag === "A") {
+            runs.push(new ExternalHyperlink({ children: await parseInline(child, newStyles), link: (child as any).getAttribute("href") || "#" }));
+          } else if (tag === "BR") {
+            runs.push(new TextRun({ break: 1, ...newStyles }));
+          } else if (tag === "IMG") {
+             const src = (child as any).getAttribute("src");
+             if (src) {
+               try {
+                 const blob = await fetch(src).then(r => r.blob());
+                 const buf = await blob.arrayBuffer();
+                 runs.push(new ImageRun({ data: buf, transformation: { width: isTwoColumn ? 300 : 450, height: isTwoColumn ? 200 : 300 } }));
+               } catch(e) { console.error("Image export failed", e); }
+             }
+          }
+        }
+        return runs;
+      };
+
+      const processNode = async (node: any) => {
+        const tag = node.nodeName;
+        const headingStyles = { font: "Arial", bold: true };
+        
+        if (tag === "P") {
+          children.push(new Paragraph({ children: await parseInline(node), alignment: AlignmentType.JUSTIFIED, spacing: { line: 276 } }));
+        } else if (tag === "H1" || tag === "H2") {
+          children.push(new Paragraph({ children: [new TextRun({ text: node.textContent?.toUpperCase() || "", ...headingStyles, size: 22 })], spacing: { before: 240, after: 120 } }));
+        } else if (tag === "H3") {
+          children.push(new Paragraph({ children: [new TextRun({ text: node.textContent || "", ...headingStyles, italics: true, size: 17 })], spacing: { before: 180, after: 90 } }));
+        } else if (tag === "TABLE") {
+          const rows: any[] = [];
+          for (const tr of Array.from(node.querySelectorAll("tr"))) {
+            const cells: any[] = [];
+            for (const td of Array.from((tr as any).children)) {
+               cells.push(new DocxTableCell({ 
+                 children: [new Paragraph({ children: await parseInline(td as any), spacing: { after: 0 } })],
+                 shading: (td as any).nodeName === "TH" ? { fill: "F7FAFC", type: "clear" as any } : undefined
+               }));
+            }
+            rows.push(new DocxTableRow({ children: cells }));
+          }
+          children.push(new DocxTable({ rows, width: { size: 100, type: WidthType.PERCENTAGE } }));
+        }
+      };
+
+      for (const node of Array.from(dom.body.childNodes)) {
+        await processNode(node);
+      }
+      return children;
+    };
+
+    const doc = new Document({
+      sections: [
+        {
+          properties: { type: SectionType.CONTINUOUS },
+          children: [
+            new Paragraph({
+              children: [new TextRun({ text: "Pakistan Journal of Pharmaceutical Sciences", bold: true, size: 24, font: "Times New Roman" })],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 400 }
+            }),
+            new Paragraph({
+              children: [new TextRun({ text: title.toUpperCase(), bold: true, size: 32, font: "Arial" })],
+              spacing: { after: 400 }
+            }),
+            new Paragraph({
+              children: authors.map((a, i) => new TextRun({ text: `${a.name}${i < authors.length-1 ? ", " : ""}`, bold: true, size: 24 })),
+              spacing: { after: 120 }
+            }),
+            ...authors.map(a => new Paragraph({
+              children: [new TextRun({ text: a.affiliation, italics: true, size: 18 })],
+            })),
+            new Paragraph({ text: "", spacing: { after: 400 } }),
+            new Paragraph({ children: [new TextRun({ text: "ABSTRACT", bold: true, size: 20 })] }),
+            ...await parseHtmlToDocx(abstractHtml),
+            new Paragraph({ text: "", spacing: { after: 400 } }),
+          ]
+        },
+        {
+          properties: { 
+            type: SectionType.CONTINUOUS,
+            column: { count: 2, space: 720 },
+          },
+          children: await parseHtmlToDocx(bodyHtml, true)
+        }
+      ]
+    });
+
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, "Manuscript_Draft.docx");
   };
 
   const uploadImageNative = async (files: File[], editorInstance: any, position?: number | null) => {
@@ -484,17 +616,19 @@ function SubmissionForm() {
            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
               <div className="text-center mb-6">
                 <h3 className="text-3xl font-serif font-black text-slate-800 tracking-tight">Manuscript Formatting</h3>
-                 <div className="flex justify-center gap-2 mt-3 mb-4">
-                   <span className="px-3 py-1 bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg">New Features</span>
-                   <span className="px-3 py-1 bg-slate-100 text-slate-500 text-[9px] font-black uppercase tracking-widest rounded-full border border-slate-200 uppercase">Optional Step</span>
+                 <div className="flex justify-center gap-2 mt-3 mb-6">
+                   <span className="px-3 py-1 bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg">Official Template</span>
+                   <button 
+                    type="button" 
+                    onClick={handleExportWord}
+                    className="flex items-center gap-2 px-3 py-1 bg-indigo-50 text-indigo-600 text-[9px] font-black uppercase tracking-widest rounded-full border border-indigo-100 hover:bg-indigo-100 transition-all font-black"
+                   >
+                     <Download size={10} /> Download Word Format
+                   </button>
                  </div>
-                 <p className="text-sm text-slate-500 mt-1 max-w-2xl mx-auto font-medium">
-                   You may skip this optional formatting step if you have already attached a full manuscript (PDF/DOCX) in the <strong>Attach</strong> step.
+                 <p className="text-sm text-slate-600 mt-1 max-w-2xl mx-auto font-bold uppercase tracking-tight">
+                   Complete all scholarly sections below to enable automated journal indexing and standard peer-review formatting.
                  </p>
-                <p className="text-sm text-slate-500 mt-1">
-                  You may skip this formatting step if you have already attached a full manuscript (PDF/DOCX) in the <strong>Attach</strong> step. 
-                  However, formatting here enables direct indexing.
-                </p>
               </div>
               
               <div className="bg-slate-50 p-4 rounded-3xl border border-slate-200 shadow-inner">
@@ -612,65 +746,122 @@ function SubmissionForm() {
           </div>
         )}
 
-        {step === 5 && (
+         {step === 5 && (
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4">
-            <div className="bg-white p-12 rounded-[2.5rem] border border-slate-200 shadow-2xl relative overflow-hidden print-body-section" style={{ fontFamily: "'Times New Roman', serif", backgroundColor: 'white', color: 'black' }}>
-               <div className="absolute top-0 left-0 w-full h-2 bg-blue-900"></div>
-               <div className="absolute top-4 right-8 text-[9px] font-black text-slate-300 uppercase tracking-widest">PJPS Submission Registry</div>
-               
-               <div className="border-b-2 border-slate-900 pb-12 mb-12 text-center">
-                  <h1 className="text-4xl font-serif font-black uppercase text-slate-900 mb-8 leading-tight tracking-tight">{title}</h1>
-                  <div className="flex flex-wrap justify-center gap-x-12 gap-y-4">
-                     {authors.map((a, i) => (
-                        <div key={i} className="text-center group">
-                           <p className="font-bold text-slate-900 uppercase tracking-tighter text-[12px] mb-1">{a.name}<sup>{i+1}*</sup></p>
-                           <p className="text-[10px] text-slate-400 italic max-w-[200px] mx-auto leading-tight">{a.affiliation}</p>
+            <div className="bg-slate-50 p-12 rounded-[3.5rem] border border-slate-200 shadow-premium relative overflow-hidden">
+               <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600" />
+               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12">
+                  <div>
+                    <h3 className="text-3xl font-serif font-black text-slate-900 tracking-tight mb-2">Manuscript Registry Review</h3>
+                    <p className="text-sm text-slate-500 font-medium">Verify your final research structure before official peer-review entry.</p>
+                  </div>
+                  <div className="flex flex-wrap gap-4">
+                     <button 
+                       type="button" 
+                       onClick={() => {
+                          const win = window.open("", "_blank");
+                          if (win) {
+                            win.document.write(`
+                              <html>
+                                <head>
+                                  <title>Manuscript Preview | PJPS</title>
+                                  <style>
+                                    body { font-family: 'Times New Roman', serif; padding: 40px; line-height: 1.6; color: #1a202c; max-width: 900px; margin: 0 auto; background: #f8fafc; }
+                                    .paper { background: white; padding: 60px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-radius: 8px; }
+                                    h1 { text-align: center; text-transform: uppercase; font-size: 24px; margin-bottom: 20px; }
+                                    .authors { text-align: center; font-weight: bold; margin-bottom: 10px; }
+                                    .affiliations { text-align: center; font-style: italic; font-size: 14px; color: #4a5568; margin-bottom: 30px; }
+                                    .section-title { font-weight: bold; text-transform: uppercase; margin-top: 30px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 15px; }
+                                    .content { text-align: justify; }
+                                    @media print { body { background: none; padding: 0; } .paper { box-shadow: none; border: none; } }
+                                  </style>
+                                </head>
+                                <body>
+                                  <div class="paper">
+                                    <h1>${title}</h1>
+                                    <div class="authors">${authors.map(a => a.name).join(", ")}</div>
+                                    <div class="affiliations">${authors.map(a => a.affiliation).join(" | ")}</div>
+                                    
+                                    <div class="section-title">Abstract</div>
+                                    <div class="content">${abstract}</div>
+                                    
+                                    ${sections.map(s => `
+                                      <div class="section-title">${s.title}</div>
+                                      <div class="content">${s.html}</div>
+                                    `).join("")}
+                                  </div>
+                                </body>
+                              </html>
+                            `);
+                            win.document.close();
+                          }
+                       }}
+                       className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:scale-105 active:scale-95 transition-all"
+                     >
+                        <Globe size={16} /> View Online Full-View
+                     </button>
+                     <button 
+                       type="button" 
+                       onClick={handleExportWord}
+                       className="flex items-center gap-2 px-6 py-3 bg-white text-slate-800 border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 active:scale-95 transition-all"
+                     >
+                        <Download size={16} /> Download Word (DOCX)
+                     </button>
+                  </div>
+               </div>
+
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="p-6 bg-white rounded-3xl border border-slate-200">
+                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Metadata Analysis</p>
+                     <div className="space-y-4">
+                        <div>
+                           <p className="text-[10px] font-black text-blue-600 uppercase tracking-tight">Manuscript Title</p>
+                           <p className="text-xs font-bold text-slate-900 line-clamp-2">{title}</p>
                         </div>
-                     ))}
+                        <div>
+                           <p className="text-[10px] font-black text-blue-600 uppercase tracking-tight">Submission Track</p>
+                           <p className="text-xs font-bold text-slate-900">{submissionType}</p>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div className="p-6 bg-white rounded-3xl border border-slate-200">
+                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Contributor Registry</p>
+                     <div className="space-y-3">
+                        {authors.map((a, i) => (
+                           <div key={i} className="flex items-center gap-3">
+                              <div className="w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-[10px] font-black text-slate-500 whitespace-nowrap">{i+1}</div>
+                              <p className="text-xs font-bold text-slate-900 truncate">{a.name}</p>
+                           </div>
+                        ))}
+                     </div>
+                  </div>
+
+                  <div className="p-6 bg-white rounded-3xl border border-slate-200">
+                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Formal Attachments</p>
+                     <div className="space-y-3">
+                        {manuscriptFile ? (
+                           <div className="flex items-center gap-3 p-2 bg-emerald-50 border border-emerald-100 rounded-xl">
+                              <FileText size={14} className="text-emerald-600" />
+                              <p className="text-[10px] font-black text-emerald-700 truncate">{manuscriptFile.name}</p>
+                           </div>
+                        ) : (
+                           <p className="text-[10px] font-bold text-slate-400 italic">No external manuscript attached. Online formatting active.</p>
+                        )}
+                        <div className="flex gap-2 mt-2">
+                           <span className="px-2 py-1 bg-slate-100 rounded text-[9px] font-black uppercase text-slate-500">{figureFiles.length} Figures</span>
+                           <span className="px-2 py-1 bg-slate-100 rounded text-[9px] font-black uppercase text-slate-500">{supplementaryFiles.length} Data</span>
+                        </div>
+                     </div>
                   </div>
                </div>
 
-               <div className="max-w-[850px] mx-auto text-black">
-                  <div className="mb-14">
-                     <h4 className="font-bold text-[11px] uppercase tracking-[0.3em] mb-6 border-b border-slate-100 pb-3 text-slate-900">Abstract</h4>
-                     <div className="text-[14px] leading-relaxed text-justify indent-10 font-serif" dangerouslySetInnerHTML={{ __html: abstract || 'No abstract content localized.' }} />
-                  </div>
-
-                  <div className="space-y-16">
-                     {sections.map((sec, i) => (
-                       <div key={i} className="text-justify pt-10 border-t border-slate-100 first:border-0 first:pt-0">
-                         <h4 className="font-bold text-[11px] mb-6 uppercase tracking-[0.2em] text-slate-950 flex items-center gap-4">
-                           <span className="w-8 h-8 bg-slate-900 text-white rounded-full flex items-center justify-center text-[11px] font-black">{i+1}</span>
-                           {sec.title}
-                         </h4>
-                         <div dangerouslySetInnerHTML={{ __html: sec.html || "<p class='italic text-slate-300 py-6 text-center border border-dashed rounded-2xl'>Section content skipped.</p>" }} 
-                              className="text-[15px] leading-[1.8] tiptap-section" />
-                       </div>
-                     ))}
-                  </div>
-               </div>
-               
-               <div className="mt-20 pt-10 border-t border-slate-100 text-center">
-                  <button type="button" onClick={() => setStep(3)} className="px-10 py-3 bg-slate-100 text-slate-500 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all">Correction needed? Return to Formatting</button>
+               <div className="mt-12 flex justify-center">
+                  <button type="button" onClick={() => setStep(3)} className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] hover:underline transition-all">
+                     Technical Corrections Required? Edit Formatting
+                  </button>
                </div>
             </div>
-
-            {manuscriptFile && (
-              <div className="flex items-center gap-6 p-6 bg-slate-900 rounded-[2rem] text-white shadow-xl">
-                 <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-blue-400">
-                    <FileText size={28} />
-                 </div>
-                 <div className="flex-1">
-                    <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1">Attached Manuscript</p>
-                    <p className="text-lg font-bold">{manuscriptFile?.name}</p>
-                 </div>
-                 <div className="flex gap-3">
-                    <button type="button" onClick={handleDownloadPreviewPdf} className="p-3 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-all border border-white/10" title="Review formatting as PDF">
-                       <Download size={20} />
-                    </button>
-                 </div>
-              </div>
-            )}
           </div>
         )}
 
