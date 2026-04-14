@@ -26,6 +26,8 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [doi, setDoi] = useState("");
   const [files, setFiles] = useState<FileList | null>(null);
+  const [editors, setEditors] = useState<any[]>([]);
+  const [selectedEditorId, setSelectedEditorId] = useState<string>("");
 
   const handleSendMessage = async () => {
     if (!messageContent.trim() && (!files || files.length === 0)) return;
@@ -61,10 +63,19 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
   useEffect(() => {
     async function fetchArticle() {
       try {
-        const res = await fetch(`/api/articles/${id}`);
+        const [res, editorsRes] = await Promise.all([
+          fetch(`/api/articles/${id}`),
+          fetch(`/api/admin/reviewers`)
+        ]);
         const data = await res.json();
+        const edData = await editorsRes.json();
+        
         setArticle(data);
         if (data.doi) setDoi(data.doi);
+        
+        if (Array.isArray(edData)) {
+           setEditors(edData.filter(u => u.role === 'EDITOR' || u.role === 'EDITOR_IN_CHIEF' || u.role === 'ASSOCIATE_EDITOR'));
+        }
       } catch (err) {
         console.error("Fetch error:", err);
       } finally {
@@ -123,6 +134,29 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
     }
   };
 
+  const handleAssignEditor = async () => {
+    if (!selectedEditorId) return;
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/admin/assign-editor`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ articleId: id, editorId: selectedEditorId })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMessage({ type: 'success', text: "Internal editor successfully assigned for peer review." });
+        setArticle(data.article);
+      } else {
+        throw new Error("Failed to assign editor.");
+      }
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (loading) return <div className={styles.loaderContainer}><Loader2 className={styles.spinner} /></div>;
   if (!article) return <div className={styles.errorState}>Manuscript entry not found in active registry.</div>;
 
@@ -143,6 +177,9 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
         <div className={styles.meta}>
           <div className={styles.metaItem}><User size={14} /> {article.submitter?.name || "Lead Author"}</div>
           <div className={styles.metaItem}><Calendar size={14} /> Registered {new Date(article.createdAt).toLocaleDateString()}</div>
+          {article.assignedEditor && (
+             <div className={styles.metaItem}><User size={14} /> Internal Editor: {article.assignedEditor?.name}</div>
+          )}
           <div className={`${styles.statusBadge} ${styles[article.status.toLowerCase()] || styles.screening}`}>
              {article.status === 'SCREENING' ? 'INTERNAL PEER REVIEW' : 
               article.status === 'UNDER_REVIEW' ? 'SUBJECT EXPERT REVIEW' : 
@@ -371,14 +408,41 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
              
              <div className={styles.actionGrid}>
                  {article.status === "SCREENING" && (
-                    <button 
-                      onClick={() => handleDecision("UNDER_REVIEW")}
-                      disabled={submitting}
-                      className={styles.actionBtn}
-                      style={{ background: '#2563eb', marginBottom: '1rem' }}
-                    >
-                      Initiate Subject Expert Review
-                    </button>
+                    <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '1.5rem', border: '1px solid #e2e8f0', marginBottom: '1rem' }}>
+                       <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '1rem', display: 'block' }}>Internal Peer Review</label>
+                       {article.editorId ? (
+                          <div style={{ marginBottom: '1rem', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                            <CheckCircle size={16} className="inline mr-2 text-emerald-500" />
+                            Assigned Editor: <span style={{ color: '#0f172a' }}>{article.assignedEditor?.name}</span>
+                          </div>
+                       ) : (
+                          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px dashed #cbd5e1' }}>
+                             <select 
+                               value={selectedEditorId} 
+                               onChange={(e) => setSelectedEditorId(e.target.value)}
+                               style={{ flex: 1, padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid #cbd5e1', outline: 'none', fontSize: '0.75rem', fontWeight: 'bold', color: '#334155' }}
+                             >
+                               <option value="">Select Internal Editor...</option>
+                               {editors.map((ed: any) => <option key={ed.id} value={ed.id}>{ed.name}</option>)}
+                             </select>
+                             <button 
+                               onClick={handleAssignEditor} 
+                               disabled={submitting || !selectedEditorId}
+                               style={{ background: '#0f172a', color: 'white', padding: '0 1.5rem', borderRadius: '0.75rem', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer' }}
+                             >
+                               Assign
+                             </button>
+                          </div>
+                       )}
+                       <button 
+                         onClick={() => handleDecision("UNDER_REVIEW")}
+                         disabled={submitting}
+                         className={styles.actionBtn}
+                         style={{ background: '#2563eb', opacity: article.editorId ? 1 : 0.5, width: '100%' }}
+                       >
+                         {article.editorId ? 'Approve & Initiate Subject Expert Review' : 'Initiate Subject Expert Review (Overrule)'}
+                       </button>
+                    </div>
                  )}
 
                  <div style={{ marginBottom: '2rem', padding: '1.5rem', background: '#f8fafc', borderRadius: '1.5rem', border: '1px solid #e2e8f0' }}>

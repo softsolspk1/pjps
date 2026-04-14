@@ -59,10 +59,12 @@ model Article {
   submissionTrack   String?         @default("REGULAR")
   parentId          String?
   version           Int             @default(1)
+  editorId          String?
   issue             Issue?          @relation(fields: [issueId], references: [id])
   parentArticle     Article?        @relation("ArticleVersions", fields: [parentId], references: [id])
   revisions         Article[]       @relation("ArticleVersions")
   submitter         User?           @relation("SubmittedArticles", fields: [userId], references: [id])
+  assignedEditor    User?           @relation("EditorAssignments", fields: [editorId], references: [id])
   authors           AuthorMapping[]
   media             Media[]
   reviews           Review[]
@@ -173,6 +175,7 @@ model User {
   resetToken       String?
   resetTokenExpiry DateTime?
   articles         Article[]  @relation("SubmittedArticles")
+  editorialArticles Article[] @relation("EditorAssignments")
   auditLogs        AuditLog[]
   reviewsGiven     Review[]   @relation("ReviewAssignments")
 }

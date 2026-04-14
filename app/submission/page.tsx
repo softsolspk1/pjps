@@ -168,7 +168,7 @@ function SubmissionForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (step < 6) return handleNextStep();
+    if (step < 6) return;
 
     // Validation for final submission
     // Since payment proof was removed from UI, we bypass its validation
