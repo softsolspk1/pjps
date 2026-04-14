@@ -124,6 +124,12 @@ export default function SectionEditor({ title, html, onChange, onImageUpload, au
     autofocus: autoFocus ? 'end' : false,
   });
 
+  React.useEffect(() => {
+    if (editor && autoFocus) {
+      editor.commands.focus('end');
+    }
+  }, [editor, autoFocus]);
+
   if (!editor) return null;
 
   return (

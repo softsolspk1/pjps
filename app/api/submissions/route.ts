@@ -49,6 +49,9 @@ export async function POST(req: Request) {
           startsWith: prefix
         }
       },
+      select: {
+        trackingId: true
+      },
       orderBy: {
         createdAt: 'desc'
       }

@@ -447,21 +447,21 @@ function SubmissionForm() {
                   <div className="col-span-2 md:col-span-1">
                     <label className={styles.subLabel}>Full Academic Name (A{idx + 1})</label>
                     <input 
-                      type="text" required value={author.name} onChange={(e) => updateAuthor(idx, "name", e.target.value)}
+                      type="text" value={author.name} onChange={(e) => updateAuthor(idx, "name", e.target.value)}
                       className={styles.inputSmall}
                     />
                   </div>
                   <div className="col-span-2 md:col-span-1">
                     <label className={styles.subLabel}>Email Address</label>
                     <input 
-                      type="email" required value={author.email} onChange={(e) => updateAuthor(idx, "email", e.target.value)}
+                      type="email" value={author.email} onChange={(e) => updateAuthor(idx, "email", e.target.value)}
                       className={styles.inputSmall}
                     />
                   </div>
                   <div className="col-span-2">
                     <label className={styles.subLabel}>Primary Institutional Affiliation <span className="text-red-500 font-black">*</span></label>
                     <input 
-                      type="text" required value={author.affiliation} onChange={(e) => updateAuthor(idx, "affiliation", e.target.value)}
+                      type="text" value={author.affiliation} onChange={(e) => updateAuthor(idx, "affiliation", e.target.value)}
                       className={styles.inputSmall}
                       placeholder="University / Research Center / Hospital"
                     />
@@ -483,8 +483,14 @@ function SubmissionForm() {
         {step === 3 && (
            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
               <div className="text-center mb-6">
-                <h3 className="text-2xl font-serif font-black text-slate-800">Manuscript Formatting</h3>
-                <p className="text-sm font-bold text-blue-600 mt-2 uppercase tracking-tight">Optional Step</p>
+                <h3 className="text-3xl font-serif font-black text-slate-800 tracking-tight">Manuscript Formatting</h3>
+                 <div className="flex justify-center gap-2 mt-3 mb-4">
+                   <span className="px-3 py-1 bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg">New Features</span>
+                   <span className="px-3 py-1 bg-slate-100 text-slate-500 text-[9px] font-black uppercase tracking-widest rounded-full border border-slate-200 uppercase">Optional Step</span>
+                 </div>
+                 <p className="text-sm text-slate-500 mt-1 max-w-2xl mx-auto font-medium">
+                   You may skip this optional formatting step if you have already attached a full manuscript (PDF/DOCX) in the <strong>Attach</strong> step.
+                 </p>
                 <p className="text-sm text-slate-500 mt-1">
                   You may skip this formatting step if you have already attached a full manuscript (PDF/DOCX) in the <strong>Attach</strong> step. 
                   However, formatting here enables direct indexing.
@@ -607,82 +613,66 @@ function SubmissionForm() {
         )}
 
         {step === 5 && (
-          <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4">
-            <div className="p-8 bg-slate-50 border border-slate-100 rounded-[2rem]">
-               <h3 className="text-xl font-serif font-black mb-6 flex items-center gap-3">
-                  <FileText size={24} className="text-blue-600" /> Professional Portfolio Review
-               </h3>
+          <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4">
+            <div className="bg-white p-12 rounded-[2.5rem] border border-slate-200 shadow-2xl relative overflow-hidden print-body-section" style={{ fontFamily: "'Times New Roman', serif", backgroundColor: 'white', color: 'black' }}>
+               <div className="absolute top-0 left-0 w-full h-2 bg-blue-900"></div>
+               <div className="absolute top-4 right-8 text-[9px] font-black text-slate-300 uppercase tracking-widest">PJPS Submission Registry</div>
                
-               <div className="space-y-6">
-                  <div>
-                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Title</p>
-                     <p className="text-lg font-bold text-slate-900 font-serif leading-tight">{title}</p>
+               <div className="border-b-2 border-slate-900 pb-12 mb-12 text-center">
+                  <h1 className="text-4xl font-serif font-black uppercase text-slate-900 mb-8 leading-tight tracking-tight">{title}</h1>
+                  <div className="flex flex-wrap justify-center gap-x-12 gap-y-4">
+                     {authors.map((a, i) => (
+                        <div key={i} className="text-center group">
+                           <p className="font-bold text-slate-900 uppercase tracking-tighter text-[12px] mb-1">{a.name}<sup>{i+1}*</sup></p>
+                           <p className="text-[10px] text-slate-400 italic max-w-[200px] mx-auto leading-tight">{a.affiliation}</p>
+                        </div>
+                     ))}
                   </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                     <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Keywords</p>
-                        <p className="text-sm font-medium text-slate-700">{keywords}</p>
-                     </div>
-                     <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Track</p>
-                        <p className="text-sm font-bold text-blue-600">{submissionType}</p>
-                     </div>
+               </div>
+
+               <div className="max-w-[850px] mx-auto text-black">
+                  <div className="mb-14">
+                     <h4 className="font-bold text-[11px] uppercase tracking-[0.3em] mb-6 border-b border-slate-100 pb-3 text-slate-900">Abstract</h4>
+                     <div className="text-[14px] leading-relaxed text-justify indent-10 font-serif" dangerouslySetInnerHTML={{ __html: abstract || 'No abstract content localized.' }} />
                   </div>
 
-                  <div>
-                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Authors ({authors.length})</p>
-                     <div className="flex flex-wrap gap-2 mt-2">
-                        {authors.map((a, i) => (
-                           <div key={i} className="px-4 py-2 bg-white border border-slate-200 rounded-full text-[10px] font-bold text-slate-700">
-                              {a.name}
-                           </div>
-                        ))}
-                     </div>
-                  </div>
-
-                  <div className="bg-white p-10 rounded-[2rem] border border-blue-50 mt-6 shadow-sm">
-                     <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] mb-4 border-b border-blue-50 pb-2 inline-block">Technical Abstract</p>
-                     <div className="text-sm text-slate-700 leading-relaxed indent-8 text-justify font-serif" dangerouslySetInnerHTML={{ __html: abstract || 'No abstract content localized.' }} />
-                  </div>
-
-                  <div className="bg-white p-6 rounded-2xl border border-slate-200 mt-4 max-h-[400px] overflow-y-auto print-body-section" style={{ fontFamily: "'Times New Roman', serif" }}>
-                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 sticky top-0 bg-white pt-2 pb-2">Formatted Body Preview</p>
+                  <div className="space-y-16">
                      {sections.map((sec, i) => (
-                       <div key={i}>
-                         <h4 className="font-bold text-lg mb-2 uppercase">{sec.title}</h4>
-                         <div dangerouslySetInnerHTML={{ __html: sec.html || "<p class='italic text-slate-400'>No content formatted for this section.</p>" }} className="mb-6 tiptap-section" />
+                       <div key={i} className="text-justify pt-10 border-t border-slate-100 first:border-0 first:pt-0">
+                         <h4 className="font-bold text-[11px] mb-6 uppercase tracking-[0.2em] text-slate-950 flex items-center gap-4">
+                           <span className="w-8 h-8 bg-slate-900 text-white rounded-full flex items-center justify-center text-[11px] font-black">{i+1}</span>
+                           {sec.title}
+                         </h4>
+                         <div dangerouslySetInnerHTML={{ __html: sec.html || "<p class='italic text-slate-300 py-6 text-center border border-dashed rounded-2xl'>Section content skipped.</p>" }} 
+                              className="text-[15px] leading-[1.8] tiptap-section" />
                        </div>
                      ))}
                   </div>
-                  
-                  <div className="text-center">
-                    <button type="button" onClick={() => setStep(3)} className="text-blue-600 text-xs font-black uppercase tracking-widest hover:underline">Needs correction? Go back to formatting</button>
-                  </div>
-
-                  {manuscriptFile && (
-                    <div className="flex items-center gap-4 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl mt-4">
-                       <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-emerald-600 shadow-sm">
-                          <FileText size={20} />
-                       </div>
-                       <div className="flex-1">
-                          <p className="text-[10px] font-black text-emerald-800 uppercase tracking-widest">Attached File</p>
-                          <p className="text-sm font-bold text-emerald-900">{manuscriptFile?.name}</p>
-                       </div>
-                       <div className="flex gap-2">
-                          <button type="button" onClick={handleDownloadPreviewPdf} className="p-2 bg-white text-rose-600 rounded-lg hover:bg-rose-50 transition-colors border border-rose-100" title="Preview PDF">
-                             <Download size={16} />
-                          </button>
-                          <button type="button" onClick={handleDownloadPreviewDocx} className="p-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors border border-blue-100" title="Preview Word">
-                             <FileArchive size={16} />
-                          </button>
-                       </div>
-                    </div>
-                  )}
+               </div>
+               
+               <div className="mt-20 pt-10 border-t border-slate-100 text-center">
+                  <button type="button" onClick={() => setStep(3)} className="px-10 py-3 bg-slate-100 text-slate-500 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all">Correction needed? Return to Formatting</button>
                </div>
             </div>
+
+            {manuscriptFile && (
+              <div className="flex items-center gap-6 p-6 bg-slate-900 rounded-[2rem] text-white shadow-xl">
+                 <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-blue-400">
+                    <FileText size={28} />
+                 </div>
+                 <div className="flex-1">
+                    <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1">Attached Manuscript</p>
+                    <p className="text-lg font-bold">{manuscriptFile?.name}</p>
+                 </div>
+                 <div className="flex gap-3">
+                    <button type="button" onClick={handleDownloadPreviewPdf} className="p-3 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-all border border-white/10" title="Review formatting as PDF">
+                       <Download size={20} />
+                    </button>
+                 </div>
+              </div>
+            )}
           </div>
-        )}
+        )}}
 
         {step === 6 && (
            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4">
@@ -694,15 +684,21 @@ function SubmissionForm() {
                <p className="text-blue-100 text-sm leading-relaxed mb-6">
                   By clicking submit, you certify that this manuscript constitutes original scholarly research and adheres to the ethical standards of the Pakistan Journal of Pharmaceutical Sciences.
                </p>
-               <label className="flex items-center gap-4 cursor-pointer group">
-                  <input 
-                    type="checkbox" 
-                    checked={guidelinesConfirmed}
-                    onChange={(e) => setGuidelinesConfirmed(e.target.checked)}
-                    className="w-6 h-6 rounded bg-white/10 border-white/20 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-xs font-black uppercase tracking-widest group-hover:text-blue-400 transition-colors">I accept the terms of submission</span>
-               </label>
+               <label className="flex items-center gap-6 cursor-pointer group bg-white/5 p-6 rounded-2xl border border-white/10 hover:bg-white/10 transition-all">
+                   <div className="relative">
+                     <input 
+                       type="checkbox" 
+                       required
+                       checked={guidelinesConfirmed}
+                       onChange={(e) => setGuidelinesConfirmed(e.target.checked)}
+                       className="w-8 h-8 rounded-lg bg-white/10 border-white/20 text-blue-500 focus:ring-blue-500 transition-all cursor-pointer"
+                     />
+                   </div>
+                   <div className="flex-1">
+                     <p className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-300 mb-1">Peer-Review Integrity Check</p>
+                     <p className="text-xs font-bold text-white group-hover:text-blue-100 transition-colors leading-relaxed">I certify that this submission is original work and adheres to the ethical standards and formatting guidelines of the Pakistan Journal of Pharmaceutical Sciences.</p>
+                   </div>
+                </label>
             </div>
            </div>
         )}
@@ -724,7 +720,12 @@ function SubmissionForm() {
             </button>
           ) : (
             <div className="flex flex-col items-center gap-4">
-              {error && <p className="text-red-500 text-xs font-bold uppercase animate-pulse">{error}</p>}
+              {error && (
+                <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 animate-shake">
+                  <AlertCircle size={16} className="text-red-500" />
+                  <p className="text-red-500 text-[10px] font-black uppercase tracking-widest">{error}</p>
+                </div>
+              )}
               <button type="submit" disabled={loading} className="btn btn-primary px-12 py-4 flex items-center gap-3 active:scale-95 transition-transform shadow-premium">
                 {loading ? <Loader2 className="animate-spin" size={20} /> : <><ShieldCheck size={20} /> {parentId ? "Submit Revision Cycle" : "Complete Peer-Review Entry"}</>}
               </button>
