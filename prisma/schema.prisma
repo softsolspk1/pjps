@@ -58,9 +58,10 @@ model Article {
   trackingId        String?         @unique
   submissionTrack   String?         @default("REGULAR")
   parentId          String?
-  version           Int             @default(1)
+  version           Int              @default(1)
   editorId          String?
-  issue             Issue?          @relation(fields: [issueId], references: [id])
+  editorialRemarks  String?
+  issue             Issue?           @relation(fields: [issueId], references: [id])
   parentArticle     Article?        @relation("ArticleVersions", fields: [parentId], references: [id])
   revisions         Article[]       @relation("ArticleVersions")
   submitter         User?           @relation("SubmittedArticles", fields: [userId], references: [id])

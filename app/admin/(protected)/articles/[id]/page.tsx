@@ -28,6 +28,8 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
   const [files, setFiles] = useState<FileList | null>(null);
   const [editors, setEditors] = useState<any[]>([]);
   const [selectedEditorId, setSelectedEditorId] = useState<string>("");
+  const [internalRemarks, setInternalRemarks] = useState("");
+  const [activeStep, setActiveStep] = useState<1 | 2>(1);
 
   const handleSendMessage = async () => {
     if (!messageContent.trim() && (!files || files.length === 0)) return;
@@ -72,7 +74,11 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
         
         setArticle(data);
         if (data.doi) setDoi(data.doi);
+        if (data.editorialRemarks) setInternalRemarks(data.editorialRemarks);
         
+        if (data.status === 'SCREENING') setActiveStep(1);
+        else setActiveStep(2);
+
         if (Array.isArray(edData)) {
            setEditors(edData.filter(u => u.role === 'EDITOR' || u.role === 'EDITOR_IN_CHIEF' || u.role === 'ASSOCIATE_EDITOR'));
         }
@@ -149,6 +155,25 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
         setArticle(data.article);
       } else {
         throw new Error("Failed to assign editor.");
+      }
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSaveRemarks = async () => {
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/admin/articles/${id}/remarks`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ remarks: internalRemarks })
+      });
+      if (res.ok) {
+        setMessage({ type: 'success', text: "Internal peer review remarks successfully archived." });
+        setArticle({ ...article, editorialRemarks: internalRemarks });
       }
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message });
@@ -321,55 +346,85 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-               <h3 className={styles.sectionHeader} style={{ fontSize: '1.1rem' }}><MessageSquare size={18} /> Review Scorecards</h3>
+               <h3 className={styles.sectionHeader} style={{ fontSize: '1.1rem' }}>
+                  {article.status === 'SCREENING' ? <Eye size={18} /> : <MessageSquare size={18} />} 
+                  {article.status === 'SCREENING' ? ' Step 1: Internal Peer Review' : ' Step 2: Subject Expert Review'}
+               </h3>
                <Link 
                  href={`/admin/articles/${id}/assign`}
                  style={{ background: '#2563eb', color: 'white', padding: '0.75rem 1.25rem', borderRadius: '1.25rem', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', textDecoration: 'none', transition: '0.3s' }}
                >
-                  Assign Expert
+                  {article.status === 'SCREENING' ? 'Peer Review - Assign Editor' : 'Subject Expert - Assign Reviewer'}
                </Link>
             </div>
 
-            {article.reviews?.length === 0 ? (
-              <div style={{ padding: '3rem', textAlign: 'center', background: '#f8fafc', borderRadius: '2rem', border: '1px dashed #cbd5e1', color: '#94a3b8', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase' }}>No expert reviews localized.</div>
+            {article.status === 'SCREENING' ? (
+               <div className={styles.reviewItem} style={{ borderLeft: '4px solid #2563eb', padding: '2rem' }}>
+                  <div className={styles.reviewHeader}>
+                     <span className={styles.reviewerName}>Internal Editorial Evaluation</span>
+                     {article.assignedEditor && <span className={styles.reviewRec}>{article.assignedEditor.name}</span>}
+                  </div>
+                  <div style={{ marginTop: '1.5rem' }}>
+                     <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.75rem', display: 'block' }}>Journal Internal Remarks</label>
+                     <textarea 
+                        className={styles.abstractContent}
+                        style={{ width: '100%', minHeight: '150px', border: '1px solid #e2e8f0', borderRadius: '1rem', padding: '1rem', fontSize: '0.85rem', color: '#1e293b' }}
+                        placeholder="Enter internal peer review findings, scientific merit check, and editorial recommendations..."
+                        value={internalRemarks}
+                        onChange={(e) => setInternalRemarks(e.target.value)}
+                     />
+                     <button 
+                        onClick={handleSaveRemarks}
+                        disabled={submitting}
+                        className={styles.actionBtn}
+                        style={{ marginTop: '1rem', background: '#0f172a', width: 'auto', padding: '0.75rem 2rem' }}
+                     >
+                        {submitting ? <Loader2 className="animate-spin" size={16} /> : 'Save Internal Remarks'}
+                     </button>
+                  </div>
+               </div>
             ) : (
-              article.reviews.map((review: any) => (
-                <div key={review.id} className={styles.reviewItem}>
-                   <div className={styles.reviewHeader}>
-                      <span className={styles.reviewerName}>Expert Referee MS-#{review.id.slice(-4)}</span>
-                      <span className={styles.reviewRec}>{review.recommendation}</span>
-                   </div>
-                   
-                   <div className={styles.scoreBox}>
-                      <div className={styles.scoreItem}>
-                         <div className={styles.scoreItemLabel}>Orig</div>
-                         <div className={styles.scoreItemVal}>{review.originality}</div>
-                      </div>
-                      <div className={styles.scoreItem}>
-                         <div className={styles.scoreItemLabel}>Qual</div>
-                         <div className={styles.scoreItemVal}>{review.quality}</div>
-                      </div>
-                      <div className={styles.scoreItem}>
-                         <div className={styles.scoreItemLabel}>Impact</div>
-                         <div className={styles.scoreItemVal}>{review.importance}</div>
-                      </div>
-                      <div className={styles.scoreItem} style={{ background: '#eff6ff' }}>
-                         <div className={styles.scoreItemLabel} style={{ color: '#3b82f6' }}>Rating</div>
-                         <div className={styles.scoreItemVal} style={{ color: '#2563eb' }}>{review.rating || 0}</div>
-                      </div>
-                   </div>
-                   
-                   <div className={`${styles.feedbackPanel} ${styles.confidential}`}>
-                      <div className={styles.panelHeader}><ShieldCheck size={14} color="#ef4444" /> Executive Disclosure (Editorial Only)</div>
-                      <p className={styles.panelContent}>"{review.commentsToEditor || "No private remarks provided."}"</p>
-                   </div>
-
-                   <div className={`${styles.feedbackPanel} ${styles.public}`}>
-                      <div className={styles.panelHeader}><MessageSquare size={14} color="#2563eb" /> Public Recommendation (Author)</div>
-                      <p className={styles.panelContent}>"{review.commentsToAuthor || review.comments || "No author feedback provided."}"</p>
-                   </div>
-                </div>
-              ))
+              article.reviews?.length === 0 ? (
+                <div style={{ padding: '3rem', textAlign: 'center', background: '#f8fafc', borderRadius: '2rem', border: '1px dashed #cbd5e1', color: '#94a3b8', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase' }}>No expert reviews localized.</div>
+              ) : (
+                article.reviews.map((review: any) => (
+                  <div key={review.id} className={styles.reviewItem}>
+                     <div className={styles.reviewHeader}>
+                        <span className={styles.reviewerName}>Expert Referee MS-#{review.id.slice(-4)}</span>
+                        <span className={styles.reviewRec}>{review.recommendation}</span>
+                     </div>
+                     
+                     <div className={styles.scoreBox}>
+                        <div className={styles.scoreItem}>
+                           <div className={styles.scoreItemLabel}>Orig</div>
+                           <div className={styles.scoreItemVal}>{review.originality}</div>
+                        </div>
+                        <div className={styles.scoreItem}>
+                           <div className={styles.scoreItemLabel}>Qual</div>
+                           <div className={styles.scoreItemVal}>{review.quality}</div>
+                        </div>
+                        <div className={styles.scoreItem}>
+                           <div className={styles.scoreItemLabel}>Impact</div>
+                           <div className={styles.scoreItemVal}>{review.importance}</div>
+                        </div>
+                        <div className={styles.scoreItem} style={{ background: '#eff6ff' }}>
+                           <div className={styles.scoreItemLabel} style={{ color: '#3b82f6' }}>Rating</div>
+                           <div className={styles.scoreItemVal} style={{ color: '#2563eb' }}>{review.rating || 0}</div>
+                        </div>
+                     </div>
+                     
+                     <div className={`${styles.feedbackPanel} ${styles.confidential}`}>
+                        <div className={styles.panelHeader}><ShieldCheck size={14} color="#ef4444" /> Executive Disclosure (Editorial Only)</div>
+                        <p className={styles.panelContent}>"{review.commentsToEditor || "No private remarks provided."}"</p>
+                     </div>
+  
+                     <div className={`${styles.feedbackPanel} ${styles.public}`}>
+                        <div className={styles.panelHeader}><MessageSquare size={14} color="#2563eb" /> Public Recommendation (Author)</div>
+                        <p className={styles.panelContent}>"{review.commentsToAuthor || review.comments || "No author feedback provided."}"</p>
+                     </div>
+                  </div>
+                ))
+              )
             )}
           </div>
 
