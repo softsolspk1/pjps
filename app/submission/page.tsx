@@ -403,7 +403,7 @@ function SubmissionForm() {
               <div className={styles.formGroup}>
                 <label className={styles.label}>Index Keywords</label>
                 <input 
-                  type="text" required value={keywords} onChange={(e) => setKeywords(e.target.value)}
+                  type="text" value={keywords} onChange={(e) => setKeywords(e.target.value)}
                   className={styles.input}
                   placeholder="Pharmacology, Pharmaceutics..."
                 />
@@ -412,7 +412,7 @@ function SubmissionForm() {
               <div className={`col-span-1 md:col-span-2 max-w-4xl ${styles.formGroup}`}>
                 <label className={styles.label}>Full Manuscript Title</label>
                 <input 
-                  type="text" required value={title} onChange={(e) => setTitle(e.target.value)}
+                  type="text" value={title} onChange={(e) => setTitle(e.target.value)}
                   className={styles.input}
                   placeholder="Scientific title of your research..."
                 />
@@ -420,12 +420,14 @@ function SubmissionForm() {
               
               <div className={`col-span-1 md:col-span-2 max-w-4xl ${styles.formGroup}`}>
                 <label className={styles.label}>Abstract (Scoping Summary)</label>
-                <textarea 
-                  required value={abstract} onChange={(e) => setAbstract(e.target.value)}
-                  className={styles.textarea}
-                  rows={6}
-                  placeholder="Comprehensive summary of research objectives, methodology, and key findings..."
-                />
+                <div className="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-inner mt-2">
+                  <SectionEditor 
+                    title="ABSTRACT (RICH TEXT)"
+                    html={abstract}
+                    onChange={(newHtml) => setAbstract(newHtml)}
+                    onImageUpload={uploadImageNative}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -482,7 +484,11 @@ function SubmissionForm() {
            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
               <div className="text-center mb-6">
                 <h3 className="text-2xl font-serif font-black text-slate-800">Manuscript Formatting</h3>
-                <p className="text-sm text-slate-500 mt-2">Draft and format your manuscript content using the structural editor below. This content will be attached to your submission online.</p>
+                <p className="text-sm font-bold text-blue-600 mt-2 uppercase tracking-tight">Optional Step</p>
+                <p className="text-sm text-slate-500 mt-1">
+                  You may skip this formatting step if you have already attached a full manuscript (PDF/DOCX) in the <strong>Attach</strong> step. 
+                  However, formatting here enables direct indexing.
+                </p>
               </div>
               
               <div className="bg-slate-50 p-4 rounded-3xl border border-slate-200 shadow-inner">
@@ -491,6 +497,7 @@ function SubmissionForm() {
                     key={sec.id}
                     title={sec.title}
                     html={sec.html}
+                    autoFocus={idx === 0}
                     onChange={(newHtml) => {
                       const newSecs = [...sections];
                       newSecs[idx].html = newHtml;
@@ -603,7 +610,7 @@ function SubmissionForm() {
           <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4">
             <div className="p-8 bg-slate-50 border border-slate-100 rounded-[2rem]">
                <h3 className="text-xl font-serif font-black mb-6 flex items-center gap-3">
-                  <FileText size={24} className="text-blue-600" /> Online Manuscript Review
+                  <FileText size={24} className="text-blue-600" /> Professional Portfolio Review
                </h3>
                
                <div className="space-y-6">
@@ -628,15 +635,15 @@ function SubmissionForm() {
                      <div className="flex flex-wrap gap-2 mt-2">
                         {authors.map((a, i) => (
                            <div key={i} className="px-4 py-2 bg-white border border-slate-200 rounded-full text-[10px] font-bold text-slate-700">
-                              {a.name} ({a.affiliation})
+                              {a.name}
                            </div>
                         ))}
                      </div>
                   </div>
 
-                  <div className="bg-white p-6 rounded-2xl border border-slate-200">
-                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Abstract Preview</p>
-                     <p className="text-sm text-slate-600 leading-relaxed italic">{abstract}</p>
+                  <div className="bg-white p-10 rounded-[2rem] border border-blue-50 mt-6 shadow-sm">
+                     <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] mb-4 border-b border-blue-50 pb-2 inline-block">Technical Abstract</p>
+                     <div className="text-sm text-slate-700 leading-relaxed indent-8 text-justify font-serif" dangerouslySetInnerHTML={{ __html: abstract || 'No abstract content localized.' }} />
                   </div>
 
                   <div className="bg-white p-6 rounded-2xl border border-slate-200 mt-4 max-h-[400px] overflow-y-auto print-body-section" style={{ fontFamily: "'Times New Roman', serif" }}>
@@ -716,9 +723,12 @@ function SubmissionForm() {
               Continue to {step === 1 ? "Authors" : step === 2 ? "Formatting" : step === 3 ? "Attach" : step === 4 ? "Review" : "Submit"} <ChevronRight size={16} />
             </button>
           ) : (
-            <button type="submit" disabled={loading} className="btn btn-primary px-12 py-4 flex items-center gap-3 active:scale-95 transition-transform">
-              {loading ? <Loader2 className="animate-spin" size={20} /> : <><ShieldCheck size={20} /> {parentId ? "Submit Revision Cycle" : "Complete Peer-Review Entry"}</>}
-            </button>
+            <div className="flex flex-col items-center gap-4">
+              {error && <p className="text-red-500 text-xs font-bold uppercase animate-pulse">{error}</p>}
+              <button type="submit" disabled={loading} className="btn btn-primary px-12 py-4 flex items-center gap-3 active:scale-95 transition-transform shadow-premium">
+                {loading ? <Loader2 className="animate-spin" size={20} /> : <><ShieldCheck size={20} /> {parentId ? "Submit Revision Cycle" : "Complete Peer-Review Entry"}</>}
+              </button>
+            </div>
           )}
         </div>
       </form>

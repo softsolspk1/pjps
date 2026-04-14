@@ -91,6 +91,7 @@ interface SectionEditorProps {
   html: string;
   onChange: (html: string) => void;
   onImageUpload: (files: File[], editor: any, position?: number | null) => Promise<void>;
+  autoFocus?: boolean;
 }
 
 export default function SectionEditor({ title, html, onChange, onImageUpload }: SectionEditorProps) {
@@ -119,7 +120,8 @@ export default function SectionEditor({ title, html, onChange, onImageUpload }: 
     editorProps: { attributes: { class: 'tiptap-section' } },
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
-    }
+    },
+    autofocus: autoFocus ? 'end' : false,
   });
 
   if (!editor) return null;
