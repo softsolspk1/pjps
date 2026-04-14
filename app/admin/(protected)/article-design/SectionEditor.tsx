@@ -94,7 +94,7 @@ interface SectionEditorProps {
   autoFocus?: boolean;
 }
 
-export default function SectionEditor({ title, html, onChange, onImageUpload }: SectionEditorProps) {
+export default function SectionEditor({ title, html, onChange, onImageUpload, autoFocus }: SectionEditorProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [savedSelection, setSavedSelection] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
