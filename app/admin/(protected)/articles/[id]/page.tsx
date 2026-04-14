@@ -10,7 +10,8 @@ import {
   Calendar, MessageSquare, Info,
   TrendingUp, Award, Quote,
   ShieldCheck, Eye, Search,
-  ChevronRight, ExternalLink, PlusCircle, BookOpen
+  ChevronRight, ExternalLink, PlusCircle, BookOpen,
+  Trash2
 } from "lucide-react";
 import styles from "./DecisionUpgrade.module.css";
 
