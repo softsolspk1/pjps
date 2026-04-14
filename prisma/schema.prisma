@@ -64,8 +64,8 @@ model Article {
   issue             Issue?           @relation(fields: [issueId], references: [id])
   parentArticle     Article?        @relation("ArticleVersions", fields: [parentId], references: [id])
   revisions         Article[]       @relation("ArticleVersions")
-  submitter         User?           @relation("SubmittedArticles", fields: [userId], references: [id])
-  assignedEditor    User?           @relation("EditorAssignments", fields: [editorId], references: [id])
+  submitter         User?           @relation("SubmittedArticles", fields: [userId], references: [id], onDelete: Cascade)
+  assignedEditor    User?           @relation("EditorAssignments", fields: [editorId], references: [id], onDelete: SetNull)
   authors           AuthorMapping[]
   media             Media[]
   reviews           Review[]

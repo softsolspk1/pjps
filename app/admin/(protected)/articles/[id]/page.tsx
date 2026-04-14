@@ -182,6 +182,27 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
     }
   };
 
+  const handleDeleteManuscript = async () => {
+    if (!confirm("Are you absolutely sure you want to PERMANENTLY purge this manuscript and all its associated data (reviews, media, etc.)? This cannot be undone.")) return;
+    
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/admin/articles/${id}`, {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        alert("Manuscript purged successfully. Returning to registry...");
+        router.push("/admin/articles");
+      } else {
+        alert("Failed to purge scholarly record.");
+      }
+    } catch (err) {
+      alert("Network error occurred.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (loading) return <div className={styles.loaderContainer}><Loader2 className={styles.spinner} /></div>;
   if (!article) return <div className={styles.errorState}>Manuscript entry not found in active registry.</div>;
 
@@ -542,6 +563,17 @@ export default function ArticleDecisionPage({ params }: { params: Promise<{ id: 
                  <button onClick={() => handleDecision("ACCEPTED")} disabled={submitting} className={`${styles.actionBtn} ${styles.accept}`}>Accept Manuscript</button>
                  <button onClick={() => handleDecision("REVISION")} disabled={submitting} className={`${styles.actionBtn} ${styles.revision}`}>Request Revision</button>
                  <button onClick={() => handleDecision("REJECTED")} disabled={submitting} className={`${styles.actionBtn} ${styles.reject}`}>Reject Manuscript</button>
+                 
+                 <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid #edf2f7' }}>
+                    <button 
+                       onClick={handleDeleteManuscript} 
+                       disabled={submitting} 
+                       className={styles.actionBtn} 
+                       style={{ background: 'white', color: '#ef4444', border: '1px solid #fee2e2', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                    >
+                       <Trash2 size={16} /> Purge Scholarly Record
+                    </button>
+                 </div>
               </div>
           </section>
         </aside>

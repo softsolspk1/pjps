@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import styles from "@/components/AdminTable.module.css";
-import { Edit2, UserCheck, Plus, FileText, Search, Filter, Loader2 } from "lucide-react";
+import { Edit2, UserCheck, Plus, FileText, Search, Filter, Loader2, Trash2, AlertTriangle } from "lucide-react";
 
 export default function AdminArticlesList() {
   const [articles, setArticles] = useState<any[]>([]);
@@ -12,6 +12,28 @@ export default function AdminArticlesList() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
+
+  const handleDelete = async (id: string, title: string) => {
+    if (!confirm(`Are you absolutely sure you want to purge the manuscript: "${title}"?\n\nThis will permanently delete it along with all reviews and formatting metadata.`)) return;
+    
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/admin/articles/${id}`, {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        const updated = articles.filter(a => a.id !== id);
+        setArticles(updated);
+        setFilteredArticles(updated);
+      } else {
+        alert("Failed to purge scholarly record.");
+      }
+    } catch (err) {
+      alert("Network error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     async function fetchArticles() {
@@ -155,6 +177,14 @@ export default function AdminArticlesList() {
                           <UserCheck size={16} />
                        </Link>
                      )}
+                     <button 
+                        onClick={() => handleDelete(article.id, article.title)}
+                        className={styles.actionBtn} 
+                        style={{ color: '#ef4444', borderColor: '#fee2e2' }} 
+                        title="Purge Scholarly Record"
+                     >
+                        <Trash2 size={16} />
+                     </button>
                   </div>
                 </td>
               </tr>

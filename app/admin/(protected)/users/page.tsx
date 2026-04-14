@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import styles from "@/components/AdminTable.module.css";
+import DeleteUserButton from "./DeleteUserButton";
 
 export default async function UserRegistryPage() {
   const users = await prisma.user.findMany({
@@ -111,15 +112,13 @@ export default async function UserRegistryPage() {
                   </div>
                 </td>
                  <td>
-                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                      <Link href={`/admin/users/${user.id}/edit`} className={styles.actionBtn} title="Modify Expert Profile">
-                         <Edit size={16} />
-                      </Link>
-                      <button className={styles.actionBtn} style={{ color: '#ef4444', borderColor: '#fee2e2' }} title="Revoke Registry Access">
-                         <Trash2 size={16} />
-                      </button>
-                    </div>
-                 </td>
+                     <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                       <Link href={`/admin/users/${user.id}/edit`} className={styles.actionBtn} title="Modify Expert Profile">
+                          <Edit size={16} />
+                       </Link>
+                       <DeleteUserButton userId={user.id} userName={user.name || "Unknown Expert"} />
+                     </div>
+                  </td>
               </tr>
             ))}
           </tbody>

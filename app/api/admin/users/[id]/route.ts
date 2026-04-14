@@ -62,3 +62,27 @@ export async function PATCH(
     return NextResponse.json({ error: "Failed to calibrate user institutional role" }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || (session.user as any).role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await params;
+
+    // The user associations like Articles will be deleted due to Cascade in schema
+    await prisma.user.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ success: true, message: "User and all associations purged from registry." });
+  } catch (err: any) {
+    console.error("User Delete API Error:", err);
+    return NextResponse.json({ error: "Failed to purge user entry" }, { status: 500 });
+  }
+}
