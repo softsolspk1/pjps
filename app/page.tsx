@@ -15,8 +15,8 @@ export default async function Home() {
       <Hero />
       <JournalMetrics />
 
-      <section className="container section-padding">
-        <div className={styles.portalGrid}>
+      <section className="container-full section-padding">
+        <div className={styles.portalGridFull}>
           {/* Main Content Column */}
           <div className={styles.mainContent}>
             <div className={styles.tabHeader}>
@@ -106,8 +106,8 @@ export default async function Home() {
 
       {/* Scope Section - Refined */}
       <section className={`${styles.scopeSection} section-padding`}>
-        <div className="container">
-          <div className={styles.sectionHeader}>
+        <div className="container-full">
+          <div className={styles.sectionHeaderLeft}>
             <span className={styles.preTitle}>Scientific Frontiers</span>
             <h2 className={styles.sectionTitle}>Expanding Research Horizons</h2>
             <p className={styles.sectionSubtitle}>
@@ -115,7 +115,7 @@ export default async function Home() {
             </p>
           </div>
           
-          <div className={styles.scopeGrid}>
+          <div className={styles.scopeGridFull}>
              {[
                "Biological Sciences", "Pharmaceutical Analysis", "Drug Delivery Systems", 
                "Molecular Biology", "Biopharmaceutics", "Pharmacology", 

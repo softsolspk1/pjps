@@ -1,15 +1,15 @@
 .metricsWrapper {
   background-color: var(--background);
   border-bottom: 1px solid var(--border-light);
-  padding: 40px 0;
+  padding: 40px 5vw;
   position: relative;
   z-index: 10;
 }
 
 .metricsGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 30px;
+  display: flex;
+  justify-content: flex-start;
+  gap: 80px;
 }
 
 .metricCard {

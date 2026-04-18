@@ -1,123 +1,99 @@
-.hero {
-  position: relative;
+.heroLeftAligned {
+  width: 100%;
   background-color: #ffffff;
-  padding: 80px 0;
-  border-bottom: 1px solid var(--border-light);
-  min-height: 60vh;
-  display: flex;
-  align-items: center;
+  padding: 100px 5vw 60px;
+  border-bottom: 3px solid var(--primary-navy);
 }
 
-.heroGrid {
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
+.heroContentFull {
+  width: 100%;
+}
+
+.heroLayout {
+  display: flex;
   gap: 60px;
   align-items: center;
-  width: 1300px;
-  margin: 0 auto;
-  padding: 0 40px;
 }
 
-.heroBadge {
-  font-size: 0.75rem;
-  font-weight: 800;
-  color: var(--accent-gold);
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  margin-bottom: 24px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.heroVisualLeft {
+  flex-shrink: 0;
 }
 
-.badgeLine {
-  width: 30px;
-  height: 2px;
-  background-color: var(--accent-gold);
-}
-
-.heroTitle {
-  font-family: var(--font-serif);
-  font-size: 4.5rem;
-  font-weight: 900;
-  line-height: 1.05;
-  color: var(--primary-navy);
-  margin-bottom: 28px;
-  letter-spacing: -0.03em;
-}
-
-.titleAccent {
-  color: var(--primary-navy-dark);
-  font-style: italic;
-  font-weight: 500;
-}
-
-.heroSubtitle {
-  font-size: 1.15rem;
-  line-height: 1.7;
-  color: var(--text-muted);
-  margin-bottom: 48px;
-  max-width: 650px;
-  font-weight: 500;
-}
-
-.heroActions {
-  display: flex;
-  gap: 20px;
-}
-
-.heroVisual {
-  display: flex;
-  justify-content: flex-end;
-  perspective: 1000px;
-}
-
-.journalCoverWrapper {
-  width: 360px;
-  height: 500px;
+.journalCoverFrame {
+  width: 280px;
+  height: 400px;
   background: white;
-  padding: 8px;
-  box-shadow: 30px 30px 80px rgba(0, 33, 71, 0.25);
-  position: relative;
-  transform: rotateY(-12deg) rotateX(3deg);
-  transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(0,0,0,0.05);
-}
-
-.journalCoverWrapper:hover {
-  transform: rotateY(-5deg) rotateX(1deg) scale(1.02);
+  padding: 0;
+  box-shadow: 20px 20px 50px rgba(0, 33, 71, 0.15);
+  border: 1px solid var(--border-light);
 }
 
 .journalImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.heroTextRight {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.heroBadgeLeft {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--primary-navy);
+  letter-spacing: 0.2em;
+  padding: 8px 16px;
+  background: var(--bg-soft);
+  margin-bottom: 24px;
+}
+
+.heroTitleLeft {
+  font-family: var(--font-serif);
+  font-size: 4rem;
+  font-weight: 900;
+  line-height: 1.1;
+  color: var(--primary-navy);
+  margin-bottom: 24px;
+}
+
+.titleSerifSecondary {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--primary-navy-light);
+}
+
+.heroSubtitleLeft {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  max-width: 800px;
+  margin-bottom: 40px;
+}
+
+.heroActionsLeft {
+  display: flex;
+  gap: 20px;
 }
 
 @media (max-width: 1024px) {
-  .heroGrid {
-    grid-template-columns: 1fr;
-    text-align: center;
+  .heroLayout {
+    flex-direction: column;
+    text-align: left;
     gap: 40px;
   }
-  .heroText {
-    order: 2;
+  .heroTextRight {
+    width: 100%;
   }
-  .heroVisual {
-    order: 1;
-    justify-content: center;
-  }
-  .heroTitle { font-size: 3rem; }
-  .heroSubtitle { margin: 0 auto 40px; }
-  .heroActions { justify-content: center; }
+  .heroTitleLeft { font-size: 3rem; }
 }
 
 @media (max-width: 768px) {
-  .heroTitle { font-size: 2.5rem; }
-  .journalCoverStub { width: 240px; height: 330px; padding: 20px; }
-  .coverTitle { font-size: 3rem; }
+  .journalCoverFrame { width: 220px; height: 320px; }
+  .heroTitleLeft { font-size: 2.2rem; }
+  .heroActionsLeft { flex-direction: column; width: 100%; }
 }

@@ -2,10 +2,11 @@
   background: #ffffff;
 }
 
-.portalGrid {
+.portalGrid, .portalGridFull {
   display: grid;
   grid-template-columns: 1fr 340px;
   gap: 60px;
+  width: 100%;
 }
 
 /* Main Content Styles */
@@ -237,14 +238,15 @@
 
 .sectionSubtitle {
   max-width: 700px;
-  margin: 0 auto;
+  margin: 0;
   opacity: 0.8;
 }
 
-.scopeGrid {
+.scopeGrid, .scopeGridFull {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 20px;
+  width: 100%;
 }
 
 .scopeItem {
