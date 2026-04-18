@@ -32,10 +32,10 @@ export default function Header() {
       <div className={styles.topBar}>
         <div className={`container-full ${styles.topBarContent}`}>
           <div className={styles.institutionalBranding}>
-            <Globe size={12} />
-            <span>Faculty of Pharmacy and Pharmaceutical Sciences</span>
-            <span className={styles.divider}>|</span>
-            <span>University of Karachi</span>
+            <Globe size={11} className={styles.brandingIcon} />
+            <span className={styles.brandingText}>FACULTY OF PHARMACY & PHARMACEUTICAL SCIENCES</span>
+            <span className={styles.brandingDivider}></span>
+            <span className={styles.brandingText}>UNIVERSITY OF KARACHI</span>
           </div>
         </div>
       </div>
@@ -46,29 +46,30 @@ export default function Header() {
         <div className={styles.logoAndSearch}>
           <Link href="/" className={styles.logo} onClick={() => setIsMenuOpen(false)}>
             <div className={styles.logoBadge}>PJPS</div>
-            <div className={styles.logoText}>
-              <span className={styles.journalFull}>Pakistan Journal of <br/> Pharmaceutical Sciences</span>
+            <div className={styles.logoTitleGroup}>
+              <span className={styles.journalMainTitle}>Pakistan Journal of</span>
+              <span className={styles.journalSubTitle}>Pharmaceutical Sciences</span>
             </div>
           </Link>
 
-          <div className={styles.searchContainer}>
-            <input type="text" placeholder="Search articles, authors, or keywords..." className={styles.searchInput} />
-            <button className={styles.searchSubmit} aria-label="Submit Search">
-              <Search size={18} />
-            </button>
+          <div className={styles.searchWrapper}>
+            <div className={styles.searchContainer}>
+              <Search size={16} className={styles.searchIcon} />
+              <input type="text" placeholder="Search scholarly articles..." className={styles.searchInput} />
+            </div>
           </div>
         </div>
 
         <div className={styles.headerActions}>
            {session ? (
-             <div className="flex items-center gap-4">
-               <Link href="/submission" className="btn btn-primary btn-sm">Submit Article</Link>
-               <Link href="/profile" className={styles.profileLink}><UserCircle size={24} /></Link>
+             <div className="flex items-center gap-6">
+               <Link href="/profile" className={styles.profileLink}><UserCircle size={22} /></Link>
+               <Link href="/submission" className={styles.submitBtnElite}>SUBMIT ARTICLE</Link>
              </div>
            ) : (
-             <div className="flex items-center gap-4">
-               <Link href="/admin/login" className={styles.loginLink}>Sign In</Link>
-               <Link href="/submission" className="btn btn-primary" style={{ height: '38px', borderRadius: '0', display: 'flex', alignItems: 'center', padding: '0 20px', fontSize: '0.8rem' }}>SUBMIT</Link>
+             <div className="flex items-center gap-6">
+               <Link href="/admin/login" className={styles.signInLink}>Sign In</Link>
+               <Link href="/submission" className={styles.submitBtnElite}>SUBMIT ARTICLE</Link>
              </div>
            )}
            <button className={styles.menuToggle} onClick={() => setIsMenuOpen(!isMenuOpen)}>

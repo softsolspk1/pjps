@@ -4,39 +4,81 @@ import styles from './Hero.module.css';
 export default function Hero() {
   return (
     <section className={styles.hero}>
-      <div className={styles.heroDecorative}></div>
       <div className={`container-full ${styles.heroContent}`}>
-        <div className={styles.heroGrid}>
-          <div className={styles.heroText}>
-            <div className={styles.heroBadge}>
-               <span className={styles.badgeLine}></span>
-               Official Journal of the Faculty
+        <div className={styles.heroGridElite}>
+          <div className={styles.heroTextElite}>
+            <div className={styles.eliteBadge}>
+               <span className={styles.badgeLabel}>ESTABLISHED 1988</span>
+               <span className={styles.badgeSeparator}></span>
+               <span className={styles.badgeLabel}>HEC RECOGNIZED</span>
             </div>
-            <h1 className={styles.heroTitle}>
-              Advancing the Global <br />
-              <span className={styles.titleAccent}>Pharmaceutical Frontier</span>
+
+            <h1 className={styles.heroTitleElite}>
+              The Vanguard of <br />
+              <span className={styles.titleSerifHighlight}>Pharmaceutical Discovery</span>
             </h1>
-            <p className={styles.heroSubtitle}>
-              A leading global forum for the dissemination of pharmaceutical and biomedical research, officially recognized by HEC and indexed in Web of Science, Scopus, and PubMed.
+
+            <p className={styles.heroSubtitleElite}>
+               Pakistan Journal of Pharmaceutical Sciences (PJPS) is a premier peer-reviewed platform dedicated to the global advancement of pharmaceutical and biomedical excellence.
             </p>
-            <div className={styles.heroActions}>
-              <Link href="/submission" className="btn btn-primary">Submit Manuscript</Link>
-              <Link href="/publication/current" className="btn btn-outline">Current Issue</Link>
+
+            <div className={styles.heroActionsElite}>
+              <Link href="/submission" className={styles.ctaPrimary}>
+                 SUBMIT MANUSCRIPT
+                 <ArrowRight size={16} className={styles.ctaIcon} />
+              </Link>
+              <Link href="/publication/current" className={styles.ctaSecondary}>EXPLORE CURRENT ISSUE</Link>
+            </div>
+
+            <div className={styles.indexedByStrip}>
+               <span className={styles.indexLabel}>INDEXED IN:</span>
+               <div className={styles.indexItems}>
+                  <span>Web of Science</span>
+                  <span className={styles.dot}></span>
+                  <span>Scopus</span>
+                  <span className={styles.dot}></span>
+                  <span>PubMed</span>
+                  <span className={styles.dot}></span>
+                  <span>EMBASE</span>
+               </div>
             </div>
           </div>
           
-          <div className={styles.heroVisual}>
-             <div className={styles.journalCoverWrapper}>
+          <div className={styles.heroVisualElite}>
+             <div className={styles.mainVisualContainer}>
                 <img 
-                  src="/hero-pjps.png" 
-                  alt="Pakistan Journal of Pharmaceutical Sciences - Latest Issue" 
-                  className={styles.journalImage}
+                  src="/a1.jpg" 
+                  alt="Advanced Pharmaceutical Research Library" 
+                  className={styles.heroMainImage}
                 />
+                <div className={styles.visualOverlay}></div>
+                <div className={styles.floatingImpactCard}>
+                   <span className={styles.impactVal}>0.6</span>
+                   <span className={styles.impactLabel}>IF (2024)</span>
+                </div>
              </div>
           </div>
         </div>
-        
       </div>
     </section>
+  );
+}
+
+function ArrowRight({ size, className }: { size: number, className: string }) {
+  return (
+    <svg 
+      width={size} 
+      height={size} 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="2" 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+      className={className}
+    >
+      <path d="M5 12h14" />
+      <path d="m12 5 7 7-7 7" />
+    </svg>
   );
 }
