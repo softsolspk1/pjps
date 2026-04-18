@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
-import { User as UserIcon, LogOut, LayoutDashboard, UserCircle } from 'lucide-react';
+import { User as UserIcon, LogOut, LayoutDashboard, UserCircle, Search, Menu, X, ChevronDown, Globe } from 'lucide-react';
 import styles from './Header.module.css';
 
 export default function Header() {
@@ -32,119 +32,81 @@ export default function Header() {
       <div className={styles.topBar}>
         <div className={`container-full ${styles.topBarContent}`}>
           <div className={styles.institutionalBranding}>
+            <Globe size={12} />
             <span>Faculty of Pharmacy and Pharmaceutical Sciences</span>
             <span className={styles.divider}>|</span>
             <span>University of Karachi</span>
+          </div>
+          <div className={styles.topLinks}>
+             <Link href="/contact">Support</Link>
+             <Link href="/about">About OJS</Link>
+             <Link href="/admin/login">Journal Login</Link>
           </div>
         </div>
       </div>
       
       <div className={styles.progressBar} style={{ width: `${scrollProgress}%` }}></div>
       
-      <div className={`container-full ${styles.headerContent}`}>
-        <Link href="/" className={styles.logo} onClick={() => setIsMenuOpen(false)}>
-          <div className={styles.logoBadge}>PJPS</div>
-          <div className={styles.logoText}>
-            <span className={styles.journalFull}>Pakistan Journal of <br/> Pharmaceutical Sciences</span>
-          </div>
-        </Link>
-
-        {/* Mobile Menu Toggle */}
-        <button 
-          className={styles.menuToggle} 
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label="Toggle Menu"
-        >
-          {isMenuOpen ? (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          ) : (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-          )}
-        </button>
-
-        <nav className={`${styles.nav} ${isMenuOpen ? styles.navOpen : ''}`}>
-          <ul className={styles.navList}>
-            <li><Link href="/" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Home</Link></li>
-            <li className={styles.navItemDropdown}>
-              <Link href="#" className={styles.navLink} onClick={(e) => e.preventDefault()}>About PJPS</Link>
-              <ul className={styles.dropdownMenu}>
-                <li><Link href="/about/board" onClick={() => setIsMenuOpen(false)}>Editorial Board</Link></li>
-                <li><Link href="/board" onClick={() => setIsMenuOpen(false)}>Editor-in-Chief Message</Link></li>
-              </ul>
-            </li>
-            <li className={styles.navItemDropdown}>
-              <Link href="/submission" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Submission</Link>
-              <ul className={styles.dropdownMenu}>
-                <li><Link href="/submission" onClick={() => setIsMenuOpen(false)}>Online Submission Portal</Link></li>
-                <li><Link href="/submission/checklist" onClick={() => setIsMenuOpen(false)}>Submission Checklist & Fees</Link></li>
-                <li><Link href="/formatting" onClick={() => setIsMenuOpen(false)}>Article Formatting Tool</Link></li>
-                <li><Link href="/submission/instructions" onClick={() => setIsMenuOpen(false)}>Instructions for Authors</Link></li>
-                <li><Link href="/submission/peer-review" onClick={() => setIsMenuOpen(false)}>Peer Review Guidelines</Link></li>
-                <li><Link href="/submission/conflict-of-interest" onClick={() => setIsMenuOpen(false)}>Conflict of Interest</Link></li>
-                <li><Link href="/tracking" onClick={() => setIsMenuOpen(false)}>Track Manuscript</Link></li>
-              </ul>
-            </li>
-            <li className={styles.navItemDropdown}>
-              <Link href="#" className={styles.navLink} onClick={(e) => e.preventDefault()}>Publication</Link>
-              <ul className={styles.dropdownMenu}>
-                <li><Link href="/publication/current" onClick={() => setIsMenuOpen(false)}>Current Issue</Link></li>
-                <li><Link href="/publication/previous" onClick={() => setIsMenuOpen(false)}>Previous Issues</Link></li>
-                <li><Link href="/publication/special" onClick={() => setIsMenuOpen(false)}>Special Issues</Link></li>
-                <li><Link href="/publication/supplementary" onClick={() => setIsMenuOpen(false)}>Supplementary Issues</Link></li>
-                <li><Link href="/issues" onClick={() => setIsMenuOpen(false)}>Browse by Year</Link></li>
-              </ul>
-            </li>
-            <li><Link href="/archive" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Archive</Link></li>
-            <li><Link href="/contact" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Contact</Link></li>
-            {/* Mobile-only links */}
-            <li className={styles.mobileOnly}><Link href="/admin/login" className={styles.navLink} onClick={() => setIsMenuOpen(false)}>Author Login</Link></li>
-          </ul>
-          
-          <div className={styles.mobileActions}>
-             <Link href="/admin/login" className="btn btn-outline" onClick={() => setIsMenuOpen(false)}>Login</Link>
-             <Link href="/submission" className="btn btn-primary" onClick={() => setIsMenuOpen(false)}>Online Submission Portal</Link>
-          </div>
-        </nav>
-
-        <div className={styles.actions}>
-          <Link href="/search" className={styles.searchBtn} aria-label="Search Registry">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
-          </Link>
-          
-          {session ? (
-            <div className="flex items-center gap-4">
-              <Link 
-                href={
-                  session.user?.role === 'ADMIN' || session.user?.role === 'EDITOR' 
-                  ? "/admin/dashboard" 
-                  : session.user?.role === 'REVIEWER' 
-                  ? "/reviewer/dashboard" 
-                  : "/submission"
-                } 
-                className="btn btn-outline flex items-center gap-2"
-                style={{ padding: '0.6rem 1.2rem', fontSize: '0.75rem' }}
-              >
-                <LayoutDashboard size={14} /> Dashboard
-              </Link>
-              <Link href="/profile" className="text-slate-600 hover:text-blue-600 transition-colors" title="My Profile">
-                 <UserCircle size={28} />
-              </Link>
-              <button 
-                onClick={() => signOut()} 
-                className="text-slate-400 hover:text-red-500 transition-colors" 
-                title="Sign Out"
-              >
-                 <LogOut size={20} />
-              </button>
+      <div className={`container-full ${styles.headerMain}`}>
+        <div className={styles.logoAndSearch}>
+          <Link href="/" className={styles.logo} onClick={() => setIsMenuOpen(false)}>
+            <div className={styles.logoBadge}>PJPS</div>
+            <div className={styles.logoText}>
+              <span className={styles.journalFull}>Pakistan Journal of <br/> Pharmaceutical Sciences</span>
             </div>
-          ) : (
-            <>
-              <Link href="/admin/login" className="btn btn-outline" style={{ padding: '0.6rem 1.5rem', fontSize: '0.8rem' }}>Login</Link>
-              <Link href="/submission" className={`btn btn-primary ${styles.cta}`}>Online Submission Portal</Link>
-            </>
-          )}
+          </Link>
+
+          <div className={styles.searchContainer}>
+            <input type="text" placeholder="Search articles, authors, or keywords..." className={styles.searchInput} />
+            <button className={styles.searchSubmit} aria-label="Submit Search">
+              <Search size={18} />
+            </button>
+          </div>
+        </div>
+
+        <div className={styles.headerActions}>
+           {session ? (
+             <div className="flex items-center gap-4">
+               <Link href="/submission" className="btn btn-primary btn-sm">Submit Article</Link>
+               <Link href="/profile" className={styles.profileLink}><UserCircle size={24} /></Link>
+             </div>
+           ) : (
+             <div className="flex items-center gap-4">
+               <Link href="/admin/login" className={styles.loginLink}>Sign In</Link>
+               <Link href="/submission" className="btn btn-primary btn-sm">Submit</Link>
+             </div>
+           )}
+           <button className={styles.menuToggle} onClick={() => setIsMenuOpen(!isMenuOpen)}>
+             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+           </button>
         </div>
       </div>
+
+      <nav className={`${styles.navStrip} ${isMenuOpen ? styles.navOpen : ''}`}>
+        <div className="container-full">
+          <ul className={styles.navList}>
+            <li><Link href="/">Home</Link></li>
+            <li className={styles.hasDropdown}>
+              <span>About <ChevronDown size={14} /></span>
+              <ul className={styles.dropdown}>
+                <li><Link href="/about/board">Editorial Board</Link></li>
+                <li><Link href="/policy">Ethics & Policies</Link></li>
+                <li><Link href="/instructions">Instructions for Authors</Link></li>
+              </ul>
+            </li>
+            <li className={styles.hasDropdown}>
+              <span>Articles <ChevronDown size={14} /></span>
+              <ul className={styles.dropdown}>
+                <li><Link href="/publication/current">Current Issue</Link></li>
+                <li><Link href="/archive">Past Issues</Link></li>
+                <li><Link href="/publication/special">Special Issues</Link></li>
+              </ul>
+            </li>
+            <li><Link href="/submission">Submissions</Link></li>
+            <li><Link href="/contact">Contact</Link></li>
+          </ul>
+        </div>
+      </nav>
     </header>
   );
 }

@@ -6,21 +6,31 @@ export default function Hero() {
     <section className={styles.hero}>
       <div className={styles.heroDecorative}></div>
       <div className={`container-full ${styles.heroContent}`}>
-        <div className={styles.heroBadge}>
-          <span className={styles.badgeLine}></span>
-          Academic Excellence Since 1988
+      <div className={styles.heroGrid}>
+        <div className={styles.heroText}>
+          <div className={styles.heroBadge}>
+            Journal of Pharmaceutical Sciences
+          </div>
+          <h1 className={styles.heroTitle}>
+            Scholarly Excellence in <br />
+            <span className={styles.titleAccent}>Pharmaceutical Research</span>
+          </h1>
+          <p className={styles.heroSubtitle}>
+            A leading global forum for the dissemination of pharmaceutical and biomedical research, officially recognized by HEC and indexed in Web of Science, Scopus, and PubMed.
+          </p>
+          <div className={styles.heroActions}>
+            <Link href="/submission" className="btn btn-primary">Submit Manuscript</Link>
+            <Link href="/publication/current" className="btn btn-outline">Current Issue</Link>
+          </div>
         </div>
-        <h1 className={styles.heroTitle}>
-          Advancing the Global <br />
-          <span className={styles.titleAccent}>Pharmaceutical Frontier</span>
-        </h1>
-        <p className={styles.heroSubtitle}>
-          A globally recognized platform dedicated to advancing pharmaceutical and biomedical research, officially acknowledged by HEC and indexed in leading databases such as Web of Science and Scopus.
-        </p>
-        <div className={styles.heroActions}>
-          <Link href="/submission" className="btn btn-primary">Submit Your Research</Link>
-          <Link href="/issues" className="btn btn-outline">Explore Current Issue</Link>
+        
+        <div className={styles.heroVisual}>
+           <div className={styles.journalCoverStub}>
+              <div className={styles.coverTitle}>PJPS</div>
+              <div className={styles.coverIssue}>Vol. 39, No. 4, April 2026</div>
+           </div>
         </div>
+      </div>
         
         <div className={styles.statsStrip}>
           <div className={styles.statItem}>

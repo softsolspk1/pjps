@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import HeaderWrapper from "./HeaderWrapper";
 import FooterWrapper from "./FooterWrapper";
+import CookiePopup from "./CookiePopup";
 
 export default function LayoutClientWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -36,6 +37,7 @@ export default function LayoutClientWrapper({ children }: { children: React.Reac
         {children}
       </main>
       {!isDashboardRoute && <FooterWrapper />}
+      <CookiePopup />
     </div>
   );
 }

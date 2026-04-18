@@ -55,12 +55,17 @@ export default function Footer() {
       
       <div className={styles.bottomBar}>
         <div className={`container ${styles.bottomContent}`}>
-          <p>© {currentYear} Pakistan Journal of Pharmaceutical Sciences. Developed by <a href="https://softsols.pk/" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', fontWeight: 'bold' }}>Softsols Pakistan</a></p>
+          <p>© {currentYear} Pakistan Journal of Pharmaceutical Sciences. All Rights Reserved.</p>
           <div className={styles.bottomLinks}>
-            <Link href="/terms">Terms</Link>
+            <Link href="/terms">Terms of Use</Link>
             <span className={styles.separator}>|</span>
-            <Link href="/privacy">Privacy</Link>
+            <Link href="/privacy">Privacy Policy</Link>
+            <span className={styles.separator}>|</span>
+            <Link href="/contact">Contact Support</Link>
           </div>
+        </div>
+        <div className={styles.developerCredit}>
+          Developed by <a href="https://softsols.pk/" target="_blank" rel="noopener noreferrer">Softsols Pakistan</a>
         </div>
       </div>
     </footer>

@@ -11,44 +11,105 @@ import {
 export default async function Home() {
   return (
     <div className={styles.home}>
-      {/* Restored Hero Component from previous build structure */}
       <Hero />
 
-      {/* Announcements & Key Metrics */}
-      <section className="section-padding container">
-        <div className={styles.announcementGrid}>
-          <div className={styles.announcementCard}>
-            <Zap className="text-amber-500 mb-4" size={32} />
-            <h3 className="text-xl font-bold mb-2">Monthly Publication Cycle</h3>
-            <p className="text-slate-500 text-sm leading-relaxed">
-              Pakistan Journal of Pharmaceutical Sciences is scheduled to be published monthly from January 2026 onwards to expedite scientific dissemination.
-            </p>
+      <section className="container section-padding">
+        <div className={styles.portalGrid}>
+          {/* Main Content Column */}
+          <div className={styles.mainContent}>
+            <div className={styles.tabHeader}>
+              <button className={styles.tabBtnActive}>Latest Articles</button>
+              <button className={styles.tabBtn}>Most Read</button>
+              <button className={styles.tabBtn}>Open Access</button>
+            </div>
+
+            <div className={styles.articleList}>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className={styles.articleCard}>
+                  <div className={styles.articleMeta}>
+                    <span className={styles.articleType}>Original Research</span>
+                    <span className={styles.articleDate}>Published: April 12, 2026</span>
+                  </div>
+                  <h3 className={styles.articleTitle}>
+                    <Link href={`/articles/${i}`}>
+                      Comparative Efficacy of Novel Biopharmaceutics in the Management of Metabolic Disorders: A Multicenter Study
+                    </Link>
+                  </h3>
+                  <p className={styles.articleAuthors}>
+                    Dr. Sarah Ahmed, Prof. John Smith, et al.
+                  </p>
+                  <div className={styles.articleLinks}>
+                    <Link href={`/articles/${i}`} className={styles.linkText}>Abstract</Link>
+                    <Link href={`/articles/${i}/pdf`} className={styles.linkText}>Full-Text PDF</Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <Link href="/archive" className="btn btn-outline mt-8 w-full">View Full Archive</Link>
           </div>
-          <div className={styles.metricsHighlight}>
-            <div className={styles.metricEntry}>
-              <span className={styles.metricVal}>0.6</span>
-              <span className={styles.metricTag}>JCR Impact Factor (2024)</span>
+
+          {/* Sidebar Column */}
+          <aside className={styles.sidebar}>
+            <div className={styles.sidebarSection}>
+              <h4 className={styles.sidebarTitle}>Journal Metrics</h4>
+              <div className={styles.metricCard}>
+                <div className={styles.metricRow}>
+                  <span className={styles.metricLabel}>Impact Factor (2024)</span>
+                  <span className={styles.metricValue}>0.6</span>
+                </div>
+                <div className={styles.metricRow}>
+                  <span className={styles.metricLabel}>CiteScore (Q3)</span>
+                  <span className={styles.metricValue}>1.4</span>
+                </div>
+                <div className={styles.metricRow}>
+                  <span className={styles.metricLabel}>Acceptance Rate</span>
+                  <span className={styles.metricValue}>24%</span>
+                </div>
+              </div>
             </div>
-            <div className={styles.metricEntry}>
-              <span className={styles.metricVal}>0.8</span>
-              <span className={styles.metricTag}>5-Year Impact Factor</span>
+
+            <div className={styles.sidebarSection}>
+              <h4 className={styles.sidebarTitle}>Official Indexing</h4>
+              <div className={styles.indexingGrid}>
+                <div className={styles.indexItem}>Web of Science</div>
+                <div className={styles.indexItem}>Scopus</div>
+                <div className={styles.indexItem}>PubMed</div>
+                <div className={styles.indexItem}>MEDLINE</div>
+                <div className={styles.indexItem}>DOAJ</div>
+                <div className={styles.indexItem}>EMBASE</div>
+              </div>
             </div>
-            <div className={styles.metricEntry}>
-              <span className={styles.metricVal}>1.4</span>
-              <span className={styles.metricTag}>Scopus CiteScore</span>
+
+            <div className={styles.announcementBox}>
+              <h4 className={styles.sidebarTitle}>Announcements</h4>
+              <div className={styles.announcementItem}>
+                <span className={styles.announcementDate}>April 15, 2026</span>
+                <p className={styles.announcementText}>PJPS transition to monthly publication cycle starting Jan 2026.</p>
+              </div>
+              <Link href="/news" className={styles.viewMore}>View all announcements</Link>
             </div>
-          </div>
+
+            <div className={styles.sidebarSection}>
+              <h4 className={styles.sidebarTitle}>Submission</h4>
+              <div className={styles.submissionCta}>
+                <p>Submit your high-quality research to PJPS.</p>
+                <Link href="/instructions" className={styles.ctaLink}>Instruction for Authors</Link>
+                <Link href="/submission" className="btn btn-primary w-full mt-4">Submit Online</Link>
+              </div>
+            </div>
+          </aside>
         </div>
       </section>
 
-      {/* Comprehensive Academic Scope */}
+      {/* Scope Section - Refined */}
       <section className={`${styles.scopeSection} section-padding`}>
         <div className="container">
           <div className={styles.sectionHeader}>
             <span className={styles.preTitle}>Scientific Frontiers</span>
             <h2 className={styles.sectionTitle}>Expanding Research Horizons</h2>
             <p className={styles.sectionSubtitle}>
-              PJPS covers a multi-disciplinary spectrum of Pharmaceutical and Biomedical Sciences.
+              Covering a multi-disciplinary spectrum of Pharmaceutical and Biomedical Sciences.
             </p>
           </div>
           
@@ -67,80 +128,7 @@ export default async function Home() {
           </div>
         </div>
       </section>
-
-      {/* Global Recognition & Recognition */}
-      <section className="section-padding container">
-        <div className={styles.recognitionGrid}>
-          <div className={styles.recognitionContent}>
-            <h2 className={styles.titleSerif}>Global Scholarly Impact</h2>
-            <p className={styles.bodyText}>
-              Recognized by the Higher Education Commission (HEC) of Pakistan and abstracted by the world's most prestigious scientific databases.
-            </p>
-            <div className={styles.indexingList}>
-              <div className={styles.indexTag}>Web of Science (SCIE)</div>
-              <div className={styles.indexTag}>Scopus</div>
-              <div className={styles.indexTag}>PubMed / MEDLINE</div>
-              <div className={styles.indexTag}>EMBASE</div>
-              <div className={styles.indexTag}>DOAJ</div>
-              <div className={styles.indexTag}>CABI</div>
-            </div>
-          </div>
-          
-          <div className={styles.heritageBox}>
-             <div className={styles.heritageIcon}>
-                <Library size={48} className="text-blue-600" />
-             </div>
-             <div>
-                <h4 className="font-bold text-lg mb-2">Heritage of Excellence</h4>
-                <p className="text-sm text-slate-500 mb-4">Digitizing pharmaceutical research from 1988 to the present day with over 5,893+ published contributions.</p>
-                <div className="flex gap-4">
-                   <Link href="/issues" className="text-blue-600 font-bold text-xs uppercase tracking-widest hover:underline">Recent Issues</Link>
-                   <Link href="/archive" className="text-slate-400 font-bold text-xs uppercase tracking-widest hover:underline">Full Archive</Link>
-                </div>
-             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Ethics, Licensing & Associated Journals */}
-      <section className={`${styles.ethicsArea} section-padding`}>
-        <div className="container">
-          <div className={styles.gridColumns}>
-             <div className={styles.ethicsBox}>
-                <ShieldCheck size={32} className="text-emerald-500 mb-4" />
-                <h3 className="text-xl font-bold mb-3">Open Access & Licensing</h3>
-                <p className="text-slate-600 text-sm leading-relaxed mb-6">
-                  Items are licensed under CC BY-NC-4.0. PJPS ensures that all published content remains unrestricted globally while authors retain full copyright of their work.
-                </p>
-                <div className={styles.ethicsLinks}>
-                  <Link href="/policy">Publishing Ethics</Link>
-                  <Link href="/instructions">Author Instructions</Link>
-                </div>
-             </div>
-
-             <div className={styles.associatedJournals}>
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                   <Microscope size={20} className="text-blue-600" /> Associated Journals
-                </h3>
-                <div className={styles.journalCard}>
-                   <div>
-                      <h4 className="font-bold text-slate-800">Pakistan Journal of Pharmacology</h4>
-                      <p className="text-xs text-slate-400 mt-1">Official Affiliate publication of the Faculty.</p>
-                   </div>
-                   <ArrowRight size={18} className="text-slate-300" />
-                </div>
-                <div className={styles.issnBlock}>
-                   <div className={styles.issnItem}>
-                      <strong>ISSN (Print):</strong> 1011-601X
-                   </div>
-                   <div className={styles.issnItem}>
-                      <strong>ISSN (Online):</strong> 3105-9686
-                   </div>
-                </div>
-             </div>
-          </div>
-        </div>
-      </section>
+    </div>
     </div>
   );
 }
