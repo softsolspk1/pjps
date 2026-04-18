@@ -33,20 +33,20 @@ export async function POST(req: Request) {
 
     const authors = JSON.parse(authorsJson);
 
-    // 1. Generate Custom Tracking ID: ON-Date-UniqueNumbers-Year
+    // 1. Generate Custom Tracking ID: ON-Month-UniqueNumber-Year
     const now = new Date();
-    const day = now.getDate().toString().padStart(2, '0');
     const month = (now.getMonth() + 1).toString().padStart(2, '0');
     const year = now.getFullYear();
-    const dateStr = `${day}${month}${year}`;
     
-    // Find the current sequence for this date prefix
-    const prefix = `ON-${dateStr}`;
+    // Find the current sequence for this month/year combo
+    const prefix = `ON-${month}`;
+    const suffix = `${year}`;
     
     const lastArticle = await prisma.article.findFirst({
       where: {
         trackingId: {
-          startsWith: prefix
+          startsWith: prefix,
+          endsWith: suffix
         }
       },
       select: {
@@ -57,7 +57,7 @@ export async function POST(req: Request) {
       }
     });
 
-    let sequence = 1;
+    let sequence = 100; // Starting from 100 as per example 000000100
     if (lastArticle?.trackingId) {
       const parts = lastArticle.trackingId.split('-');
       if (parts.length >= 3) {
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
       }
     }
     
-    const trackingId = `${prefix}-${sequence.toString().padStart(7, '0')}-${year}`;
+    const trackingId = `${prefix}-${sequence.toString().padStart(9, '0')}-${suffix}`;
 
     // 2. Upload manuscript (PDF/DOCX/LaTeX) to Cloudinary
     let manuscriptUpload: any = { secure_url: null, public_id: null };

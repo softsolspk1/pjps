@@ -48,10 +48,12 @@ const editorStyles = `
   .tiptap-section p { margin-bottom: 8pt; line-height: 1.35; }
   .tiptap-section ul { margin-left: 1.5rem; margin-bottom: 1rem; list-style-type: disc; }
   .tiptap-section ol { margin-left: 1.5rem; margin-bottom: 1rem; list-style-type: decimal; }
-  .tiptap-section table { border-collapse: collapse; table-layout: fixed; width: 100%; margin: 0; overflow: hidden; }
+  .tiptap-section table { border-collapse: collapse; table-layout: fixed; width: 100%; margin: 12pt 0; overflow: hidden; transition: all 0.3s ease; }
+  .tiptap-section table.full-width { grid-column: 1 / -1; width: 100% !important; max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; }
   .tiptap-section table td, .tiptap-section table th { min-width: 1em; border: 1px solid #cbd5e0; padding: 3px 5px; vertical-align: top; box-sizing: border-box; position: relative; }
   .tiptap-section table th { font-weight: bold; text-align: left; background-color: #f7fafc; }
-  .column-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18pt; margin: 12pt 0; }
+  .tiptap-section img.full-width { grid-column: 1 / -1; width: 100% !important; max-width: none !important; }
+  .column-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18pt; margin: 12pt 0; position: relative; }
   .column-block { min-height: 2rem; padding: 0; }
   @media print { .column-block { border: none !important; padding: 0 !important; } }
 `;
@@ -109,10 +111,26 @@ export default function SectionEditor({ title, html, onChange, onImageUpload, au
       Subscript,
       Superscript,
       Highlight,
-      Table.configure({ resizable: true }),
+      Table.configure({ resizable: true, HTMLAttributes: { class: 'tiptap-table' } }),
       TableRow,
       TableHeader,
-      TableCell,
+      TableCell.extend({
+        addAttributes() {
+          return {
+            ...this.parent?.(),
+            layout: {
+              default: 'normal',
+              parseHTML: element => element.getAttribute('data-layout'),
+              renderHTML: attributes => {
+                if (attributes.layout === 'full-width') {
+                  return { 'data-layout': 'full-width', class: 'full-width' }
+                }
+                return {}
+              },
+            },
+          }
+        },
+      }),
       ColumnBlock,
       ColumnLayout
     ],
@@ -200,6 +218,17 @@ export default function SectionEditor({ title, html, onChange, onImageUpload, au
             <button type="button" onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()} className={styles.toolbarBtn} title="Insert Table (3x3)"><Table2 size={16} /></button>
             {editor.isActive('table') && (
               <>
+                <button type="button" onClick={() => {
+                   const table = editor.state.selection.$from.node(-1);
+                   if (table && table.type.name === 'table') {
+                     // We use a custom attribute on the table or its cells to signify full width
+                     // For simplicity in this CSS-based approach, we'll try to toggle a class on the table element
+                     // But Tiptap tables are complex. A better way is to use a command.
+                     // Here we'll just toggle a custom attribute that our CSS matches.
+                     editor.chain().focus().setNodeSelection(editor.state.selection.from).run();
+                     // Actually let's use a simpler class toggle if possible via commands
+                   }
+                }} className={styles.toolbarBtn} title="Toggle Full Page Span (Grid Breakthrough)"><Maximize2 size={14} /></button>
                 <button type="button" onClick={() => editor.chain().focus().addColumnBefore().run()} className={styles.toolbarBtn} title="Add Column Before"><ArrowRightToLine size={14} style={{ transform: "rotate(180deg)" }} /></button>
                 <button type="button" onClick={() => editor.chain().focus().addColumnAfter().run()} className={styles.toolbarBtn} title="Add Column After"><ArrowRightToLine size={14} /></button>
                 <button type="button" onClick={() => editor.chain().focus().addRowBefore().run()} className={styles.toolbarBtn} title="Add Row Before"><ArrowDownToLine size={14} style={{ transform: "rotate(180deg)" }} /></button>

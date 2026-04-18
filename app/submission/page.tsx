@@ -140,15 +140,6 @@ function SubmissionForm() {
       }
     }
 
-    if (step === 3) {
-      const missingSections = sections.filter(s => !s.html || s.html.trim().length < 50);
-      if (missingSections.length > 0) {
-        setError(`The following clinical sections are mandatory for scholarly indexing: ${missingSections.map(s => s.title).join(", ")}. Please ensure each section has adequate content.`);
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        return;
-      }
-    }
-
     setStep(step + 1);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -300,7 +291,7 @@ function SubmissionForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (step < 6) return;
+    if (step < 5) return;
 
     // Validation for final submission
     // Since payment proof was removed from UI, we bypass its validation
@@ -435,7 +426,7 @@ function SubmissionForm() {
 
   const renderStepIndicator = () => (
     <div className={styles.stepper}>
-      {[1, 2, 3, 4, 5, 6].map((s) => (
+      {[1, 2, 3, 4, 5].map((s) => (
         <div key={s} className={`${styles.step} ${step === s ? styles.activeStep : ""} ${step > s ? styles.completedStep : ""}`}>
           <div className={styles.stepCircle}>
              {step > s ? <CheckCircle size={18} /> : (
@@ -443,9 +434,9 @@ function SubmissionForm() {
              )}
           </div>
           <p className="text-[10px] font-black uppercase tracking-widest mt-2 text-center" style={{ width: '80px', marginLeft: '-25px' }}>
-            {s === 1 ? "Meta Data" : s === 2 ? "Authors" : s === 3 ? "Formatting" : s === 4 ? "Attach" : s === 5 ? "Review" : "Submit"}
+            {s === 1 ? "Meta Data" : s === 2 ? "Authors" : s === 3 ? "Attach" : s === 4 ? "Review" : "Submit"}
           </p>
-          {s < 6 && <div className={styles.stepLine} />}
+          {s < 5 && <div className={styles.stepLine} />}
         </div>
       ))}
     </div>
@@ -613,44 +604,6 @@ function SubmissionForm() {
         )}
 
         {step === 3 && (
-           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-              <div className="text-center mb-6">
-                <h3 className="text-3xl font-serif font-black text-slate-800 tracking-tight">Manuscript Formatting</h3>
-                 <div className="flex justify-center gap-2 mt-3 mb-6">
-                   <span className="px-3 py-1 bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg">Official Template</span>
-                   <button 
-                    type="button" 
-                    onClick={handleExportWord}
-                    className="flex items-center gap-2 px-3 py-1 bg-indigo-50 text-indigo-600 text-[9px] font-black uppercase tracking-widest rounded-full border border-indigo-100 hover:bg-indigo-100 transition-all font-black"
-                   >
-                     <Download size={10} /> Download Word Format
-                   </button>
-                 </div>
-                 <p className="text-sm text-slate-600 mt-1 max-w-2xl mx-auto font-bold uppercase tracking-tight">
-                   Complete all scholarly sections below to enable automated journal indexing and standard peer-review formatting.
-                 </p>
-              </div>
-              
-              <div className="bg-slate-50 p-4 rounded-3xl border border-slate-200 shadow-inner">
-                {sections.map((sec, idx) => (
-                  <SectionEditor 
-                    key={sec.id}
-                    title={sec.title}
-                    html={sec.html}
-                    autoFocus={idx === 0}
-                    onChange={(newHtml) => {
-                      const newSecs = [...sections];
-                      newSecs[idx].html = newHtml;
-                      setSections(newSecs);
-                    }}
-                    onImageUpload={uploadImageNative}
-                  />
-                ))}
-              </div>
-           </div>
-        )}
-
-        {step === 4 && (
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4">
             <div className="text-center mb-6">
               <h3 className="text-2xl font-serif font-black text-slate-800">Attach Documents</h3>
@@ -658,7 +611,6 @@ function SubmissionForm() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Primary Manuscript */}
               <div className={`${styles.fileVaultCard} ${manuscriptFile ? styles.hasFile : ""}`}>
                 <div className="absolute top-4 right-4 bg-slate-100 text-slate-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-slate-200">Optional</div>
                 <div className={styles.fileCardHeader}>
@@ -667,7 +619,7 @@ function SubmissionForm() {
                   </div>
                   <div>
                     <h4 className={styles.fileTitle}>Full Manuscript Text</h4>
-                    <p className={styles.fileSubtitle}>PDF, DOCX (If not formatted in Step 3)</p>
+                    <p className={styles.fileSubtitle}>PDF, DOCX</p>
                   </div>
                 </div>
                 
@@ -690,7 +642,6 @@ function SubmissionForm() {
               </div>
             </div>
 
-            {/* Figures Upload */}
             <div className={styles.supplementaryRow}>
                <div className="flex-1 flex items-center gap-4">
                   <div className={styles.suppIcon} style={{ border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', color: '#64748b' }}>
@@ -717,7 +668,6 @@ function SubmissionForm() {
                </div>
             </div>
 
-            {/* Supplementary Data */}
             <div className={styles.supplementaryRow}>
                <div className="flex-1 flex items-center gap-4">
                   <div className={styles.suppIcon}>
@@ -746,7 +696,7 @@ function SubmissionForm() {
           </div>
         )}
 
-         {step === 5 && (
+         {step === 4 && (
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4">
             <div className="bg-slate-50 p-12 rounded-[3.5rem] border border-slate-200 shadow-premium relative overflow-hidden">
                <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600" />
@@ -773,7 +723,6 @@ function SubmissionForm() {
                                     .affiliations { text-align: center; font-style: italic; font-size: 14px; color: #4a5568; margin-bottom: 30px; }
                                     .section-title { font-weight: bold; text-transform: uppercase; margin-top: 30px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 15px; }
                                     .content { text-align: justify; }
-                                    @media print { body { background: none; padding: 0; } .paper { box-shadow: none; border: none; } }
                                   </style>
                                 </head>
                                 <body>
@@ -784,11 +733,6 @@ function SubmissionForm() {
                                     
                                     <div class="section-title">Abstract</div>
                                     <div class="content">${abstract}</div>
-                                    
-                                    ${sections.map(s => `
-                                      <div class="section-title">${s.title}</div>
-                                      <div class="content">${s.html}</div>
-                                    `).join("")}
                                   </div>
                                 </body>
                               </html>
@@ -798,74 +742,78 @@ function SubmissionForm() {
                        }}
                        className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:scale-105 active:scale-95 transition-all"
                      >
-                        <Globe size={16} /> View Online Full-View
+                        <BookOpen size={16} /> Online Preview
                      </button>
-                     <button 
-                       type="button" 
-                       onClick={handleExportWord}
-                       className="flex items-center gap-2 px-6 py-3 bg-white text-slate-800 border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 active:scale-95 transition-all"
-                     >
-                        <Download size={16} /> Download Word (DOCX)
+                     <button type="button" onClick={handleExportWord} className="flex items-center gap-2 px-6 py-3 bg-white text-slate-900 border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-sm hover:bg-slate-50 transition-all">
+                        <FileText size={16} /> Export PDF
                      </button>
                   </div>
                </div>
 
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="p-6 bg-white rounded-3xl border border-slate-200">
-                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Metadata Analysis</p>
-                     <div className="space-y-4">
-                        <div>
-                           <p className="text-[10px] font-black text-blue-600 uppercase tracking-tight">Manuscript Title</p>
-                           <p className="text-xs font-bold text-slate-900 line-clamp-2">{title}</p>
-                        </div>
-                        <div>
-                           <p className="text-[10px] font-black text-blue-600 uppercase tracking-tight">Submission Track</p>
-                           <p className="text-xs font-bold text-slate-900">{submissionType}</p>
-                        </div>
-                     </div>
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                  <div className="col-span-2 space-y-10">
+                      <div>
+                         <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2">Research Title</p>
+                         <h2 className="text-2xl font-serif font-black text-slate-900 leading-tight">{title || "Untitled Research"}</h2>
+                      </div>
+                      
+                      <div>
+                         <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-3">Abstract</p>
+                         <div className="text-sm text-slate-600 leading-relaxed text-justify bg-white/50 p-6 rounded-2xl border border-slate-100 italic" dangerouslySetInnerHTML={{ __html: abstract || "No abstract provided." }} />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-8">
+                         <div>
+                            <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2">Keywords</p>
+                            <p className="text-xs font-bold text-slate-700">{keywords || "None"}</p>
+                         </div>
+                         <div>
+                            <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2">Submission Track</p>
+                            <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[9px] font-black uppercase tracking-widest border border-indigo-100">
+                               {submissionType}
+                            </span>
+                         </div>
+                      </div>
                   </div>
 
-                  <div className="p-6 bg-white rounded-3xl border border-slate-200">
-                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Contributor Registry</p>
-                     <div className="space-y-3">
-                        {authors.map((a, i) => (
-                           <div key={i} className="flex items-center gap-3">
-                              <div className="w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-[10px] font-black text-slate-500 whitespace-nowrap">{i+1}</div>
-                              <p className="text-xs font-bold text-slate-900 truncate">{a.name}</p>
-                           </div>
-                        ))}
-                     </div>
-                  </div>
+                  <div className="space-y-8">
+                      <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
+                         <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-6">Author Lineup</p>
+                         <div className="space-y-6">
+                            {authors.map((a, i) => (
+                               <div key={i} className="flex items-start gap-3">
+                                  <div className="w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-[10px] font-bold text-slate-500 shrink-0">{i+1}</div>
+                                  <div>
+                                     <p className="text-xs font-black text-slate-800 uppercase tracking-tight">{a.name || "Anonymous Author"}</p>
+                                     <p className="text-[9px] text-slate-400 font-medium truncate max-w-[150px]">{a.affiliation || "No Affiliation"}</p>
+                                  </div>
+                               </div>
+                            ))}
+                         </div>
+                      </div>
 
-                  <div className="p-6 bg-white rounded-3xl border border-slate-200">
-                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Formal Attachments</p>
-                     <div className="space-y-3">
-                        {manuscriptFile ? (
-                           <div className="flex items-center gap-3 p-2 bg-emerald-50 border border-emerald-100 rounded-xl">
-                              <FileText size={14} className="text-emerald-600" />
-                              <p className="text-[10px] font-black text-emerald-700 truncate">{manuscriptFile.name}</p>
-                           </div>
-                        ) : (
-                           <p className="text-[10px] font-bold text-slate-400 italic">No external manuscript attached. Online formatting active.</p>
-                        )}
-                        <div className="flex gap-2 mt-2">
-                           <span className="px-2 py-1 bg-slate-100 rounded text-[9px] font-black uppercase text-slate-500">{figureFiles.length} Figures</span>
-                           <span className="px-2 py-1 bg-slate-100 rounded text-[9px] font-black uppercase text-slate-500">{supplementaryFiles.length} Data</span>
-                        </div>
-                     </div>
+                      <div className="bg-slate-100/50 p-8 rounded-3xl border border-slate-200/50">
+                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Files Attached</p>
+                         {manuscriptFile ? (
+                            <div className="flex items-center gap-2 bg-white p-3 rounded-xl border border-slate-200">
+                               <FileText size={14} className="text-emerald-600" />
+                               <p className="text-[10px] font-black text-emerald-700 truncate">{manuscriptFile.name}</p>
+                            </div>
+                         ) : (
+                            <p className="text-[10px] font-bold text-slate-400 italic">No external manuscript attached.</p>
+                         )}
+                         <div className="flex gap-2 mt-2">
+                            <span className="px-2 py-1 bg-slate-100 rounded text-[9px] font-black uppercase text-slate-500">{figureFiles.length} Figures</span>
+                            <span className="px-2 py-1 bg-slate-100 rounded text-[9px] font-black uppercase text-slate-500">{supplementaryFiles.length} Data</span>
+                         </div>
+                      </div>
                   </div>
-               </div>
-
-               <div className="mt-12 flex justify-center">
-                  <button type="button" onClick={() => setStep(3)} className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] hover:underline transition-all">
-                     Technical Corrections Required? Edit Formatting
-                  </button>
                </div>
             </div>
           </div>
         )}
 
-        {step === 6 && (
+        {step === 5 && (
            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4">
             <div className="p-8 bg-blue-900 rounded-[2rem] text-white">
                <div className="flex items-center gap-4 mb-4">
@@ -895,19 +843,25 @@ function SubmissionForm() {
         )}
 
         <div className="flex justify-between items-center mt-12 pt-8 border-t border-slate-100">
-          {step > 1 ? (
-            <button type="button" onClick={() => setStep(step - 1)} className="btn btn-outline px-10">
-              Return
+          {step > 1 && (
+            <button 
+              type="button" 
+              onClick={() => setStep(step - 1)} 
+              className="flex items-center gap-3 px-8 py-4 bg-slate-50 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all font-black"
+            >
+              <ArrowLeft size={16} /> Previous
             </button>
-          ) : <div />}
+          )}
 
-          {step < 6 ? (
+          <div className="flex-1" />
+
+          {step < 5 ? (
             <button 
               type="button" 
               onClick={handleNextStep}
-              className="btn btn-primary px-10 flex items-center gap-2"
+              className="flex items-center gap-3 px-10 py-5 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-premium hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all font-black"
             >
-              Continue to {step === 1 ? "Authors" : step === 2 ? "Formatting" : step === 3 ? "Attach" : step === 4 ? "Review" : "Submit"} <ChevronRight size={16} />
+              Continue to {step === 1 ? "Authors" : step === 2 ? "Attach" : step === 3 ? "Review" : "Submit"} <ChevronRight size={18} />
             </button>
           ) : (
             <div className="flex flex-col items-center gap-4">
@@ -917,7 +871,11 @@ function SubmissionForm() {
                   <p className="text-red-500 text-[10px] font-black uppercase tracking-widest">{error}</p>
                 </div>
               )}
-              <button type="submit" disabled={loading} className="btn btn-primary px-12 py-4 flex items-center gap-3 active:scale-95 transition-transform shadow-premium">
+              <button 
+                type="submit" 
+                disabled={loading} 
+                className="flex items-center gap-3 px-10 py-5 bg-emerald-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-premium hover:bg-emerald-700 active:scale-95 transition-all font-black disabled:opacity-50"
+              >
                 {loading ? <Loader2 className="animate-spin" size={20} /> : <><ShieldCheck size={20} /> {parentId ? "Submit Revision Cycle" : "Complete Peer-Review Entry"}</>}
               </button>
             </div>
