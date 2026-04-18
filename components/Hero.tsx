@@ -39,27 +39,6 @@ export default function Hero() {
           </div>
         </div>
         
-        <div className={styles.statsStrip}>
-          <div className={styles.statItem}>
-            <span className={styles.statValue}>0.6</span>
-            <span className={styles.statLabel}>JCR Impact Factor</span>
-          </div>
-          <div className={styles.statDivider}></div>
-          <div className={styles.statItem}>
-            <span className={styles.statValue}>1.4</span>
-            <span className={styles.statLabel}>CiteScore (Q3)</span>
-          </div>
-          <div className={styles.statDivider}></div>
-          <div className={styles.statItem}>
-            <span className={styles.statValue}>1011-601X</span>
-            <span className={styles.statLabel}>ISSN (Print)</span>
-          </div>
-          <div className={styles.statDivider}></div>
-          <div className={styles.statItem}>
-            <span className={styles.statValue}>5,893+</span>
-            <span className={styles.statLabel}>Total Publications</span>
-          </div>
-        </div>
       </div>
     </section>
   );

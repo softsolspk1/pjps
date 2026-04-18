@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 import Hero from "@/components/Hero";
+import JournalMetrics from "@/components/JournalMetrics";
 import styles from "./page.module.css";
 import { 
   ShieldCheck, Globe, Zap, 
@@ -12,6 +13,7 @@ export default async function Home() {
   return (
     <div className={styles.home}>
       <Hero />
+      <JournalMetrics />
 
       <section className="container section-padding">
         <div className={styles.portalGrid}>

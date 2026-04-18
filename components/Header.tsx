@@ -37,11 +37,6 @@ export default function Header() {
             <span className={styles.divider}>|</span>
             <span>University of Karachi</span>
           </div>
-          <div className={styles.topLinks}>
-             <Link href="/contact">Support</Link>
-             <Link href="/about">About OJS</Link>
-             <Link href="/admin/login">Journal Login</Link>
-          </div>
         </div>
       </div>
       
@@ -73,7 +68,7 @@ export default function Header() {
            ) : (
              <div className="flex items-center gap-4">
                <Link href="/admin/login" className={styles.loginLink}>Sign In</Link>
-               <Link href="/submission" className="btn btn-primary btn-sm">Submit</Link>
+               <Link href="/submission" className="btn btn-primary" style={{ height: '38px', borderRadius: '0', display: 'flex', alignItems: 'center', padding: '0 20px', fontSize: '0.8rem' }}>SUBMIT</Link>
              </div>
            )}
            <button className={styles.menuToggle} onClick={() => setIsMenuOpen(!isMenuOpen)}>
