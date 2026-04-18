@@ -62,12 +62,12 @@ export default function Header() {
 
         <div className={styles.headerActions}>
            {session ? (
-             <div className="flex items-center gap-6">
+             <div className={styles.actionLinks}>
                <Link href="/profile" className={styles.profileLink}><UserCircle size={22} /></Link>
                <Link href="/submission" className={styles.submitBtnElite}>SUBMIT ARTICLE</Link>
              </div>
            ) : (
-             <div className="flex items-center gap-6">
+             <div className={styles.actionLinks}>
                <Link href="/admin/login" className={styles.signInLink}>Sign In</Link>
                <Link href="/submission" className={styles.submitBtnElite}>SUBMIT ARTICLE</Link>
              </div>

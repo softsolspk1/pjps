@@ -160,32 +160,48 @@
 .headerActions {
   display: flex;
   align-items: center;
+  gap: 40px;
+}
+
+.actionLinks {
+  display: flex;
+  align-items: center;
   gap: 30px;
 }
 
 .signInLink {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 800;
   color: var(--primary-navy);
   text-transform: uppercase;
   letter-spacing: 0.1em;
+  padding: 5px 0;
+  transition: var(--transition);
+}
+
+.signInLink:hover {
+  color: var(--accent-gold);
 }
 
 .submitBtnElite {
   background: var(--primary-navy);
   color: white;
-  padding: 12px 28px;
-  font-size: 0.85rem;
+  padding: 10px 24px;
+  font-size: 0.8rem;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   border: 1px solid var(--primary-navy);
   transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .submitBtnElite:hover {
   background: white;
   color: var(--primary-navy);
+  box-shadow: var(--shadow-subtle);
 }
 
 .navStrip {
