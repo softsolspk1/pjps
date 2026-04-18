@@ -58,16 +58,18 @@ export const authOptions: NextAuthOptions = {
       id: "orcid",
       name: "ORCID",
       type: "oauth",
-      issuer: "https://orcid.org",
-      wellKnown: "https://orcid.org/.well-known/openid-configuration",
-      authorization: { params: { scope: "openid" } },
-      idToken: true,
-      checks: ["pkce", "state"],
+      authorization: {
+        url: `${process.env.ORCID_SANDBOX === "true" ? "https://sandbox.orcid.org" : "https://orcid.org"}/oauth/authorize`,
+        params: { scope: "/authenticate" },
+      },
+      token: `${process.env.ORCID_SANDBOX === "true" ? "https://sandbox.orcid.org" : "https://orcid.org"}/oauth/token`,
+      userinfo: `${process.env.ORCID_SANDBOX === "true" ? "https://pub.sandbox.orcid.org" : "https://pub.orcid.org"}/v3.0/oauth/userinfo`,
+      checks: ["state"], // ORCID doesn't always support PKCE in all tiers, state is essential
       clientId: process.env.ORCID_CLIENT_ID || "",
       clientSecret: process.env.ORCID_CLIENT_SECRET || "",
-      profile(profile) {
+      profile(profile: any) {
         return {
-          id: profile.sub,
+          id: profile.orcid || profile.sub,
           name: profile.name || "ORCID Scholar",
           email: profile.email || null,
         }
