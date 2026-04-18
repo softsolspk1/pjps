@@ -1,5 +1,6 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import OrcidProvider from "next-auth/providers/orcid";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
@@ -53,12 +54,63 @@ export const authOptions: NextAuthOptions = {
 
         throw new Error("Invalid access credentials");
       }
-    })
+    }),
+    OrcidProvider({
+      clientId: process.env.ORCID_CLIENT_ID || "",
+      clientSecret: process.env.ORCID_CLIENT_SECRET || "",
+      // issuer: process.env.ORCID_SANDBOX === 'true' ? "https://sandbox.orcid.org" : "https://orcid.org",
+    }),
   ],
   session: {
     strategy: "jwt",
   },
   callbacks: {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "orcid") {
+        const orcidId = (profile as any).orcid || profile?.sub;
+        if (!orcidId) return false;
+
+        // Check if user exists by ORCID
+        let dbUser = await prisma.user.findFirst({
+          where: { orcid: orcidId }
+        });
+
+        // Fallback: Check by email if ORCID profile has one
+        if (!dbUser && user.email) {
+          dbUser = await prisma.user.findUnique({
+            where: { email: user.email }
+          });
+        }
+
+        if (dbUser) {
+          // Update ORCID if not set
+          if (!dbUser.orcid) {
+            await prisma.user.update({
+              where: { id: dbUser.id },
+              data: { orcid: orcidId }
+            });
+          }
+          user.id = dbUser.id;
+          (user as any).role = dbUser.role;
+          return true;
+        }
+
+        // Auto-create Author account if user doesn't exist
+        const newUser = await prisma.user.create({
+          data: {
+            email: user.email || `${orcidId}@orcid.pjps.pk`,
+            name: user.name || "ORCID Scholar",
+            orcid: orcidId,
+            password: await bcrypt.hash(Math.random().toString(36), 10),
+            role: "AUTHOR"
+          }
+        });
+        user.id = newUser.id;
+        (user as any).role = newUser.role;
+        return true;
+      }
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.role = (user as any).role;
