@@ -86,24 +86,28 @@ export default function Header() {
         <div className="container-full">
           <ul className={styles.navList}>
             <li><Link href="/">Home</Link></li>
+            <li><Link href="/about">About PJPS</Link></li>
             <li className={styles.hasDropdown}>
-              <span>About <ChevronDown size={14} /></span>
+              <span>SUBMISSION <ChevronDown size={14} /></span>
               <ul className={styles.dropdown}>
-                <li><Link href="/about/board">Editorial Board</Link></li>
-                <li><Link href="/policy">Ethics & Policies</Link></li>
-                <li><Link href="/instructions">Instructions for Authors</Link></li>
+                <li><Link href="/formatting">Article Formating Tool</Link></li>
+                <li><Link href="/submission/checklist">Submission Checklist and Fees</Link></li>
+                <li><Link href="/submission/instructions">Instructions for Authors</Link></li>
+                <li><Link href="/submission/peer-review">Peer Review Guidelines</Link></li>
+                <li><Link href="/submission/conflict-of-interest">Conflict of Interest</Link></li>
+                <li><Link href="/tracking">Track Manuscript</Link></li>
               </ul>
             </li>
             <li className={styles.hasDropdown}>
-              <span>Articles <ChevronDown size={14} /></span>
+              <span>ARTICLES <ChevronDown size={14} /></span>
               <ul className={styles.dropdown}>
                 <li><Link href="/publication/current">Current Issue</Link></li>
                 <li><Link href="/archive">Past Issues</Link></li>
                 <li><Link href="/publication/special">Special Issues</Link></li>
               </ul>
             </li>
-            <li><Link href="/submission">Submissions</Link></li>
-            <li><Link href="/contact">Contact</Link></li>
+            <li><Link href="/archive">ARCHIVE</Link></li>
+            <li><Link href="/contact">CONTACT</Link></li>
           </ul>
         </div>
       </nav>

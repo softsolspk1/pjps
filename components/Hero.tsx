@@ -8,12 +8,15 @@ export default function Hero() {
       <div className={`container-full ${styles.heroContent}`}>
       <div className={styles.heroGrid}>
         <div className={styles.heroText}>
+      <div className={styles.heroGrid}>
+        <div className={styles.heroText}>
           <div className={styles.heroBadge}>
-            Journal of Pharmaceutical Sciences
+             <span className={styles.badgeLine}></span>
+             Official Journal of the Faculty
           </div>
           <h1 className={styles.heroTitle}>
-            Scholarly Excellence in <br />
-            <span className={styles.titleAccent}>Pharmaceutical Research</span>
+            Advancing the Global <br />
+            <span className={styles.titleAccent}>Pharmaceutical Frontier</span>
           </h1>
           <p className={styles.heroSubtitle}>
             A leading global forum for the dissemination of pharmaceutical and biomedical research, officially recognized by HEC and indexed in Web of Science, Scopus, and PubMed.
@@ -26,8 +29,14 @@ export default function Hero() {
         
         <div className={styles.heroVisual}>
            <div className={styles.journalCoverStub}>
-              <div className={styles.coverTitle}>PJPS</div>
-              <div className={styles.coverIssue}>Vol. 39, No. 4, April 2026</div>
+              <div className={styles.coverInner}>
+                 <div className={styles.coverHeader}>PJPS</div>
+                 <div className={styles.coverBody}>
+                    <span className={styles.volText}>Volume 39</span>
+                    <span className={styles.noText}>Number 4</span>
+                 </div>
+                 <div className={styles.coverFooter}>April 2026</div>
+              </div>
            </div>
         </div>
       </div>
