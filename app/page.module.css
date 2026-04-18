@@ -1,217 +1,72 @@
 .home {
   display: flex;
   flex-direction: column;
+  background-color: #ffffff;
 }
 
-/* Premium Hero Section */
-.premiumHero {
-  position: relative;
-  min-height: 85vh;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-  color: white;
-  padding: 100px 0;
-  background-color: #0f172a;
-}
-
-.heroBgImage {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0.4;
-  z-index: 1;
-}
-
-.heroOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.4) 100%);
-  z-index: 2;
-}
-
-.heroContent {
-  position: relative;
-  z-index: 10;
-}
-
-.badgeLine {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 30px;
-  flex-wrap: wrap;
-}
-
-.premiumBadge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 100px;
-  font-size: 0.7rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  backdrop-filter: blur(10px);
-}
-
-.mainTitle {
-  font-family: var(--font-serif);
-  font-size: 4.5rem;
-  line-height: 1.1;
-  font-weight: 900;
-  margin-bottom: 25px;
-  max-width: 900px;
-}
-
-.mainSubtitle {
-  font-size: 1.25rem;
-  line-height: 1.6;
-  opacity: 0.8;
-  max-width: 650px;
-  margin-bottom: 40px;
-  font-weight: 500;
-}
-
-.heroCta {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 60px;
-}
-
-.heroStats {
-  display: flex;
-  align-items: center;
-  gap: 40px;
-  padding-top: 40px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.statItem {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.statVal {
-  font-family: var(--font-serif);
-  font-size: 2.2rem;
-  font-weight: 900;
-  color: white;
-}
-
-.statLabel {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  font-weight: 800;
-  letter-spacing: 0.15em;
-  opacity: 0.5;
-}
-
-.statLine {
-  width: 1px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.2);
-}
-
-/* Grid Section & Scope */
-.gridSection {
+/* Announcement Section */
+.announcementGrid {
   display: grid;
-  grid-template-columns: 1fr 400px;
-  gap: 80px;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
   align-items: center;
 }
 
-.titleSerif {
-  font-family: var(--font-serif);
-  font-size: 3rem;
-  margin-bottom: 20px;
-  color: #0f172a;
-}
-
-.bodyText {
-  font-size: 1.15rem;
-  color: #475569;
-  line-height: 1.7;
-  margin-bottom: 30px;
-}
-
-.topicCloud {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.topicTag {
-  padding: 8px 16px;
-  background: #f1f5f9;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #334155;
-  transition: all 0.3s ease;
-  cursor: default;
-}
-
-.topicTag:hover {
-  background: #e2e8f0;
-  color: #0f172a;
-  transform: translateY(-2px);
-}
-
-.scopeCards {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-}
-
-.glassCard {
-  padding: 40px;
+.announcementCard {
+  padding: 48px;
   background: white;
-  border: 1px solid #e2e8f0;
   border-radius: 32px;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: all 0.4s ease;
 }
 
-.glassCard:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.08);
+.announcementCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
   border-color: #cbd5e1;
 }
 
-.glassCard h4 {
-  font-size: 1.25rem;
+.metricsHighlight {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.metricEntry {
+  display: flex;
+  flex-direction: column;
+  padding: 32px;
+  background: #f8fafc;
+  border-radius: 24px;
+  border: 1px solid #f1f5f9;
+}
+
+.metricVal {
+  font-family: var(--font-serif);
+  font-size: 2.8rem;
+  font-weight: 900;
+  color: #1e3a8a;
+  line-height: 1;
+}
+
+.metricTag {
+  font-size: 0.65rem;
   font-weight: 800;
-  margin-bottom: 12px;
-  color: #0f172a;
-}
-
-.glassCard p {
-  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
   color: #64748b;
-  line-height: 1.6;
+  margin-top: 12px;
 }
 
-/* Indexing Section Modern */
-.indexingSection {
-  background-color: #f8fafc;
-  border-top: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
+/* Scope Section */
+.scopeSection {
+  background-color: #0f172a;
+  color: white;
 }
 
 .sectionHeader {
-  text-align: center;
-  max-width: 800px;
-  margin: 0 auto 60px;
+  margin-bottom: 64px;
 }
 
 .preTitle {
@@ -224,237 +79,211 @@
   margin-bottom: 12px;
 }
 
-.sectionTitleCenter {
+.sectionTitle {
+  font-family: var(--font-serif);
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 24px;
+  letter-spacing: -0.02em;
+}
+
+.sectionSubtitle {
+  font-size: 1.1rem;
+  opacity: 0.7;
+  max-width: 600px;
+}
+
+.scopeGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.scopeItem {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.scopeItem:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(59, 130, 246, 0.3);
+  transform: translateX(8px);
+}
+
+.scopeDot {
+  width: 8px;
+  height: 8px;
+  background: #3b82f6;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.scopeItem span {
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Recognition Grid */
+.recognitionGrid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 80px;
+  align-items: center;
+}
+
+.titleSerif {
   font-family: var(--font-serif);
   font-size: 3rem;
+  font-weight: 800;
   color: #0f172a;
-  margin-bottom: 15px;
+  margin-bottom: 24px;
 }
 
-.indexingGridModern {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 20px;
+.bodyText {
+  font-size: 1.1rem;
+  color: #475569;
+  line-height: 1.7;
+  margin-bottom: 32px;
 }
 
-.indexModernItem {
-  background: white;
-  padding: 30px 15px;
-  border-radius: 20px;
+.indexingList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.indexTag {
+  padding: 8px 16px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1e293b;
   border: 1px solid #e2e8f0;
+}
+
+.heritageBox {
+  padding: 48px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 32px;
   display: flex;
   flex-direction: column;
+  gap: 24px;
+}
+
+.heritageIcon {
+  width: 80px;
+  height: 80px;
+  background: #eff6ff;
+  border-radius: 20px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 15px;
-  transition: all 0.3s ease;
 }
 
-.indexModernItem:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-  border-color: #3b82f6;
+/* Ethics & Associated */
+.ethicsArea {
+  background-color: #f8fafc;
+  border-top: 1px solid #e2e8f0;
 }
 
-.indexLogoModern {
-  height: 40px;
-  max-width: 100%;
-  object-fit: contain;
-  filter: grayscale(100%);
-  opacity: 0.6;
-  transition: all 0.3s ease;
-}
-
-.indexModernItem:hover .indexLogoModern {
-  filter: grayscale(0%);
-  opacity: 1;
-}
-
-.indexModernItem span {
-  font-size: 0.7rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: #64748b;
-  text-align: center;
-}
-
-/* Heritage & Heritage Grid */
-.heritageGrid {
+.gridColumns {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 40px;
-  align-items: stretch;
-}
-
-.archiveModernCard {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  color: white;
-  padding: 60px;
-  border-radius: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.archiveModernCard .cardHeader {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
-.archiveModernCard h3 {
-  font-family: var(--font-serif);
-  font-size: 2.5rem;
-  margin: 0;
-}
-
-.archiveModernCard p {
-  font-size: 1.1rem;
-  opacity: 0.7;
-  margin-bottom: 40px;
-}
-
-.dualArchiveBtn {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.archiveBtnPrimary {
-  padding: 15px 30px;
-  background: white;
-  color: #0f172a;
-  border-radius: 12px;
-  font-weight: 800;
-  text-align: center;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: all 0.3s ease;
-}
-
-.archiveBtnPrimary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
-}
-
-.archiveBtnOutline {
-  padding: 15px 30px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  border-radius: 12px;
-  font-weight: 800;
-  text-align: center;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: all 0.3s ease;
-}
-
-.archiveBtnOutline:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: white;
-}
-
-.infoSummary {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  justify-content: center;
-}
-
-.infoRow {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 25px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
-}
-
-.infoRow div {
-  font-size: 0.95rem;
-  color: #334155;
-}
-
-.infoRow strong {
-  color: #0f172a;
-}
-
-/* Ethics Section */
-.ethicsSection {
-  padding: 60px 0 100px;
 }
 
 .ethicsBox {
-  display: flex;
-  align-items: center;
-  gap: 40px;
-  padding: 50px;
-  background: #ecfdf5;
-  border: 1px solid #10b98120;
-  border-radius: 40px;
-}
-
-.ethicsText h3 {
-  font-family: var(--font-serif);
-  font-size: 1.8rem;
-  color: #064e3b;
-  margin-bottom: 10px;
-}
-
-.ethicsText p {
-  color: #065f46;
-  opacity: 0.8;
-  font-size: 1rem;
-  line-height: 1.6;
-  margin-bottom: 25px;
-  max-width: 800px;
+  background: white;
+  padding: 48px;
+  border-radius: 32px;
+  border: 1px solid #e2e8f0;
 }
 
 .ethicsLinks {
   display: flex;
-  gap: 25px;
+  gap: 24px;
 }
 
 .ethicsLinks a {
   font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #059669;
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
+  color: #1e3a8a;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  decoration-color: rgba(30, 58, 138, 0.2);
+}
+
+.associatedJournals {
+  padding: 48px;
+}
+
+.journalCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  margin-bottom: 32px;
   transition: all 0.3s ease;
 }
 
-.ethicsLinks a:hover {
-  border-color: currentColor;
+.journalCard:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+.issnBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.issnItem {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.issnItem strong {
+  color: #0f172a;
+  margin-right: 8px;
 }
 
 /* Responsive */
 @media (max-width: 1200px) {
-  .mainTitle { font-size: 3.5rem; }
-  .gridSection { grid-template-columns: 1fr; gap: 40px; }
-  .scopeCards { flex-direction: row; }
+  .scopeGrid { grid-template-columns: repeat(3, 1fr); }
 }
 
-@media (max-width: 900px) {
-  .indexingGridModern { grid-template-columns: repeat(3, 1fr); }
-  .heritageGrid { grid-template-columns: 1fr; }
-  .scopeCards { flex-direction: column; }
+@media (max-width: 1024px) {
+  .announcementGrid, .recognitionGrid, .gridColumns {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .sectionTitle { font-size: 2.8rem; }
+  .titleSerif { font-size: 2.5rem; }
 }
 
-@media (max-width: 600px) {
-  .mainTitle { font-size: 2.5rem; }
-  .heroStats { flex-direction: column; align-items: flex-start; gap: 20px; }
-  .statLine { display: none; }
-  .heroCta { flex-direction: column; }
-  .indexingGridModern { grid-template-columns: repeat(2, 1fr); }
-  .ethicsBox { flex-direction: column; align-items: flex-start; text-align: left; padding: 30px; }
-  .ethicsLinks { flex-direction: column; gap: 10px; }
+@media (max-width: 768px) {
+  .scopeGrid { grid-template-columns: repeat(2, 1fr); }
+  .metricEntry { padding: 24px; }
+  .metricVal { font-size: 2.2rem; }
 }
+
+@media (max-width: 480px) {
+  .scopeGrid { grid-template-columns: 1fr; }
+  .metricsHighlight { grid-template-columns: 1fr; }
+}
+
 
 

@@ -25,8 +25,8 @@ export default function Hero() {
         
         <div className={styles.statsStrip}>
           <div className={styles.statItem}>
-            <span className={styles.statValue}>0.601</span>
-            <span className={styles.statLabel}>Impact Factor</span>
+            <span className={styles.statValue}>0.6</span>
+            <span className={styles.statLabel}>JCR Impact Factor</span>
           </div>
           <div className={styles.statDivider}></div>
           <div className={styles.statItem}>
@@ -40,8 +40,8 @@ export default function Hero() {
           </div>
           <div className={styles.statDivider}></div>
           <div className={styles.statItem}>
-            <span className={styles.statValue}>6,000+</span>
-            <span className={styles.statLabel}>Citations</span>
+            <span className={styles.statValue}>5,893+</span>
+            <span className={styles.statLabel}>Total Publications</span>
           </div>
         </div>
       </div>
