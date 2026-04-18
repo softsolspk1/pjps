@@ -43,10 +43,10 @@
 }
 
 .brandingText {
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.15em;
-  opacity: 0.8;
+  letter-spacing: 0.12em;
+  opacity: 0.9;
 }
 
 .brandingDivider {
@@ -105,17 +105,17 @@
 
 .journalMainTitle {
   font-family: var(--font-sans);
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.15em;
   color: var(--text-muted);
 }
 
 .journalSubTitle {
   font-family: var(--font-serif);
-  font-size: 1.35rem;
-  font-weight: 900;
+  font-size: 1.6rem;
+  font-weight: 950;
   color: var(--primary-navy);
   line-height: 1;
 }
@@ -164,7 +164,7 @@
 }
 
 .signInLink {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: var(--primary-navy);
   text-transform: uppercase;
@@ -174,10 +174,10 @@
 .submitBtnElite {
   background: var(--primary-navy);
   color: white;
-  padding: 10px 24px;
-  font-size: 0.75rem;
+  padding: 12px 28px;
+  font-size: 0.85rem;
   font-weight: 800;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   border: 1px solid var(--primary-navy);
   transition: var(--transition);
@@ -207,14 +207,14 @@
 }
 
 .navList > li > a, .navList > li > span {
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.12em;
   color: var(--primary-navy);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   transition: var(--transition);
 }
 
@@ -252,8 +252,8 @@
 }
 
 .dropdown li a {
-  padding: 14px 25px;
-  font-size: 0.8rem;
+  padding: 15px 30px;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--text-main);
   border-bottom: 1px solid rgba(0, 33, 71, 0.03);
