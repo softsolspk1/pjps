@@ -96,8 +96,9 @@ h3 { font-size: 1.6rem; }
 
 .container-full {
   width: 100%;
-  max-width: 100%;
-  margin: 0;
+  max-width: 1440px;
+  margin-left: 0;
+  margin-right: auto;
   padding: 0 5vw;
 }
 

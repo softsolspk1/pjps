@@ -31,7 +31,7 @@ export default function JournalMetrics() {
 
   return (
     <div className={styles.metricsWrapper}>
-      <div className="container">
+      <div className="container-full">
         <div className={styles.metricsGrid}>
           {metrics.map((item, idx) => (
             <div key={idx} className={styles.metricCard}>
