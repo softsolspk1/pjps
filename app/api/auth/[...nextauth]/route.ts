@@ -1,6 +1,5 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import OrcidProvider from "next-auth/providers/orcid";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
@@ -55,11 +54,23 @@ export const authOptions: NextAuthOptions = {
         throw new Error("Invalid access credentials");
       }
     }),
-    OrcidProvider({
-      clientId: process.env.ORCID_CLIENT_ID || "",
-      clientSecret: process.env.ORCID_CLIENT_SECRET || "",
-      // issuer: process.env.ORCID_SANDBOX === 'true' ? "https://sandbox.orcid.org" : "https://orcid.org",
-    }),
+    {
+      id: "orcid",
+      name: "ORCID",
+      type: "oauth",
+      wellKnown: "https://orcid.org/.well-known/openid-configuration",
+      authorization: { params: { scope: "openid" } },
+      idToken: true,
+      clientId: process.env.ORCID_CLIENT_ID,
+      clientSecret: process.env.ORCID_CLIENT_SECRET,
+      profile(profile) {
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+        }
+      },
+    },
   ],
   session: {
     strategy: "jwt",
