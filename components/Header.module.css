@@ -163,12 +163,13 @@
   top: 100%;
   left: 0;
   background: white;
-  min-width: 200px;
-  box-shadow: var(--shadow-standard);
+  min-width: 280px;
+  box-shadow: 0 10px 30px rgba(0, 33, 71, 0.1);
   display: none;
   flex-direction: column;
   z-index: 10;
   border: 1px solid var(--border-light);
+  border-top: 2px solid var(--primary-navy);
 }
 
 .navList > li:hover .dropdown {
@@ -176,11 +177,13 @@
 }
 
 .dropdown li a {
-  padding: 12px 20px;
-  font-size: 0.8rem;
+  padding: 12px 25px;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-main);
-  border-bottom: 1px solid var(--border-light);
+  border-bottom: 1px solid #f0f4f8;
+  display: block;
+  transition: var(--transition);
 }
 
 .dropdown li a:hover {

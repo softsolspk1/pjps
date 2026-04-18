@@ -26,15 +26,12 @@ export default function Hero() {
           </div>
           
           <div className={styles.heroVisual}>
-             <div className={styles.journalCoverStub}>
-                <div className={styles.coverInner}>
-                   <div className={styles.coverHeader}>PJPS</div>
-                   <div className={styles.coverBody}>
-                      <span className={styles.volText}>Volume 39</span>
-                      <span className={styles.noText}>Number 4</span>
-                   </div>
-                   <div className={styles.coverFooter}>April 2026</div>
-                </div>
+             <div className={styles.journalCoverWrapper}>
+                <img 
+                  src="/hero-pjps.png" 
+                  alt="Pakistan Journal of Pharmaceutical Sciences - Latest Issue" 
+                  className={styles.journalImage}
+                />
              </div>
           </div>
         </div>
