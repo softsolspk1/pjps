@@ -17,7 +17,7 @@ export default function Hero() {
               <span className={styles.titleAccent}>Pharmaceutical Frontier</span>
             </h1>
             <p className={styles.heroSubtitle}>
-              A leading global forum for the dissemination of pharmaceutical and biomedical research, officially recognized by HEC and indexed in Web of Science, Scopus, and PubMed.
+              A globally recognized platform dedicated to advancing pharmaceutical and biomedical research, officially acknowledged by HEC and indexed in leading databases such as Web of Science and Scopus.
             </p>
             <div className={styles.heroActions}>
               <Link href="/submission" className="btn btn-primary">Submit Manuscript</Link>
