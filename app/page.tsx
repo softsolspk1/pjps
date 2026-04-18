@@ -104,8 +104,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Scope Section - Refined */}
-      <section className={`${styles.scopeSection} section-padding`}>
+      {/* Scope Section - Elite Light Theme */}
+      <section className={styles.scopeSectionRefined}>
         <div className="container-full">
           <div className={styles.sectionHeaderLeft}>
             <span className={styles.preTitle}>Scientific Frontiers</span>
@@ -122,9 +122,10 @@ export default async function Home() {
                "Medicinal Chemistry", "Nanotechnology", "Generative AI in Pharma",
                "Pharmacokinetics", "Pharmacovigilance", "Bioactive Discovery"
              ].map(item => (
-               <div key={item} className={styles.scopeItem}>
+               <div key={item} className={item === "Generative AI in Pharma" ? styles.scopeItemHighlight : styles.scopeItem}>
                  <div className={styles.scopeDot}></div>
                  <span>{item}</span>
+                 {item === "Generative AI in Pharma" && <Zap size={14} className={styles.zapIcon} />}
                </div>
              ))}
           </div>

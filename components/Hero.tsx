@@ -3,33 +3,37 @@ import styles from './Hero.module.css';
 
 export default function Hero() {
   return (
-    <section className={styles.heroLeftAligned}>
-      <div className={styles.heroContentFull}>
-        <div className={styles.heroLayout}>
-          <div className={styles.heroVisualLeft}>
-             <div className={styles.journalCoverFrame}>
+    <section className={styles.heroSection}>
+      <div className="container-full">
+        <div className={styles.heroGrid}>
+          {/* Visual Element First for strict alignment flow */}
+          <div className={styles.visualColumn}>
+             <div className={styles.coverWrapper}>
                 <img 
                   src="/journal-cover-new.png" 
-                  alt="Pakistan Journal of Pharmaceutical Sciences - Latest Issue" 
-                  className={styles.journalImage}
+                  alt="PJPS Latest Issue" 
+                  className={styles.journalCover}
                 />
+                <div className={styles.coverShadow}></div>
              </div>
           </div>
 
-          <div className={styles.heroTextRight}>
-            <div className={styles.heroBadgeLeft}>
-               ACADEMIC EXCELLENCE SINCE 1988
+          <div className={styles.contentColumn}>
+            <div className={styles.headerBadge}>
+               ESTABLISHED 1988 • IMPACT FACTOR 0.6
             </div>
-            <h1 className={styles.heroTitleLeft}>
+            <h1 className={styles.mainTitle}>
               Advancing the Global <br />
-              <span className={styles.titleSerifSecondary}>Pharmaceutical Frontier</span>
+              <span className={styles.italicTitle}>Pharmaceutical Frontier</span>
             </h1>
-            <p className={styles.heroSubtitleLeft}>
-              A globally recognized platform dedicated to advancing pharmaceutical and biomedical research, officially acknowledged by HEC and indexed in leading databases such as Web of Science and Scopus.
+            <p className={styles.description}>
+              The Pakistan Journal of Pharmaceutical Sciences (PJPS) is a premier 
+              peer-reviewed monthly journal dedicated to the dissemination of 
+              high-impact research across the pharmaceutical and biomedical sciences.
             </p>
-            <div className={styles.heroActionsLeft}>
-              <Link href="/submission" className="btn btn-primary">SUBMIT YOUR RESEARCH</Link>
-              <Link href="/publication/current" className="btn btn-outline">EXPLORE CURRENT ISSUE</Link>
+            <div className={styles.actionGroup}>
+              <Link href="/submission" className="btn btn-primary">SUBMIT MANUSCRIPT</Link>
+              <Link href="/publication/current" className="btn btn-outline">CURRENT ISSUE</Link>
             </div>
           </div>
         </div>

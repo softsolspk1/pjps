@@ -102,9 +102,15 @@ h3 { font-size: 1.6rem; }
   padding: 0 5vw;
 }
 
+@media (min-width: 1600px) {
+  .container-full {
+    padding: 0 8vw;
+  }
+}
+
 @media (max-width: 768px) {
   .container-full {
-    padding: 0 2rem;
+    padding: 0 1.5rem;
   }
 }
 

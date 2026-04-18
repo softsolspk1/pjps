@@ -30,18 +30,18 @@ export default function JournalMetrics() {
   ];
 
   return (
-    <div className={styles.metricsWrapper}>
+    <div className={styles.metricsStrip}>
       <div className="container-full">
-        <div className={styles.metricsGrid}>
+        <div className={styles.metricsFlex}>
           {metrics.map((item, idx) => (
-            <div key={idx} className={styles.metricCard}>
-              <div className={styles.iconWrapper}>
-                {item.icon}
-              </div>
-              <div className={styles.content}>
-                <div className={styles.value}>{item.value}</div>
+            <div key={idx} className={styles.metricItem}>
+              <div className={styles.innerContent}>
+                <div className={styles.valueRow}>
+                  <span className={styles.value}>{item.value}</span>
+                  <span className={styles.iconWrapper}>{item.icon}</span>
+                </div>
                 <div className={styles.label}>{item.label}</div>
-                <div className={styles.meta}>{item.year}</div>
+                <div className={styles.metaYear}>{item.year}</div>
               </div>
             </div>
           ))}
