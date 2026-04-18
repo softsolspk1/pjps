@@ -22,6 +22,7 @@ export default function LoginPage() {
       username,
       password,
       redirect: false,
+      callbackUrl: "/admin/dashboard",
     });
 
     if (res?.error) {
@@ -94,7 +95,7 @@ export default function LoginPage() {
 
         <button
           type="button"
-          onClick={() => signIn("orcid")}
+          onClick={() => signIn("orcid", { callbackUrl: "/admin/dashboard" })}
           className={styles.orcidBtn}
           style={{ 
             display: 'flex', 

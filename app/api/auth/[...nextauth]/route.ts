@@ -8,12 +8,12 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "credentials",
       credentials: {
-        username: { label: "Username", type: "text" },
+        username: { label: "Username / Email", type: "text" },
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
         if (!credentials?.username || !credentials?.password) {
-          throw new Error("Invalid credentials");
+          throw new Error("Missing authentication credentials");
         }
         
         // 1. Check Environment-Based Admin
@@ -34,7 +34,7 @@ export const authOptions: NextAuthOptions = {
           };
         }
 
-        // 2. Check Database Users (New Demo System)
+        // 2. Check Database Users
         const user = await prisma.user.findUnique({
           where: { email: credentials.username }
         });
@@ -51,29 +51,32 @@ export const authOptions: NextAuthOptions = {
           }
         }
 
-        throw new Error("Invalid access credentials");
+        return null; // Return null instead of throwing to better handle failures in some NextAuth versions
       }
     }),
     {
       id: "orcid",
       name: "ORCID",
       type: "oauth",
+      issuer: "https://orcid.org",
       wellKnown: "https://orcid.org/.well-known/openid-configuration",
       authorization: { params: { scope: "openid" } },
       idToken: true,
-      clientId: process.env.ORCID_CLIENT_ID,
-      clientSecret: process.env.ORCID_CLIENT_SECRET,
+      checks: ["pkce", "state"],
+      clientId: process.env.ORCID_CLIENT_ID || "",
+      clientSecret: process.env.ORCID_CLIENT_SECRET || "",
       profile(profile) {
         return {
           id: profile.sub,
-          name: profile.name,
-          email: profile.email,
+          name: profile.name || "ORCID Scholar",
+          email: profile.email || null,
         }
       },
     },
   ],
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
     async signIn({ user, account, profile }) {
@@ -94,7 +97,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         if (dbUser) {
-          // Update ORCID if not set
+          // Sync ORCID if not set
           if (!dbUser.orcid) {
             await prisma.user.update({
               where: { id: dbUser.id },
@@ -106,10 +109,11 @@ export const authOptions: NextAuthOptions = {
           return true;
         }
 
-        // Auto-create Author account if user doesn't exist
+        // Create new account for first-time ORCID users
+        const newUserEmail = user.email || `${orcidId}@orcid.pjps.pk`;
         const newUser = await prisma.user.create({
           data: {
-            email: user.email || `${orcidId}@orcid.pjps.pk`,
+            email: newUserEmail,
             name: user.name || "ORCID Scholar",
             orcid: orcidId,
             password: await bcrypt.hash(Math.random().toString(36), 10),
@@ -122,7 +126,7 @@ export const authOptions: NextAuthOptions = {
       }
       return true;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.role = (user as any).role;
         token.id = user.id;
@@ -140,7 +144,7 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: '/admin/login',
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || "pjps_legacy_fallback_secret_67890",
 };
 
 const handler = NextAuth(authOptions);
